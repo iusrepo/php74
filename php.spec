@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.7
-Release: 1
+Release: 3
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -23,10 +23,12 @@ Patch6: php-4.3.1-tests.patch
 Patch7: php-4.3.2-libtool15.patch
 Patch8: php-4.3.3-miscfix.patch
 Patch9: php-4.3.6-umask.patch
+Patch10: php-4.3.7-handler.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.2-db4.patch
+Patch23: php-4.3.7-gmppowm.patch
 
 # Functional changes
 Patch30: php-4.3.1-dlopen.patch
@@ -34,10 +36,10 @@ Patch31: php-4.3.4-easter.patch
 
 BuildRoot: %{_tmppath}/%{name}-root
 
-BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel, freetype-devel
-BuildRequires: gd-devel >= 1.8.4, gmp-devel, aspell-devel >= 0.50.0
+BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
+BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
-BuildRequires: libstdc++-devel, ncurses-devel, openssl-devel
+BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: zlib-devel, pcre-devel, smtpdaemon
 BuildRequires: bzip2, fileutils, perl, libtool >= 1.4.3
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php
@@ -224,6 +226,45 @@ BuildRequires: expat-devel
 The php-xmlrpc package contains a dynamic shared object that will add
 support for the XML-RPC protocol to PHP.
 
+%package mbstring
+Summary: A module for PHP applications which need multi-byte string handling
+Group: Development/Languages
+Requires: php = %{version}-%{release}
+
+%description mbstring
+The php-mbstring package contains a dynamic shared object that will add
+support for multi-byte string handling to PHP.
+
+%package ncurses
+Summary: A module for PHP applications for using ncurses interfaces
+Group: Development/Languages
+Requires: php = %{version}-%{release}
+BuildRequires: ncurses-devel
+
+%description ncurses
+The php-mbstring package contains a dynamic shared object that will add
+support for using the ncurses terminal output interfaces.
+
+%package gd
+Summary: A module for PHP applications for using the gd graphics library
+Group: Development/Languages
+Requires: php = %{version}-%{release}
+BuildRequires: gd-devel, freetype-devel
+
+%description gd
+The php-mbstring package contains a dynamic shared object that will add
+support for using the gd graphics library to PHP.
+
+%package openssl
+Summary: A module for PHP applications for using the OpenSSL toolkit
+Group: Development/Languages
+Requires: php = %{version}-%{release}
+BuildRequires: openssl-devel
+
+%description openssl
+The php-openssl package contains a dynamic shared object that will add
+support for using the OpenSSL toolkit to PHP.
+
 %prep
 %setup -q
 %patch2 -p1 -b .config
@@ -234,9 +275,11 @@ support for the XML-RPC protocol to PHP.
 %patch7 -p1 -b .libtool15
 %patch8 -p1 -b .miscfix
 %patch9 -p1 -b .umask
+%patch10 -p1 -b .handler
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
+%patch23 -p1 -b .gmppowm
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -302,15 +345,15 @@ ln -sf ../configure
 	--with-exec-dir=%{_bindir} \
 	--with-freetype-dir=%{_prefix} \
 	--with-png-dir=%{_prefix} \
-	--with-gd=%{_prefix} \
+	--with-gd=shared \
 	--enable-gd-native-ttf \
 	--without-gdbm \
 	--with-gettext \
-	--with-ncurses \
+	--with-ncurses=shared \
 	--with-gmp \
 	--with-iconv \
 	--with-jpeg-dir=%{_prefix} \
-	--with-openssl \
+	--with-openssl=shared \
 	--with-png \
 	--with-pspell \
 	--with-regex=system \
@@ -348,15 +391,14 @@ ln -sf ../configure
 	--enable-ucd-snmp-hack \
 	--with-unixODBC=shared,%{_prefix} \
 	--enable-memory-limit \
-	--enable-bcmath \
 	--enable-shmop \
 	--enable-calendar \
 	--enable-dbx \
 	--enable-dio \
 	--enable-mcal \
-        --enable-mbstring --enable-mbstr-enc-trans \
+        --enable-mbstring=shared --enable-mbstr-enc-trans \
         --enable-mbregex \
-	$*
+	$* || cat config.log
 
 make %{?_smp_mflags}
 }
@@ -412,6 +454,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql odbc ldap snmp domxml xmlrpc imap \
+    mbstring ncurses gd openssl  \
     %{?_with_oci8:oci8} %{?_with_mssql:mssql} %{?_with_mhash:mhash}; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
@@ -466,10 +509,17 @@ rm files.*
 %{_libdir}/php
 
 %files pgsql -f files.pgsql
-
 %files mysql -f files.mysql
-
 %files odbc -f files.odbc
+%files imap -f files.imap
+%files ldap -f files.ldap
+%files snmp -f files.snmp
+%files domxml -f files.domxml
+%files xmlrpc -f files.xmlrpc
+%files mbstring -f files.mbstring
+%files ncurses -f files.ncurses
+%files gd -f files.gd
+%files openssl -f files.openssl
 
 %if %{with_oci8}
 %files oci8 -f files.oci8
@@ -483,17 +533,16 @@ rm files.*
 %files mhash -f files.mhash
 %endif
 
-%files imap -f files.imap
-
-%files ldap -f files.ldap
-
-%files snmp -f files.snmp
-
-%files domxml -f files.domxml
-
-%files xmlrpc -f files.xmlrpc
-
 %changelog
+* Thu Jun 17 2004 Joe Orton <jorton@redhat.com> 4.3.7-3
+- add gmp_powm fix (Oskari Saarenmaa, #124318)
+- split mbstring, ncurses, gd, openssl extns into subpackages
+- fix memory leak in apache2handler; use ap_r{write,flush}
+  rather than brigade interfaces
+
+* Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Thu Jun  3 2004 Joe Orton <jorton@redhat.com> 4.3.7-1
 - update to 4.3.7
 - have -pear subpackage require php of same VR
