@@ -17,7 +17,7 @@
 Summary: The PHP HTML-embedded scripting language.
 Name: php
 Version: 4.0.6
-Release: 15
+Release: 16
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
@@ -503,6 +503,9 @@ fi
 %lang(tr) %{contentdir}/html/manual/mod/mod_php4/tr
 
 %changelog
+* Mon Mar 25 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-16
+- rebuild
+
 * Fri Mar  8 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-15
 - rebuild for RHL 7.2
 
