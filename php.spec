@@ -7,15 +7,14 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.4
-Release: 1
+Release: 2
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
 
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
-
 Source10: pear-RunTest.php
-
+Source20: http://pear.php.net/get/DB-1.7.5.tgz
 Source50: php.conf
 
 Patch2: php-5.0.1-config.patch
@@ -336,6 +335,14 @@ rm -f ext/standard/tests/file/bug22414.phpt \
 # Missing file in 5.0.4 PEAR bundle:
 cp $RPM_SOURCE_DIR/pear-RunTest.php pear/PEAR/RunTest.php
 
+# Unpack PEAR DB package
+pushd pear
+ tar xzf %{SOURCE20}
+ mv DB-* DB
+ sed '/<file /s,name=",name="DB/,' package.xml > package-DB.xml
+ rm package.xml
+popd
+
 : Build for oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash} ibase=%{with_ibase}
 
 %build
@@ -591,6 +598,9 @@ rm files.*
 %endif
 
 %changelog
+* Mon Apr  4 2005 Joe Orton <jorton@redhat.com> 5.0.4-2
+- fix PEAR installation and bundle PEAR DB-1.7.5 package
+
 * Fri Apr  1 2005 Joe Orton <jorton@redhat.com> 5.0.4-1
 - update to 5.0.4 (#153068)
 - add .phps AddType to php.conf (#152973)
