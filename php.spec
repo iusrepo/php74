@@ -5,8 +5,8 @@
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
-Version: 4.3.7
-Release: 4
+Version: 4.3.8
+Release: 3
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -24,6 +24,7 @@ Patch7: php-4.3.2-libtool15.patch
 Patch8: php-4.3.3-miscfix.patch
 Patch9: php-4.3.6-umask.patch
 Patch10: php-4.3.7-handler.patch
+Patch11: php-4.3.7-select.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -277,6 +278,7 @@ support for using the OpenSSL toolkit to PHP.
 %patch8 -p1 -b .miscfix
 %patch9 -p1 -b .umask
 %patch10 -p1 -b .handler
+%patch11 -p1 -b .select
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
@@ -541,9 +543,13 @@ rm files.*
 %endif
 
 %changelog
+* Wed Jul 14 2004 Joe Orton <jorton@redhat.com> 4.3.8-3
+- update to 4.3.8
+- catch some fd > FD_SETSIZE vs select() issues (#125258)
+
 * Mon Jun 21 2004 Joe Orton <jorton@redhat.com> 4.3.7-4
 - pick up test failures again
-- have -devel require php of save release
+- have -devel require php of same release
 
 * Thu Jun 17 2004 Joe Orton <jorton@redhat.com> 4.3.7-3
 - add gmp_powm fix (Oskari Saarenmaa, #124318)
