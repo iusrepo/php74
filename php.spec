@@ -351,8 +351,6 @@ touch acinclude.m4
 # Regenerate configure scripts (patches change config.m4's)
 ./buildconf --force
 
-export CC=gcc4
-
 # Shell function to configure and build a PHP tree.
 build() {
 # bison-1.875-2 seems to produce a broken parser; workaround.
