@@ -1,19 +1,20 @@
 Summary: The PHP scripting language.
 Name: php
-Version: 4.0.3pl1
-Release: 1
+Version: 4.0.4pl1
+Release: 3
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 Source1: http://www.php.net/distributions/manual.tar.gz
 #Icon: php3.gif
-Patch1: php-4.0.3-redhat.patch
+Patch1: php-4.0.4-redhat.patch
 Patch2: php-4.0.0-extensions.patch
 Patch3: php-4.0.2-pear.patch
 Patch4: php-4.0.3-required.patch
+Patch5: php-4.0.4pl1-quotes.patch
 Copyright: PHP
 BuildRoot: %{_tmppath}/%{name}-root
-Obsoletes: php3
+Obsoletes: php3, mod_php
 BuildPrereq: apache-devel, db2-devel, db3-devel, imap-devel,
 BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel
 BuildPrereq: freetype-devel, gd-devel, libjpeg-devel, libpng-devel, zlib-devel
@@ -27,38 +28,14 @@ integration for several commercial and non-commercial database management
 systems, so writing a database-enabled script with PHP is fairly simple.  The
 most common use of PHP coding is probably as a replacement for CGI scripts.
 
-%package -n mod_php
-Summary: The PHP HTML-embedded scripting language for use with Apache.
-Group: System Environment/Daemons
-URL: http://www.php.net/
-Prereq: webserver
-Obsoletes: php3, phpfi
-BuildPrereq: apache-devel
-Prereq: php = %{version}-%{release}
-
-%description -n mod_php
-PHP is an HTML-embedded scripting language.  PHP attempts to make it
-easy for developers to write dynamically generated web pages.  PHP
-also offers built-in database integration for several commercial and
-non-commercial database management systems, so writing a
-database-enabled web page with PHP is fairly simple.  The most common
-use of PHP coding is probably as a replacement for CGI scripts.  The
-mod_php module enables the Apache web server to understand and process
-the embedded PHP language in web pages.
-
-This package contains PHP version 4.0.  You'll also need to install the
-Apache web server.
-
-%if 0
 %package devel
 Group: Development/Libraries
 Summary: Files needed for building PHP extensions.
 
 %description devel
-The php-devel package contains the files needed when building PHP
+The php-devel package contains the files needed for building PHP
 extensions.  If you need to compile your own PHP extensions, you will
 need to install this package.
-%endif
 
 %package imap
 Group: Development/Languages
@@ -73,8 +50,8 @@ The php-imap package contains a dynamic shared object that will add IMAP
 (Internet Message Access Protocol) support to PHP. IMAP is a protocol
 for retrieving, uploading, and manipulating e-mail messages on mail servers.
 PHP is an HTML-embeddable scripting language.  If you need IMAP support
-for PHP applications, you will need to install this package and the php or
-mod_php package.
+for PHP applications, you will need to install this package and the php
+package.
 
 %package ldap
 Group: Development/Languages
@@ -89,14 +66,14 @@ The php-ldap package contains a dynamic shared object that will add LDAP
 (Lightweight Directory Access Protocol) support to PHP. LDAP is a set
 of protocols for accessing directory services over the Internet.
 PHP is an HTML-embeddable scripting language.  If you need LDAP support
-for PHP applications, you will need to install this package and the php or
-mod_php package.
+for PHP applications, you will need to install this package and the php
+package.
 
 %package manual
 Obsoletes: mod_php3-manual
 Group: Documentation
 Summary: The PHP manual, in HTML format.
-Prereq: mod_php = %{version}-%{release}
+Prereq: php = %{version}-%{release}
 
 %description manual
 The php-manual package provides comprehensive documentation for the
@@ -116,7 +93,7 @@ The php-mysql package contains a dynamic shared object that will add
 MySQL database support to PHP.  MySQL is an object-relational database
 management system.  PHP is an HTML-embeddable scripting language.  If
 you need MySQL support for PHP applications, you will need to install
-this package and the php or mod_php package.
+this package and the php package.
 
 %package pgsql
 Group: Development/Languages
@@ -133,7 +110,7 @@ PostgreSQL database support to PHP.  PostgreSQL is an object-relational
 database management system that supports almost all SQL constructs.
 PHP is an HTML-embeddable scripting language.  If you need PostgreSQL
 support for PHP applications, you will need to install this package and
-the php or mod_php package.
+the php package.
 
 %prep
 %setup -q
@@ -141,6 +118,7 @@ the php or mod_php package.
 %patch2 -p1 -b .extensions
 %patch3 -p1 -b .pear
 %patch4 -p1 -b .required
+%patch5 -p1 -b .quotes
 
 mkdir manual
 gzip -dc %{SOURCE1} | tar -xf - -C manual
@@ -174,7 +152,7 @@ compile() {
 	--with-exec-dir=%{_bindir} \
 	--with-regex=system \
 	--with-gettext \
-	--with-gd=shared \
+	--with-gd \
 	--with-jpeg-dir=%{_prefix} \
 	--with-png \
 	--with-zlib \
@@ -184,25 +162,27 @@ compile() {
 	--enable-debugger \
 	--enable-magic-quotes \
 	--enable-safe-mode \
+	--enable-sockets \
 	--enable-sysvsem \
 	--enable-sysvshm \
 	--enable-track-vars \
 	--enable-yp \
 	--enable-ftp \
+	--enable-wddx \
 	--without-mysql \
 	--without-oracle \
 	--without-oci8 \
-	--with-openssl \
 	--with-xml
 make
 }
 
 # Build a standalone binary.
+make distclean || :
 compile --enable-force-cgi-redirect
 cp php php_standalone
-make distclean
 
 # Build a module.
+make distclean
 compile --with-apxs=%{_sbindir}/apxs
 
 # Build individual PHP modules.
@@ -259,25 +239,19 @@ perl -pi -e 's|^#LoadModule php3_module|LoadModule php3_module|g' \
 perl -pi -e 's|^#AddModule mod_php3.c|AddModule mod_php3.c|g' \
 	/etc/httpd/conf/httpd.conf
 
-%files -n mod_php
-%defattr(-,root,root)
-%{contentdir}/icons/*
-%{_libdir}/apache/libphp4.so
-
 %files
 %defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS FUNCTION_LIST.txt INSTALL LICENSE
-%doc MODULES_STATUS NEWS README.* Zend/ZEND_*
+%doc NEWS README.* Zend/ZEND_*
 %config %{_sysconfdir}/php.ini
 %{_bindir}/php
 %{_datadir}/php
-
+%{_libdir}/apache/libphp4.so
 
 %files pgsql
 %defattr(-,root,root)
 %{_libdir}/php4/pgsql.so
 
-%if 0
 %files devel
 %defattr(-,root,root)
 %{_bindir}/php-config
@@ -285,7 +259,6 @@ perl -pi -e 's|^#AddModule mod_php3.c|AddModule mod_php3.c|g' \
 %{_bindir}/phpextdist
 %{_includedir}/php
 %{_libdir}/php4/build
-%endif
 
 %post pgsql
 %{__perl} -pi -e "s|^;extension=pgsql.so|extension=pgsql.so|" %{_sysconfdir}/php.ini
@@ -333,9 +306,38 @@ fi
 
 %files manual
 %defattr(-,root,root)
+%{contentdir}/icons/*
 %{contentdir}/html/manual/mod/mod_php4
 
 %changelog
+* Sat Jan 20 2001 Nalin Dahyabhai <nalin@redhat.com>
+- tweak the fix some more
+
+* Thu Jan 18 2001 Nalin Dahyabhai <nalin@redhat.com>
+- extract stas's fix for quoting problems from CVS for testing
+- tweak the fix, ask the PHP folks about the tweak
+- tweak the fix some more
+
+* Wed Jan 17 2001 Nalin Dahyabhai <nalin@redhat.com>
+- merge mod_php into the main php package (#22906)
+
+* Fri Dec 29 2000 Nalin Dahyabhai <nalin@redhat.com>
+- try to fix a quoting problem
+
+* Wed Dec 20 2000 Nalin Dahyabhai <nalin@redhat.com>
+- update to 4.0.4 to get a raft of bug fixes
+- enable sockets
+- enable wddx
+
+* Fri Nov  3 2000 Nalin Dahyabhai <nalin@redhat.com>
+- rebuild in updated environment
+
+* Thu Nov  2 2000 Nalin Dahyabhai <nalin@redhat.com>
+- add more commented-out modules to the default config file (#19276)
+
+* Wed Nov  1 2000 Nalin Dahyabhai <nalin@redhat.com>
+- fix not-using-gd problem (#20137)
+
 * Tue Oct 17 2000 Nalin Dahyabhai <nalin@redhat.com>
 - update to 4.0.3pl1 to get some bug fixes
 
