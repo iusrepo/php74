@@ -1,13 +1,23 @@
 %define contentdir /var/www
 %define manual_langs en pt_BR cs nl fr de hu it ja ko es tr
+# Build these extension subpackages.
+%define odbc 1
 %define snmp 0
+# Build these extensions in.
+%define ext_curl 1
+%define ext_dom  1
+%define ext_expat  1
+%define ext_gd_freetype 1
+%define ext_iconv  1
+%define ext_mm 1
+%define ext_openssl 1
 
 %{!?oracle:%define oracle 0}
 
 Summary: The PHP HTML-embedded scripting language.
 Name: php
 Version: 4.0.6
-Release: 12
+Release: 15
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
@@ -33,17 +43,40 @@ Patch5: php-4.0.6-ZVAL.patch
 Patch6: php-4.0.6-dom.patch
 Patch7: http://www.php.net/distributions/rfc1867.c.diff-4.0.6.gz
 Patch8: php-4.0.6-xml2.patch
+Patch9: php-4.0.6-mysql-path.patch
+Patch10: php-4.0.6-rfc1867.c.fixfix
 License: PHP License
 BuildRoot: %{_tmppath}/%{name}-root
 Obsoletes: mod_php, php3, phpfi
-BuildPrereq: apache-devel, db2-devel, db3-devel, gdbm-devel, imap-devel >= 2000-9
-BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel, pam-devel
-BuildPrereq: freetype-devel, gd-devel, libjpeg-devel, libpng-devel, zlib-devel
-BuildPrereq: unixODBC-devel, libxml2-devel, pspell-devel, curl-devel >= 7.8
-BuildPrereq: bzip2, bzip2-devel >= 1.0.0, mm-devel, gmp-devel, expat-devel
+BuildPrereq: apache-devel, db2-devel, db3-devel, gdbm-devel
+BuildPrereq: imap-devel >= 2000-9, krb5-devel, mysql-devel, postgresql-devel
+BuildPrereq: gd-devel, libjpeg-devel, libpng-devel, zlib-devel
+BuildPrereq: bzip2, bzip2-devel >= 1.0.0, gmp-devel, pspell-devel
 BuildPrereq: autoconf, automake, libtool
+BuildPrereq: /usr/include/security/pam_appl.h
+%if %{odbc}
+BuildPrereq: unixODBC-devel
+%endif
 %if %{snmp}
 BuildPrereq: ucd-snmp-devel
+%endif
+%if %{ext_curl}
+BuildPrereq: curl-devel >= 7.8
+%endif
+%if %{ext_dom}
+BuildPrereq: libxml2-devel
+%endif
+%if %{ext_expat}
+BuildPrereq: expat-devel
+%endif
+%if %{ext_gd_freetype}
+BuildPrereq: freetype-devel
+%endif
+%if %{ext_mm}
+BuildPrereq: mm-devel
+%endif
+%if %{ext_openssl}
+BuildPrereq: openssl-devel
 %endif
 
 %description
@@ -143,6 +176,7 @@ HTML-embedded scripting language. If you need back-end support for
 PostgreSQL, you should install this package in addition to the main
 php package.
 
+%if %{odbc}
 %package odbc
 Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl
@@ -160,6 +194,7 @@ HTML-embeddable scripting language. If you need ODBC support for PHP
 applications, you will need to install this package and the php
 package.
 
+%endif
 %if %{oracle}
 %package oci8
 %description oci8
@@ -181,6 +216,8 @@ pushd main
 %patch7 -p0 -b .file_uploads
 popd
 %patch8 -p1 -b .xml2
+%patch9 -p1 -b .mysql-path
+%patch10 -p0 -b .fixfix
 cp Zend/LICENSE Zend/ZEND_LICENSE
 mkdir build-cgi build-apache
 
@@ -197,7 +234,10 @@ CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
 # will be able to find the GSSAPI libraries.
 LDFLAGS="-L/usr/kerberos/lib"; export LDFLAGS
 # Configure may or may not catch these (mostly second-order) dependencies.
-LIBS="-lttf -lfreetype -lpng -ljpeg -lz -lnsl"; export LIBS
+%if %{ext_gd_freetype}
+FTLIB=-lfreetype
+%endif
+LIBS="-lttf $FTLIB -lpng -ljpeg -lz -lnsl"; export LIBS
 # This causes the shared extension modules to be installed into %{_libdir}/php4.
 EXTENSION_DIR=%{_libdir}/php4; export EXTENSION_DIR
 # This pulls the static /usr/lib/libc-client.a into the IMAP extension module.
@@ -215,25 +255,41 @@ ln -sf ../configure
 	--disable-rpath \
 	--enable-inline-optimization \
 	--with-bz2 \
+%if %{ext_curl}
 	--with-curl \
+%endif
 	--with-db3 \
+%if %{ext_dom}
 	--with-dom=%{_prefix} \
+%endif
 	--with-exec-dir=%{_bindir} \
+%if %{ext_gd_freetype}
 	--with-freetype-dir=%{_prefix} \
+%endif
 	--with-gd \
 	--with-gdbm \
 	--with-gettext \
 	--with-gmp \
+%if %{ext_iconv}
 	--with-iconv \
+%endif
 	--with-jpeg-dir=%{_prefix} \
+%if %{ext_mm}
 	--with-mm \
+%endif
+%if %{ext_openssl}
 	--with-openssl \
+%endif
 	--with-png \
 	--with-pspell \
 	--with-regex=system \
+%if %{ext_gd_freetype}
 	--with-ttf \
+%endif
 	--with-xml \
+%if %{ext_expat}
 	--with-expat-dir=%{_prefix} \
+%endif
 	--with-zlib \
 	--with-layout=GNU \
 	--enable-bcmath \
@@ -250,16 +306,16 @@ ln -sf ../configure
 	--enable-wddx \
 	--without-oci8 \
 	--with-imap=shared --with-imap-ssl --with-kerberos=/usr/kerberos \
-	--with-ldap=shared \
-	--with-mysql=shared \
+	--with-ldap=shared,%{_prefix} \
+	--with-mysql=shared,%{_prefix} \
 %if %{oracle}
 	--with-oci8=shared \
 %endif
-	--with-pgsql=shared \
+	--with-pgsql=shared,%{_prefix} \
 %if %{snmp}
-	--with-snmp=shared --enable-ucd-snmp-hack \
+	--with-snmp=shared,%{_prefix} --enable-ucd-snmp-hack \
 %endif
-	--with-unixODBC=shared \
+	--with-unixODBC=shared,%{_prefix} \
 	$@
 # Fixup the config_vars to not include the -a on lines which call apxs.
 cat config_vars.mk > config_vars.mk.old
@@ -363,6 +419,7 @@ if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
   %{__perl} -pi -e "s|^extension=mysql.so|;extension=mysql.so|" %{_sysconfdir}/php.ini
 fi
 
+%if %{odbc}
 %files odbc
 %defattr(-,root,root)
 %{_libdir}/php4/odbc.so
@@ -374,6 +431,7 @@ fi
 if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
   %{__perl} -pi -e "s|^extension=odbc.so|;extension=odbc.so|" %{_sysconfdir}/php.ini
 fi
+%endif
 
 %if %{oracle}
 %files oci8
@@ -445,8 +503,39 @@ fi
 %lang(tr) %{contentdir}/html/manual/mod/mod_php4/tr
 
 %changelog
+* Fri Mar  8 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-15
+- rebuild for RHL 7.2
+
+* Fri Mar  8 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-14
+- rebuild for RHL 7.1
+
+* Fri Mar  8 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-13
+- rebuild for RHL 7
+
+* Wed Mar  6 2002 Nalin Dahyabhai <nalin@redhat.com>
+- build the mysql extension using the system mysql library, not the bundled
+  one which can lead to conflicting symbol hilarity
+
+* Tue Mar  5 2002 Nalin Dahyabhai <nalin@redhat.com>
+- fix some off-by-ones in the mime parsing code, from Charlie Brady by way
+  of Adrian Chung (#60523)
+
+* Mon Mar  4 2002 Nalin Dahyabhai <nalin@redhat.com>
+- better fix for the mysql socket test (from Bryce, use mysql_config)
+
+* Fri Mar  1 2002 Nalin Dahyabhai <nalin@redhat.com>
+- begin prep for PHP errata o' doom
+- require pam-devel by file (/usr/include/security/pam_appl.h), not package name
+- make use of curl, dom, external expat, gd-freetype, mm, and openssl extensions
+  optional
+- make odbc subpackage conditional
+- make the default location of the mysql socket be determined by the MYSQL_SOCK
+  environment variable (if defined) and define it
+- FIXME: incorporate an improved fix for the php_mime_split bugs
+
 * Wed Feb 27 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-12
-- add patch to fix use of memchr() in multipart MIME parsing
+- add (now known to be flawed) patch to fix use of memchr() in multipart
+  MIME parsing
 
 * Tue Nov 20 2001 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-11
 - don't build the snmp module
