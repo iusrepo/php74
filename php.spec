@@ -10,7 +10,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.2
-Release: 7
+Release: 8
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -35,7 +35,6 @@ Patch13: php-5.0.2-phpize64.patch
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.2-db4.patch
-Patch23: php-5.0.2-mysql3.patch
 
 # Functional changes
 Patch30: php-4.3.1-dlopen.patch
@@ -296,7 +295,6 @@ support for using the gd graphics library to PHP.
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
-%patch23 -p1 -b .mysql3
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -398,7 +396,7 @@ ln -sf ../configure
         --without-sqlite \
 	$* 
 if test $? != 0; then 
-  tail -300 config.log
+  tail -500 config.log
   : configure failed
   exit 1
 fi
@@ -426,7 +424,17 @@ build --enable-force-cgi-redirect \
       --with-dom-xslt=%{_prefix} --with-dom-exslt=%{_prefix} \
       --with-pgsql=shared \
       --with-snmp=shared,%{_prefix}
+popd
 
+# Build Apache module
+pushd build-apache
+build --with-apxs2=%{_sbindir}/apxs \
+      --without-mysql --without-gd \
+      --without-odbc --disable-dom
+popd
+
+%check
+cd build-cgi
 # Run tests
 export NO_INTERACTION=1 REPORT_EXIT_STATUS=1 MALLOC_CHECK_=2
 unset TZ LANG LC_ALL
@@ -438,16 +446,9 @@ if ! make test; then
     echo "-- $f result ends."
   done
   set -x
+  #exit 1
 fi
 unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
-popd
-
-# Build Apache module
-pushd build-apache
-build --with-apxs2=%{_sbindir}/apxs \
-      --without-mysql --without-gd \
-      --without-odbc --disable-dom
-popd
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -564,6 +565,11 @@ rm files.*
 %endif
 
 %changelog
+* Mon Nov 22 2004 Joe Orton <jorton@redhat.com> 5.0.2-8
+- update for db4-4.3 (Robert Scheck, #140167)
+- build against mysql-devel
+- run tests in %%check
+
 * Wed Nov 10 2004 Joe Orton <jorton@redhat.com> 5.0.2-7
 - truncate changelog at 4.3.1-1
 - merge from 4.3.x package:
