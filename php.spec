@@ -1,19 +1,22 @@
 Summary: The PHP scripting language.
 Name: php
-Version: 4.0.1pl2
-Release: 9
+Version: 4.0.3pl1
+Release: 1
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 Source1: http://www.php.net/distributions/manual.tar.gz
 #Icon: php3.gif
-Patch1: php-4.0.1pl2-redhat.patch
+Patch1: php-4.0.3-redhat.patch
 Patch2: php-4.0.0-extensions.patch
-Patch3: php-4.0.1pl2-pear.patch
+Patch3: php-4.0.2-pear.patch
+Patch4: php-4.0.3-required.patch
 Copyright: PHP
 BuildRoot: %{_tmppath}/%{name}-root
 Obsoletes: php3
-BuildPrereq: apache-devel
+BuildPrereq: apache-devel, db2-devel, db3-devel, imap-devel,
+BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel
+BuildPrereq: freetype-devel, gd-devel, libjpeg-devel, libpng-devel, zlib-devel
 ExcludeArch: ia64
 
 %define contentdir /var/www
@@ -31,7 +34,7 @@ URL: http://www.php.net/
 Prereq: webserver
 Obsoletes: php3, phpfi
 BuildPrereq: apache-devel
-Requires: php = %{version}
+Prereq: php = %{version}-%{release}
 
 %description -n mod_php
 PHP is an HTML-embedded scripting language.  PHP attempts to make it
@@ -59,7 +62,7 @@ need to install this package.
 
 %package imap
 Group: Development/Languages
-Prereq: php = %{version}, perl
+Prereq: php = %{version}-%{release}, perl
 Requires: krb5-libs, pam
 Obsoletes: mod_php3-imap
 Summary: A module for PHP applications that use IMAP.
@@ -75,7 +78,7 @@ mod_php package.
 
 %package ldap
 Group: Development/Languages
-Prereq: php = %{version}, perl
+Prereq: php = %{version}-%{release}, perl
 Obsoletes: mod_php3-ldap
 Summary: A module for PHP applications that use LDAP.
 BuildPrereq: openldap-devel
@@ -93,7 +96,7 @@ mod_php package.
 Obsoletes: mod_php3-manual
 Group: Documentation
 Summary: The PHP manual, in HTML format.
-Prereq: mod_php = %{version}
+Prereq: mod_php = %{version}-%{release}
 
 %description manual
 The php-manual package provides comprehensive documentation for the
@@ -101,7 +104,7 @@ PHP HTML-embedded scripting language, in HTML format.
 
 %package mysql
 Group: Development/Languages
-Prereq: php = %{version}, perl
+Prereq: php = %{version}-%{release}, perl
 Summary: A module for PHP applications that use MySQL databases.
 Provides: php_database
 Obsoletes: mod_php3-mysql
@@ -117,7 +120,7 @@ this package and the php or mod_php package.
 
 %package pgsql
 Group: Development/Languages
-Prereq: php = %{version}, perl
+Prereq: php = %{version}-%{release}, perl
 Summary: A module for PHP applications that use PostgreSQL databases.
 Provides: php_database
 Obsoletes: mod_php3-pgsql
@@ -137,6 +140,7 @@ the php or mod_php package.
 %patch1 -p1 -b .redhat
 %patch2 -p1 -b .extensions
 %patch3 -p1 -b .pear
+%patch4 -p1 -b .required
 
 mkdir manual
 gzip -dc %{SOURCE1} | tar -xf - -C manual
@@ -148,27 +152,29 @@ cp Zend/LICENSE Zend/ZEND_LICENSE
 ln -s %{_includedir} ext/imap/
 mkdir ext/imap/lib
 cp -fv %{_libdir}/c-client.a ext/imap/lib/libc-client.a
-
-autoconf
+./buildconf
 
 %build
-%{!?nokerberos:krb5libs="-L/usr/kerberos/lib -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"}
+krb5libs="-L/usr/kerberos/lib -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
+ssllibs="-lssl -lcrypto"
+sasllibs="-lsasl $krb5libs $ssllibs"
 
 CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
+LIBS="-lttf -lpng -ljpeg -lz"; export LIBS
 
 compile() {
 ./configure \
-	--target=%{_target_platform} \
 	--prefix=%{_prefix} \
 	--with-config-file-path=%{_sysconfdir} \
 	--disable-debug \
 	--enable-pic \
+	--enable-shared \
 	--enable-inline-optimization \
 	$* \
 	--with-exec-dir=%{_bindir} \
 	--with-regex=system \
 	--with-gettext \
-	--with-gd \
+	--with-gd=shared \
 	--with-jpeg-dir=%{_prefix} \
 	--with-png \
 	--with-zlib \
@@ -184,6 +190,9 @@ compile() {
 	--enable-yp \
 	--enable-ftp \
 	--without-mysql \
+	--without-oracle \
+	--without-oci8 \
+	--with-openssl \
 	--with-xml
 make
 }
@@ -194,21 +203,21 @@ cp php php_standalone
 make distclean
 
 # Build a module.
-compile --with-apxs=%{_sbindir}/apxs --disable-static
+compile --with-apxs=%{_sbindir}/apxs
 
-# Build PHP modules.
+# Build individual PHP modules.
 build_ext() {
 %{__cc} -fPIC -shared $RPM_OPT_FLAGS -DHAVE_CONFIG_H \
 	-DCOMPILE_DL_`echo $1 | tr '[a-z]' '[A-Z]'` \
 	-DHAVE_`echo $1 | tr '[a-z]' '[A-Z]'` \
-	-I. -I./main -I`%{_sbindir}/apxs -q INCLUDEDIR` -I./Zend \
+	-I. -I./TSRM -I./main -I`%{_sbindir}/apxs -q INCLUDEDIR` -I./Zend \
 	-I/usr/include/freetype -I/usr/include/$1 \
 	-I./ext/$1 -I./ext/$1/lib$1 \
 	-I./ext/xml/expat/xmltok -I./ext/xml/expat/xmlparse \
 	`grep ^CPPFLAGS Zend/Makefile | cut -f2- -d=` \
 	$4 $2 -o $1.so -L.libs $3 -lc
 }
-build_ext imap ext/imap/php_imap.c "%{_libdir}/c-client.a $krb5libs -lpam -ldl"
+build_ext imap ext/imap/php_imap.c "%{_libdir}/c-client.a $krb5libs $ssllibs -lpam -ldl"
 build_ext ldap ext/ldap/ldap.c "-lldap -llber"
 build_ext pgsql ext/pgsql/pgsql.c "-lpq" -DHAVE_PQCMDTUPLES
 build_ext mysql ext/mysql/php_mysql.c "-L/usr/lib/mysql -lmysqlclient" "-DHAVE_MYSQL_MYSQL_H -DHAVE_MYSQL_REAL_CONNECT"
@@ -257,7 +266,7 @@ perl -pi -e 's|^#AddModule mod_php3.c|AddModule mod_php3.c|g' \
 
 %files
 %defattr(-,root,root)
-%doc CODING_STANDARDS CREDITS FUNCTION_LIST.txt INSTALL LICENSE MAINTAINERS
+%doc CODING_STANDARDS CREDITS FUNCTION_LIST.txt INSTALL LICENSE
 %doc MODULES_STATUS NEWS README.* Zend/ZEND_*
 %config %{_sysconfdir}/php.ini
 %{_bindir}/php
@@ -327,6 +336,26 @@ fi
 %{contentdir}/html/manual/mod/mod_php4
 
 %changelog
+* Tue Oct 17 2000 Nalin Dahyabhai <nalin@redhat.com>
+- update to 4.0.3pl1 to get some bug fixes
+
+* Sat Oct 14 2000 Nalin Dahyabhai <nalin@redhat.com>
+- build for errata
+
+* Wed Oct 11 2000 Nalin Dahyabhai <nalin@redhat.com>
+- update to 4.0.3 to get security fixes integrated
+- patch around problems configuring without Oracle support
+- add TSRM to include path when building individual modules
+
+* Fri Sep  8 2000 Nalin Dahyabhai <nalin@redhat.com>
+- rebuild in new environment
+- enable OpenSSL support
+
+* Wed Sep  6 2000 Nalin Dahyabhai <nalin@redhat.com>
+- update to 4.0.2, and move the peardir settings to configure (#17171)
+- require %%{version}-%%{release} for subpackages
+- add db2-devel and db3-devel prereqs (#17168)
+
 * Wed Aug 23 2000 Nalin Dahyabhai <nalin@redhat.com>
 - rebuild in new environment (new imap-devel)
 
