@@ -1,7 +1,7 @@
 Summary: The PHP scripting language.
 Name: php
 Version: 4.0.4pl1
-Release: 7
+Release: 9
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
@@ -312,6 +312,9 @@ fi
 %{contentdir}/html/manual/mod/mod_php4
 
 %changelog
+* Fri Mar  2 2001 Nalin Dahyabhai <nalin@redhat.com>
+- rebuild in new environment
+
 * Fri Feb 23 2001 Nalin Dahyabhai <nalin@redhat.com>
 - obsolete the old phpfi (PHP 2.x) package
 
