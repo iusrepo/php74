@@ -6,8 +6,8 @@
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
-Version: 5.0.3
-Release: 5
+Version: 5.0.4
+Release: 1
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -17,31 +17,24 @@ Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 Source50: php.conf
 
 Patch2: php-5.0.1-config.patch
-Patch3: php-5.0.2-lib64.patch
+Patch3: php-5.0.4-lib64.patch
 Patch4: php-4.2.2-cxx.patch
 Patch5: php-4.3.3-install.patch
 Patch6: php-4.3.1-tests.patch
 Patch7: php-4.3.2-libtool15.patch
-Patch8: php-4.3.3-miscfix.patch
 Patch9: php-4.3.6-umask.patch
 Patch10: php-5.0.2-gdnspace.patch
 Patch11: php-4.3.8-round.patch
 Patch13: php-5.0.2-phpize64.patch
 Patch14: php-5.0.3-sprintf.patch
-Patch15: php-5.0.3-zstrtod.patch
 Patch16: php-5.0.3-gdheaders.patch
 Patch17: php-5.0.3-gcc4.patch
-Patch18: php-5.0.3-memset0.patch
-Patch19: php-5.0.3-zendwarn.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
-Patch22: php-5.0.3-libmbfl.patch
-Patch23: php-5.0.3-mysqli.patch
-Patch24: php-5.0.3-mysqliglobal.patch
 
 # Functional changes
-Patch30: php-4.3.1-dlopen.patch
+Patch30: php-5.0.4-dlopen.patch
 Patch31: php-5.0.0-easter.patch
 
 BuildRoot: %{_tmppath}/%{name}-root
@@ -306,22 +299,14 @@ support for using the gd graphics library to PHP.
 %patch5 -p1 -b .install
 %patch6 -p1 -b .tests
 %patch7 -p1 -b .libtool15
-##patch8 -p1 -b .miscfix
 %patch9 -p1 -b .umask
 %patch10 -p1 -b .gdnspace
 %patch11 -p1 -b .round
 %patch13 -p1 -b .phpize64
-%patch14 -p1 -b .sprintf
-%patch15 -p1 -b .zstrtod
 %patch16 -p1 -b .gdheaders
 %patch17 -p1 -b .gcc4
-%patch18 -p1 -b .memset0
-%patch19 -p1 -b .zendwarn
 
 %patch21 -p1 -b .odbc
-%patch22 -p1 -b .libmbfl
-%patch23 -p1 -b .mysqli
-%patch24 -p1 -b .mysqliglobal
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -349,19 +334,17 @@ rm -f ext/standard/tests/file/bug22414.phpt \
 : Build for oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash} ibase=%{with_ibase}
 
 %build
-
-CFLAGS="$RPM_OPT_FLAGS -Wall -fno-strict-aliasing"; export CFLAGS
-
-# Install extension modules in %{_libdir}/php/modules.
-EXTENSION_DIR=%{_libdir}/php/modules; export EXTENSION_DIR
-
-# pull latest ltmain.sh, AC_PROG_LIBTOOL
+# Force use of system libtool:
 libtoolize --force --copy
-# force aclocal run during buildconf
-touch acinclude.m4
+cat `aclocal --print-ac-dir`/libtool.m4 > build/libtool.m4
 
 # Regenerate configure scripts (patches change config.m4's)
 ./buildconf --force
+
+CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"; export CFLAGS
+
+# Install extension modules in %{_libdir}/php/modules.
+EXTENSION_DIR=%{_libdir}/php/modules; export EXTENSION_DIR
 
 # Shell function to configure and build a PHP tree.
 build() {
@@ -603,6 +586,10 @@ rm files.*
 %endif
 
 %changelog
+* Fri Apr  1 2005 Joe Orton <jorton@redhat.com> 5.0.4-1
+- update to 5.0.4 (#153068)
+- add .phps AddType to php.conf (#152973)
+
 * Wed Mar 30 2005 Joe Orton <jorton@redhat.com> 5.0.3-5
 - BuildRequire mysql-devel >= 4.1
 - don't mark php.ini as noreplace to make upgrades work (#152171)
