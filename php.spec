@@ -19,7 +19,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.2.2
-Release: 8.0.7
+Release: 8.0.8
 License: The PHP License, version 2.02
 Group: Development/Languages
 URL: http://www.php.net/
@@ -94,6 +94,11 @@ Patch7: php-4.2.2-mailsec.patch
 
 # Fix wordwrap() security issues
 Patch8: php-4.2.2-wrap.patch
+
+Patch9: php-4.2.2-exit.patch
+Patch10: php-4.2.2-sockets.patch
+Patch11: php-4.2.2-sessid.patch
+Patch12: php-4.2.2-snmp.patch
 
 # Where are we going to build the install set to?
 #
@@ -322,11 +327,14 @@ will need to install this package and the php package.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
-%patch5 -p1
+%patch5 -p1 -b .apache2
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
-
+%patch9 -p1 -b .exit
+%patch10 -p1 -b .socket
+%patch11 -p1 -b .sessid
+%patch12 -p1 -b .snmp
 
 # %doc gets confused about LICENSE & Zend/LICENSE
 # lets just help it out,...
@@ -800,6 +808,10 @@ done
 
 
 %changelog
+* Wed Jun 11 2003 Joe Orton <jorton@redhat.com> 4.2.2-8.0.8
+- add bug fixes for #74761, #84828, #85820, #91019, #91279
+- add security fix for CAN-2003-0442
+
 * Wed Jan 22 2003 Joe Orton <jorton@redhat.com> 4.2.2-8.0.7
 - security fix for wordwrap() overflow, CAN-2002-1396
 - bug fixes in Apache httpd 2.0 compatibility: #73516 (partially), #74396,
