@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.8
-Release: 6
+Release: 7
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -46,7 +46,7 @@ BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: zlib-devel, pcre-devel, smtpdaemon
 BuildRequires: bzip2, fileutils, file, perl, libtool >= 1.4.3
-Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php
+Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 Requires: php-pear, file
@@ -260,16 +260,6 @@ BuildRequires: freetype-devel
 The php-mbstring package contains a dynamic shared object that will add
 support for using the gd graphics library to PHP.
 
-%package openssl
-Summary: A module for PHP applications for using the OpenSSL toolkit
-Group: Development/Languages
-Requires: php = %{version}-%{release}
-BuildRequires: openssl-devel
-
-%description openssl
-The php-openssl package contains a dynamic shared object that will add
-support for using the OpenSSL toolkit to PHP.
-
 %prep
 %setup -q
 %patch2 -p1 -b .config
@@ -310,13 +300,13 @@ perl -pi -e 's|%{_prefix}/lib|%{_libdir}|' php.ini-recommended
 rm -f ext/standard/tests/file/bug21131.phpt
 
 # Tests that fail.
-rm -f ext/standard/tests/file/bug22414.phpt
+rm -f ext/standard/tests/file/bug22414.phpt \
+      ext/iconv/tests/bug16069.phpt
 %if 0
       ext/session/tests/019.phpt \
       ext/standard/tests/math/pow.phpt \
       ext/standard/tests/math/round.phpt \
       ext/standard/tests/math/abs.phpt \
-      ext/iconv/tests/bug16069.phpt
 %endif
 
 : Build for oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash}
@@ -364,7 +354,7 @@ ln -sf ../configure
 	--with-gmp \
 	--with-iconv \
 	--with-jpeg-dir=%{_prefix} \
-	--with-openssl=shared \
+	--with-openssl \
 	--with-png \
 	--with-pspell \
 	--with-regex=system \
@@ -470,7 +460,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql odbc ldap snmp domxml xmlrpc imap \
-    mbstring ncurses gd openssl  \
+    mbstring ncurses gd \
     %{?_with_oci8:oci8} %{?_with_mssql:mssql} %{?_with_mhash:mhash}; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
@@ -535,7 +525,6 @@ rm files.*
 %files mbstring -f files.mbstring
 %files ncurses -f files.ncurses
 %files gd -f files.gd
-%files openssl -f files.openssl
 
 %if %{with_oci8}
 %files oci8 -f files.oci8
@@ -550,6 +539,10 @@ rm files.*
 %endif
 
 %changelog
+* Thu Aug 26 2004 Joe Orton <jorton@redhat.com> 4.3.8-7
+- make openssl extension built-in again (#124582)
+- disable bug16069 test
+
 * Thu Aug 19 2004 Joe Orton <jorton@redhat.com> 4.3.8-6
 - fix phpize for libdir=lib64
 - "fix" round() fudging for recent gcc on x86
