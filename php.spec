@@ -1,7 +1,7 @@
 Summary: The PHP scripting language.
 Name: php
 Version: 4.0.4pl1
-Release: 3
+Release: 7
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
@@ -9,12 +9,13 @@ Source1: http://www.php.net/distributions/manual.tar.gz
 #Icon: php3.gif
 Patch1: php-4.0.4-redhat.patch
 Patch2: php-4.0.0-extensions.patch
-Patch3: php-4.0.2-pear.patch
+Patch3: php-4.0.4pl1-pear.patch
 Patch4: php-4.0.3-required.patch
 Patch5: php-4.0.4pl1-quotes.patch
+Patch6: php-4.0.4pl1-parse.patch
 Copyright: PHP
 BuildRoot: %{_tmppath}/%{name}-root
-Obsoletes: php3, mod_php
+Obsoletes: mod_php, php3, phpfi
 BuildPrereq: apache-devel, db2-devel, db3-devel, imap-devel,
 BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel
 BuildPrereq: freetype-devel, gd-devel, libjpeg-devel, libpng-devel, zlib-devel
@@ -119,6 +120,7 @@ the php package.
 %patch3 -p1 -b .pear
 %patch4 -p1 -b .required
 %patch5 -p1 -b .quotes
+%patch6 -p1 -b .parse
 
 mkdir manual
 gzip -dc %{SOURCE1} | tar -xf - -C manual
@@ -137,7 +139,7 @@ krb5libs="-L/usr/kerberos/lib -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
 ssllibs="-lssl -lcrypto"
 sasllibs="-lsasl $krb5libs $ssllibs"
 
-CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
+CFLAGS="$RPM_OPT_FLAGS -fPIC -ggdb"; export CFLAGS
 LIBS="-lttf -lpng -ljpeg -lz"; export LIBS
 
 compile() {
@@ -310,6 +312,18 @@ fi
 %{contentdir}/html/manual/mod/mod_php4
 
 %changelog
+* Fri Feb 23 2001 Nalin Dahyabhai <nalin@redhat.com>
+- obsolete the old phpfi (PHP 2.x) package
+
+* Thu Feb  8 2001 Nalin Dahyabhai <nalin@redhat.com>
+- add a commented-out curl extension to the config file (part of #24933)
+- fix the PEAR-installation-directory-not-being-eval'ed problem (#24938)
+- find the right starting point for multipart form data (#24933)
+
+* Tue Jan 30 2001 Nalin Dahyabhai <nalin@redhat.com>
+- aaarrgh, the fix breaks something else, aaarrgh; revert it (#24933)
+- terminate variable names at the right place (#24933)
+
 * Sat Jan 20 2001 Nalin Dahyabhai <nalin@redhat.com>
 - tweak the fix some more
 
