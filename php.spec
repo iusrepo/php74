@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.8
-Release: 8
+Release: 9
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -45,11 +45,11 @@ BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: zlib-devel, pcre-devel, smtpdaemon
-BuildRequires: bzip2, fileutils, file, perl, libtool >= 1.4.3
+BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
-Requires: php-pear, file
+Requires: php-pear, file >= 4.0
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -539,8 +539,12 @@ rm files.*
 %endif
 
 %changelog
+* Fri Aug 27 2004 Joe Orton <jorton@redhat.com> 4.3.8-9
+- require recent 'file' package (#131054, Robert Scheck)
+- fix Zend double->long conversion
+
 * Thu Aug 26 2004 Joe Orton <jorton@redhat.com> 4.3.8-8
-- fix -select patch bug which break stream_select on s390
+- fix -select patch bug which broke stream_select on s390
 - add an FD_SETSIZE check to php_sock_stream_wait_for_data
 
 * Thu Aug 26 2004 Joe Orton <jorton@redhat.com> 4.3.8-7
