@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.3
-Release: 1
+Release: 2
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -29,9 +29,11 @@ Patch11: php-4.3.8-round.patch
 Patch13: php-5.0.2-phpize64.patch
 Patch14: php-5.0.3-sprintf.patch
 Patch15: php-5.0.3-zstrtod.patch
+Patch16: php-5.0.3-gdheaders.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
+Patch22: php-5.0.3-libmbfl.patch
 
 # Functional changes
 Patch30: php-4.3.1-dlopen.patch
@@ -43,7 +45,7 @@ BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
 BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel
-BuildRequires: zlib-devel, pcre-devel, smtpdaemon
+BuildRequires: zlib-devel, pcre-devel >= 5.0, smtpdaemon
 BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
@@ -302,8 +304,10 @@ support for using the gd graphics library to PHP.
 %patch13 -p1 -b .phpize64
 %patch14 -p1 -b .sprintf
 %patch15 -p1 -b .zstrtod
+%patch16 -p1 -b .gdheaders
 
 %patch21 -p1 -b .odbc
+%patch22 -p1 -b .libmbfl
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -581,6 +585,12 @@ rm files.*
 %endif
 
 %changelog
+* Wed Feb  9 2005 Joe Orton <jorton@redhat.com> 5.0.3-2
+- install the ext/gd headers (#145891)
+- enable pcntl extension in /usr/bin/php (#142903)
+- add libmbfl array arithmetic fix (dcb314@hotmail.com, #143795)
+- add BuildRequire for recent pcre-devel (#147448)
+
 * Wed Jan 12 2005 Joe Orton <jorton@redhat.com> 5.0.3-1
 - update to 5.0.3 (thanks to Robert Scheck et al, #143101)
 - enable xsl extension (#142174)
