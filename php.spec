@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.3
-Release: 3
+Release: 4
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -35,6 +35,8 @@ Patch17: php-5.0.3-gcc4.patch
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-5.0.3-libmbfl.patch
+Patch23: php-5.0.3-mysqli.patch
+Patch24: php-5.0.3-mysqliglobal.patch
 
 # Functional changes
 Patch30: php-4.3.1-dlopen.patch
@@ -118,7 +120,7 @@ need to install this package in addition to the php package.
 Summary: A module for PHP applications that use MySQL databases.
 Group: Development/Languages
 Requires: php = %{version}-%{release}
-Provides: php_database
+Provides: php_database, php-mysqli
 Obsoletes: mod_php3-mysql, stronghold-php-mysql
 BuildRequires: mysql-devel
 
@@ -127,7 +129,7 @@ The php-mysql package contains a dynamic shared object that will add
 MySQL database support to PHP. MySQL is an object-relational database
 management system. PHP is an HTML-embeddable scripting language. If
 you need MySQL support for PHP applications, you will need to install
-this package and the php or mod_php package.
+this package and the php package.
 
 %package pgsql
 Summary: A PostgreSQL database module for PHP.
@@ -192,9 +194,13 @@ package.
 %if %{with_oci8}
 %package oci8
 Group: Development/Languages
-Requires: php = %{version}-%{release}
 Summary: A module for PHP applications that use OCI8 databases.
 Provides: php_database
+BuildRequires: oracle-instantclient-devel >= 10
+Requires: php = %{version}-%{release}
+Provides: php_database
+AutoReq: 0
+Requires: oracle-instantclient-basic >= 10
 
 %description oci8
 The php-oci8 package contains a dynamic shared object that will add
@@ -310,6 +316,8 @@ support for using the gd graphics library to PHP.
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .libmbfl
+%patch23 -p1 -b .mysqli
+%patch24 -p1 -b .mysqliglobal
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -389,7 +397,6 @@ ln -sf ../configure
 	--enable-exif \
 	--enable-ftp \
 	--enable-magic-quotes \
-	--enable-safe-mode \
 	--enable-sockets \
 	--enable-sysvsem \
 	--enable-sysvshm \
@@ -424,6 +431,7 @@ make %{?_smp_mflags}
 # do not need to be built twice.
 pushd build-cgi
 build --enable-force-cgi-redirect \
+      --enable-pcntl \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared --enable-mbstr-enc-trans \
       --enable-mbregex \
@@ -432,7 +440,8 @@ build --enable-force-cgi-redirect \
       --with-xmlrpc=shared \
       --with-ldap=shared \
       --with-mysql=shared,%{_prefix} \
-      %{?_with_oci8:--with-oci8=shared} \
+      --with-mysqli=shared,%{_bindir}/mysql_config \
+      %{?_with_oci8:--with-oci8-instant-client=shared} \
       %{?_with_mssql:--with-mssql=shared} \
       %{?_with_mhash:--with-mhash=shared} \
       %{?_with_ibase:--with-interbase=shared,/opt/interbase} \
@@ -500,7 +509,7 @@ install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php
 install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
-for mod in pgsql mysql odbc ldap snmp xmlrpc imap \
+for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap \
     %{?_with_oci8:oci8} %{?_with_mssql:mssql} %{?_with_mhash:mhash} \
     %{?_with_ibase:interbase}; do
@@ -516,6 +525,9 @@ done
 
 # The dom and xsl modules are both packaged in php-xml
 cat files.dom files.xsl > files.xml
+
+# The mysql and mysqli modules are both packaged in php-mysql
+cat files.mysqli >> files.mysql
 
 # Remove PEAR testsuite
 rm -rf $RPM_BUILD_ROOT%{_datadir}/pear/tests
@@ -587,6 +599,12 @@ rm files.*
 %endif
 
 %changelog
+* Thu Mar 24 2005 Joe Orton <jorton@redhat.com> 5.0.3-4
+- package mysqli extension in php-mysql
+- really enable pcntl (#142903)
+- don't build with --enable-safe-mode (#148969)
+- use "Instant Client" libraries for oci8 module (Kai Bolay, #149873)
+
 * Fri Feb 18 2005 Joe Orton <jorton@redhat.com> 5.0.3-3
 - fix build with GCC 4
 
