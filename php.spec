@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language.
 Name: php
 Version: 4.0.6
-Release: 11
+Release: 12
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
@@ -31,6 +31,8 @@ Patch3: php-4.0.6-libtool.patch
 Patch4: php-4.0.6-db.patch
 Patch5: php-4.0.6-ZVAL.patch
 Patch6: php-4.0.6-dom.patch
+Patch7: http://www.php.net/distributions/rfc1867.c.diff-4.0.6.gz
+Patch8: php-4.0.6-xml2.patch
 License: PHP License
 BuildRoot: %{_tmppath}/%{name}-root
 Obsoletes: mod_php, php3, phpfi
@@ -39,6 +41,7 @@ BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel, pam-devel
 BuildPrereq: freetype-devel, gd-devel, libjpeg-devel, libpng-devel, zlib-devel
 BuildPrereq: unixODBC-devel, libxml2-devel, pspell-devel, curl-devel >= 7.8
 BuildPrereq: bzip2, bzip2-devel >= 1.0.0, mm-devel, gmp-devel, expat-devel
+BuildPrereq: autoconf, automake, libtool
 %if %{snmp}
 BuildPrereq: ucd-snmp-devel
 %endif
@@ -174,8 +177,18 @@ package.
 %patch4 -p0 -b .db
 %patch5 -p1 -b .ZVAL
 %patch6 -p1 -b .dom
+pushd main
+%patch7 -p0 -b .file_uploads
+popd
+%patch8 -p1 -b .xml2
 cp Zend/LICENSE Zend/ZEND_LICENSE
 mkdir build-cgi build-apache
+
+# Buildconf expects the system libtool to be the same as the one in the build
+# tree, and we can't change that, so....
+rm ltmain.sh ltconfig
+libtoolize --force
+./buildconf
 
 %build
 # Add -fPIC to RPM_OPT_FLAGS.
@@ -252,6 +265,7 @@ ln -sf ../configure
 cat config_vars.mk > config_vars.mk.old
 awk '/^INSTALL_IT.*apxs.*-a -n/ {sub("-a -n ","-n ");} {print $0;}' \
 	config_vars.mk.old > config_vars.mk
+ln -sf libtool shlibtool
 make
 }
 # First, build a CGI tree.
@@ -431,6 +445,9 @@ fi
 %lang(tr) %{contentdir}/html/manual/mod/mod_php4/tr
 
 %changelog
+* Wed Feb 27 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-12
+- add patch to fix use of memchr() in multipart MIME parsing
+
 * Tue Nov 20 2001 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-11
 - don't build the snmp module
 - don't activate the module for Apache when we install it into the buildroot
