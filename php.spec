@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.9
-Release: 1
+Release: 2
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -530,7 +530,7 @@ rm files.*
 %endif
 
 %changelog
-* Mon Sep 27 2004 Joe Orton <jorton@redhat.com> 4.3.9-1
+* Mon Sep 27 2004 Joe Orton <jorton@redhat.com> 4.3.9-2
 - update to 4.3.9 (#133467, Robert Scheck)
 - use new RTLD_DEEPBIND to load extension modules
 
