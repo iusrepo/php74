@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.8
-Release: 3
+Release: 4
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -543,6 +543,9 @@ rm files.*
 %endif
 
 %changelog
+* Wed Aug 04 2004 Florian La Roche <Florian.LaRoche@redhat.de>
+- rebuild
+
 * Wed Jul 14 2004 Joe Orton <jorton@redhat.com> 4.3.8-3
 - update to 4.3.8
 - catch some fd > FD_SETSIZE vs select() issues (#125258)
