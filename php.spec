@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.8
-Release: 4
+Release: 5
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -25,11 +25,13 @@ Patch8: php-4.3.3-miscfix.patch
 Patch9: php-4.3.6-umask.patch
 Patch10: php-4.3.7-handler.patch
 Patch11: php-4.3.7-select.patch
+Patch12: php-4.3.8-gottest.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.2-db4.patch
 Patch23: php-4.3.7-gmppowm.patch
+Patch24: php-4.3.8-gdnspace.patch
 
 # Functional changes
 Patch30: php-4.3.1-dlopen.patch
@@ -46,7 +48,7 @@ BuildRequires: bzip2, fileutils, perl, libtool >= 1.4.3
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
-Requires: php-pear
+Requires: php-pear, file
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -279,10 +281,12 @@ support for using the OpenSSL toolkit to PHP.
 %patch9 -p1 -b .umask
 %patch10 -p1 -b .handler
 %patch11 -p1 -b .select
+%patch12 -p1 -b .gottest
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
 %patch23 -p1 -b .gmppowm
+%patch24 -p1 -b .gdnspace
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -303,9 +307,9 @@ perl -pi -e 's|%{_prefix}/lib|%{_libdir}|' php.ini-recommended
 # is not defined by C standard, so don't presume anything.
 rm -f ext/standard/tests/file/bug21131.phpt
 
-%if 0
 # Tests that fail.
-rm -f ext/standard/tests/file/bug22414.phpt \
+rm -f ext/standard/tests/file/bug22414.phpt
+%if 0
       ext/session/tests/019.phpt \
       ext/standard/tests/math/pow.phpt \
       ext/standard/tests/math/round.phpt \
@@ -402,6 +406,7 @@ ln -sf ../configure
 	--enable-dio \
         --enable-mbstring=shared --enable-mbstr-enc-trans \
         --enable-mbregex \
+        --with-mime-magic=%{_datadir}/file/magic.mime \
 	$* || tail -300 config.log
 
 make %{?_smp_mflags}
@@ -543,6 +548,12 @@ rm files.*
 %endif
 
 %changelog
+* Thu Aug 19 2004 Joe Orton <jorton@redhat.com> 4.3.8-5
+- add fix for bundled libgd symbol conflicts (#124530)
+- enable mime_magic extension and Require: file (#130276)
+- disable bug22414 test again (#130317) 
+- fix gettimeofday tests on x86_64
+
 * Wed Aug 04 2004 Florian La Roche <Florian.LaRoche@redhat.de>
 - rebuild
 
