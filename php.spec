@@ -9,7 +9,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.2.2
-Release: 17
+Release: 17.1
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -40,10 +40,14 @@ Patch9: php-4.2.2-lib64.patch
 Patch10: php-4.2.2-inidir.patch
 Patch11: php-4.2.2-openssl097.patch
 Patch12: php-4.2.2-snmp.patch
+Patch13: php-4.2.2-sockets.patch
+Patch14: php-4.2.2-exit.patch
+Patch15: php-4.2.2-pgsql.patch
 
 # Security fixes
 Patch30: php-4.2.2-mailsec.patch
 Patch31: php-4.2.2-wrap.patch
+Patch32: php-4.2.2-sessid.patch
 
 # Where are we going to build the install set to?
 #
@@ -199,12 +203,15 @@ will need to install this package and the php package.
 %patch2 -p1 -b .conf
 %patch3 -p1
 %patch4 -p1
-%patch5 -p1 -b .ap2
+%patch5 -p1 -b .apache2
 %patch6 -p1
 %patch9 -p1 -b .lib64
 %patch10 -p1 -b .inidir
 %patch11 -p1 -b .ossl097
 %patch12 -p1 -b .snmp
+%patch13 -p1 -b .sockets
+%patch14 -p1 -b .exit
+%patch15 -p1 -b .pgsql
 
 # Security fixes
 %patch30 -p1 -b .mailsec
@@ -457,6 +464,10 @@ rm files.*
 %files snmp -f files.snmp
 
 %changelog
+* Wed Jun 11 2003 Joe Orton <jorton@redhat.com> 4.2.2-17.1
+- add bug fixes for #82967, #84460, #84828, #85820, #91019, #91279
+- add security fix for CAN-2003-0442
+
 * Mon Feb 24 2003 Joe Orton <jorton@redhat.com> 4.2.2-17
 - restrict SNMP patch to minimal changes, fixing segv on startup (#84607)
 
