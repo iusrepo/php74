@@ -1,32 +1,21 @@
-# HTML cgi-bin directory exists under
-#
 %define contentdir /var/www
-
-
-# Language sets that we bundle with php
-#
 %define manual_langs de en es fr it ja ko pt_BR
 
+ExcludeArch: x86_64
 
 # For those wanting to recompile with Oracle libraries
 # rpm --rebuild --define 'oracle 1' php4.2.1-x.src.rpm
 #
 %{!?oracle:%define oracle 0}
 
-
-# RPM Informational headers
-#
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.2.2
-Release: 8.0.8
-License: The PHP License, version 2.02
+Release: 10
+License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
 
-
-# The one true source and manuals
-#
 Source0:  http://www.php.net/distributions/php-%{version}.tar.gz
 Source1:  http://www.php.net/distributions/manual/php_manual_de.tar.bz2
 Source2:  http://www.php.net/distributions/manual/php_manual_en.tar.bz2
@@ -37,120 +26,39 @@ Source6:  http://www.php.net/distributions/manual/php_manual_ja.tar.bz2
 Source7:  http://www.php.net/distributions/manual/php_manual_ko.tar.bz2
 Source8:  http://www.php.net/distributions/manual/php_manual_pt_BR.tar.bz2
 
-
-# httpd configuration file.
-#
 Source50: php.conf
-
-
-# Patches (old)
-#
-# Patch for https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=58801
-# Patch0: php-4.1.1-domxml.patch
-#
-# Patch for https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=60515
-# Patch1: php-4.1.2-mysql-path.patch
-#
-# Patch to tweak the default php.ini
-# Patch2: php-4.1.2-php.ini-dist.patch
-#
-# Patch in repsonse to bugzilla entry #60855
-# Patch3: php-4.1.2-bug-60855.patch
-
-
-# Patches (current)
-#
 
 # Patch to get around a dumb assumption that size_t is always 4 bytes
 Patch0: php-4.2.1-64bit-iconv.patch
-
-
-# Argh! openldap 2.1.x changed it's API! This is needed only for openldap 2.1.x and higher
+# Fix for ldap module
 Patch1: php-4.2.1-ldap-TSRM.patch
-
-
-# Patch to tweak the default php.ini to something a little more unix like
+# php.ini defaults
 Patch2: php-4.2.1-php.ini-dist.patch
-
-
-# Patch to pass in -DUCD_COMPATIBLE to the net-snmp package
+# use -DUCD_COMPATIBLE to make net-snmp backwards-compatible
 Patch3: php-4.2.1-snmp.patch
-
-
-# Patch to fix a problem where, given multiple cookies to set,
-# only the last one would be made (#67853)
+# Fix for #67853
 Patch4: php-4.2.2-cookies.patch
-
-
-# Apache httpd 2.0.40 compatibility fixes
+# Apache 2.0 compatibility fixes
 Patch5: php-4.2.2-apache2.patch
-
-
 # Patch to get around php dropping variables
 Patch6: php-4.1.2-missing-vars.patch
-
-# Fix mail() security issues
-Patch7: php-4.2.2-mailsec.patch
-
-# Fix wordwrap() security issues
-Patch8: php-4.2.2-wrap.patch
-
-Patch9: php-4.2.2-exit.patch
-Patch10: php-4.2.2-sockets.patch
-Patch11: php-4.2.2-sessid.patch
-Patch12: php-4.2.2-snmp.patch
+# Fixes for libdir = /usr/lib64; based on SuSE's patches.
+Patch9: php-4.2.2-lib64.patch
 
 # Where are we going to build the install set to?
 #
 BuildRoot: %{_tmppath}/%{name}-root
 
-
-# Kill off some old history that we no longer wish to see
-#
-Obsoletes: mod_php, php3, phpfi
-
-
-# Ok, you wanna build it, you gotta have these packages around
-#
-BuildRequires: bzip2-devel
-BuildRequires: curl-devel
-BuildRequires: db4-devel
-BuildRequires: expat-devel
-BuildRequires: freetype-devel
-BuildRequires: gd-devel >= 1.8.4
-BuildRequires: gdbm-devel
-BuildRequires: gmp-devel
-BuildRequires: httpd-devel >= 2.0.40-6
-BuildRequires: libjpeg-devel
-BuildRequires: libpng-devel
-BuildRequires: libstdc++-devel
-BuildRequires: libxml2-devel
-BuildRequires: ncurses-devel
-BuildRequires: openssl-devel
-BuildRequires: pam-devel
-BuildRequires: pspell-devel
+BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel, freetype-devel
+BuildRequires: gd-devel >= 1.8.4, gdbm-devel, gmp-devel, pspell-devel
+BuildRequires: httpd-devel >= 2.0.40-6, libjpeg-devel, libpng-devel, pam-devel
+BuildRequires: libstdc++-devel, libxml2-devel, ncurses-devel, openssl-devel
 BuildRequires: zlib-devel
-BuildRequires: imap-devel
-
-
-# What we obsolete
-#
-Obsoletes: php-dbg
-
-
-# To install, you must be /this/ high...
-# Basically it's a list of items php itself during the build doesn't
-# directly touch eg fileutils for mkdir, perl for the install scripts
-# etc. We require httpd-mmn which is a provides from httpd. ie it doesn't
-# show up in rpm -qa use rpm -q --whatprovides httpd-mmn instead.
-# Personally I'm not fond of the way the version number is aquired but
-# if it works,...
-#
-BuildPrereq: bzip2
-BuildPrereq: fileutils
+BuildRequires: bzip2, fileutils
+Obsoletes: php-dbg, mod_php, php3, phpfi
 PreReq: perl
+# Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn)
-
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -162,26 +70,21 @@ use of PHP coding is probably as a replacement for CGI scripts. The
 mod_php module enables the Apache Web server to understand and process
 the embedded PHP language in Web pages.
 
-
 %package devel
 Group: Development/Libraries
 Summary: Files needed for building PHP extensions.
-
 
 %description devel
 The php-devel package contains the files needed for building PHP
 extensions. If you need to compile your own PHP extensions, you will
 need to install this package.
 
-
 %package imap
 Summary: An Apache module for PHP applications that use IMAP.
 Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl
 Obsoletes: mod_php3-imap
-BuildRequires: krb5-devel
-BuildRequires: openssl-devel
-
+BuildRequires: krb5-devel, openssl-devel, imap-devel
 
 %description imap
 The php-imap package contains a dynamic shared object (DSO) for the
@@ -192,16 +95,12 @@ servers. PHP is an HTML-embedded scripting language. If you need IMAP
 support for PHP applications, you will need to install this package
 and the php package.
 
-
 %package ldap
 Summary: A module for PHP applications that use LDAP.
 Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl
 Obsoletes: mod_php3-ldap
-BuildRequires: cyrus-sasl-devel
-BuildRequires: openldap-devel
-BuildRequires: openssl-devel
-
+BuildRequires: cyrus-sasl-devel, openldap-devel, openssl-devel
 
 %description ldap
 The php-ldap package is a dynamic shared object (DSO) for the Apache
@@ -211,19 +110,16 @@ services over the Internet. PHP is an HTML-embedded scripting
 language. If you need LDAP support for PHP applications, you will
 need to install this package in addition to the php package.
 
-
 %package manual
 Obsoletes: mod_php3-manual
 Group: Documentation
 Summary: The PHP manual, in HTML format.
 Prereq: php = %{version}-%{release}
 
-
 %description manual
 The php-manual package provides comprehensive documentation for the
 PHP HTML-embedded scripting language, in HTML format. PHP is an
 HTML-embedded scripting language.
-
 
 %package mysql
 Summary: A module for PHP applications that use MySQL databases.
@@ -235,7 +131,6 @@ BuildRequires: mysql-devel
 Requires: mysql
 Requires: zlib
 
-
 %description mysql
 The php-mysql package contains a dynamic shared object that will add
 MySQL database support to PHP. MySQL is an object-relational database
@@ -243,20 +138,16 @@ management system. PHP is an HTML-embeddable scripting language. If
 you need MySQL support for PHP applications, you will need to install
 this package and the php or mod_php package.
 
-
 %package pgsql
 Summary: A PostgreSQL database module for PHP.
 Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl
 Provides: php_database
 Obsoletes: mod_php3-pgsql
-BuildRequires: krb5-devel
-BuildRequires: openssl-devel
-BuildRequires: postgresql-devel
+BuildRequires: krb5-devel, openssl-devel, postgresql-devel
 Requires: krb5-libs
 Requires: openssl
 Requires: postgresql-libs
-
 
 %description pgsql
 The php-pgsql package includes a dynamic shared object (DSO) that can
@@ -267,7 +158,6 @@ HTML-embedded scripting language. If you need back-end support for
 PostgreSQL, you should install this package in addition to the main
 php package.
 
-
 %package odbc
 Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl, grep
@@ -275,7 +165,6 @@ Summary: A module for PHP applications that use ODBC databases.
 Provides: php_database
 BuildRequires: unixODBC-devel
 Requires: unixODBC
-
 
 %description odbc
 The php-odbc package contains a dynamic shared object that will add
@@ -286,7 +175,6 @@ HTML-embeddable scripting language. If you need ODBC support for PHP
 applications, you will need to install this package and the php
 package.
 
-
 %if %{oracle}
 %package oci8
 Group: Development/Languages
@@ -295,12 +183,10 @@ Prereq: perl
 Summary: A module for PHP applications that use OCI8 databases.
 Provides: php_database
 
-
 %description oci8
 The php-oci8 package contains a dynamic shared object that will add
 support for accessing OCI8 databases to PHP.
 %endif
-
 
 %package snmp
 Summary: A module for PHP applications that query SNMP-managed devices.
@@ -308,87 +194,63 @@ Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl
 BuildRequires: net-snmp-devel
 
-
 %description snmp
 The php-snmp package contains a dynamic shared object that will add
 support for querying SNMP devices to PHP.  PHP is an HTML-embeddable
 scripting language. If you need SNMP support for PHP applications, you
 will need to install this package and the php package.
 
-
 %prep
 %setup -q
-
-
-# Weld the patchs into the main source
-#
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
-%patch5 -p1 -b .apache2
+%patch5 -p1 -b .ap2
 %patch6 -p1
-%patch7 -p1
-%patch8 -p1
-%patch9 -p1 -b .exit
-%patch10 -p1 -b .socket
-%patch11 -p1 -b .sessid
-%patch12 -p1 -b .snmp
+%patch9 -p1
 
-# %doc gets confused about LICENSE & Zend/LICENSE
-# lets just help it out,...
-#
+# Prevent %doc confusion over LICENSE & Zend/LICENSE
 cp Zend/LICENSE Zend/ZEND_LICENSE
 
+# Source is built twice: once for /usr/bin/php, once for the Apache DSO.
+mkdir build-cgi build-apache
 
-# We build php (normal cgi, apache_module)
-# Need some spare directories for to do that
-#
-mkdir build-cgi
-mkdir build-apache
-
+# Use correct libdir
+perl -pi -e 's|\$\(prefix\)/lib|%{_libdir}|' pear/Makefile.in
 
 %build
 
-
-# Add -fPIC to RPM_OPT_FLAGS.
-#
 CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
-
 
 # Add the Kerberos library path to the default LDFLAGS so that the IMAP checks
 # will be able to find the GSSAPI libraries.
-#
 LDFLAGS="-L/usr/kerberos/lib"; export LDFLAGS
 
-
 # Configure may or may not catch these (mostly second-order) dependencies.
-#
 LIBS="-lttf -lfreetype -lpng -ljpeg -lz -lnsl"; export LIBS
 
-
 # This causes the shared extension modules to be installed into %{_libdir}/php4.
-#
 EXTENSION_DIR=%{_libdir}/php4; export EXTENSION_DIR
 
-
 # This pulls the static /usr/lib/libc-client.a into the IMAP extension module.
-#
 IMAP_SHARED_LIBADD=-lc-client ; export IMAP_SHARED_LIBADD
 
+# pull latest ltmain.sh, AC_PROG_LIBTOOL
+libtoolize --force --copy
+# force aclocal run during buildconf
+touch acinclude.m4
 
 # Regenerate configure scripts (patches change config.m4's)
-#
 ./buildconf
 
-
 # Shell function to configure and build a PHP tree.
-#
 build() {
 ln -sf ../configure
 %configure \
 	--prefix=%{_prefix} \
+	--cache-file=../config.cache \
 	--with-config-file-path=%{_sysconfdir} \
 	--enable-force-cgi-redirect \
 	--disable-debug \
@@ -457,48 +319,32 @@ ln -sf ../configure
 	--enable-mcal \
 	$*
 
-
 # Fixup the config_vars to not include the '-a' on lines which call apxs.
 #
 cat config_vars.mk > config_vars.mk.old
 awk '/^INSTALL_IT.*apxs.*-a -n/ {sub("-a -n ","-n ");} {print $0;}' \
 	config_vars.mk.old > config_vars.mk
 
-make %{_smp_mflags}
+make %{?_smp_mflags}
 }
 
-
-# First, build a CGI tree. Remember that nice handy build() { ... } above?
-#
+# Build standalone /usr/bin/php
 pushd build-cgi
-build \
-	--enable-force-cgi-redirect
+build --enable-force-cgi-redirect
 popd
 
-
-# Second, build an Apache tree.
-#
+# Build Apache module
 pushd build-apache
-
-
-# Add the buildroot location to the front of the libexecdir.
-# Again use the build() call
-#
-build \
-	--with-apxs2=%{_sbindir}/apxs
+build --with-apxs2=%{_sbindir}/apxs
 popd
-
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
-
-# First, install the CGI tree.
-#
+# Install from CGI tree
 pushd build-cgi
 make install INSTALL_ROOT=$RPM_BUILD_ROOT 
 popd
-
 
 # Second, install the Apache tree.  Note that this overwrites the modules which
 # were installed as part of the CGI build.  Lucky for us they're compatible.
@@ -506,7 +352,6 @@ popd
 pushd build-apache
 make install INSTALL_ROOT=$RPM_BUILD_ROOT INSTALL_IT="echo "
 popd
-
 
 # Install the default configuration file and some icons which can be used to
 # indicate that this site uses PHP.
@@ -516,18 +361,13 @@ install -m 644    php.ini-dist $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 install -m 755 -d $RPM_BUILD_ROOT%{contentdir}/icons
 install -m 644    *.gif $RPM_BUILD_ROOT%{contentdir}/icons/
 
+# install the DSO
+install -m 755 -d $RPM_BUILD_ROOT%{_libdir}/httpd/modules
+install -m 755 build-apache/libs/libphp4.so $RPM_BUILD_ROOT%{_libdir}/httpd/modules
 
-# Gurrrr @!!$#? apxs/buildroot mess
-#
-install -m 755 -d $RPM_BUILD_ROOT/usr/lib/httpd/modules
-install -m 755 build-apache/libs/libphp4.so $RPM_BUILD_ROOT/usr/lib/httpd/modules
-
-
-# Install the httpd configuration file
-#
+# Apache config fragment
 install -m 755 -d $RPM_BUILD_ROOT/etc/httpd/conf.d
 install -m 644 $RPM_SOURCE_DIR/php.conf $RPM_BUILD_ROOT/etc/httpd/conf.d
-
 
 # Manuals -- we'll place English (en) in the location where the only version
 # of the manual was before, and langify the rest.
@@ -543,42 +383,33 @@ for lang in %{manual_langs} ; do
 	bzip2 -dc $RPM_SOURCE_DIR/php_manual_${lang}.tar.bz2 | tar -x -C $RPM_BUILD_ROOT%{contentdir}/manual/mod/mod_php4/${target_lang} -f -
 done
 
+# Remove unpackaged files
+rm -f $RPM_BUILD_ROOT%{_libdir}/php4/*.a \
+      $RPM_BUILD_ROOT%{_bindir}/{phptar,pearize}
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
-
-################################################################################
-# PHP ##########################################################################
-#
+### Files for main package
 %files
-	%defattr(-,root,root)
-	%doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
-	%doc Zend/ZEND_*
-	%config(noreplace) %{_sysconfdir}/php.ini
-	%{_bindir}/php
-	%{_bindir}/pear
-	%{_datadir}/pear
-	%dir %{_libdir}/php4
-	%{_libdir}/httpd/modules/libphp4.so
-	%config(noreplace) %{_sysconfdir}/httpd/conf.d/php.conf
+%defattr(-,root,root)
+%doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
+%doc Zend/ZEND_*
+%config(noreplace) %{_sysconfdir}/php.ini
+%{_bindir}/php
+%{_bindir}/pear
+%{_datadir}/pear
+%{_libdir}/httpd/modules/libphp4.so
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/php.conf
 
-%post -p /sbin/ldconfig
-
-%postun -p /sbin/ldconfig
-
-
-################################################################################
-# devel ########################################################################
-#
+### Files for -devel package
 %files devel
-	%defattr(-,root,root)
-	%{_bindir}/php-config
-	%{_bindir}/phpize
-	%{_bindir}/phpextdist
-	%{_includedir}/php
-	%{_libdir}/php
-
+%defattr(-,root,root)
+%{_bindir}/php-config
+%{_bindir}/phpize
+%{_bindir}/phpextdist
+%{_includedir}/php
+%{_libdir}/php
 
 ################################################################################
 # From here on in we need to make php-(extension) alter the php.ini
@@ -587,7 +418,6 @@ done
 # Just to make things annoying, upstream has decided to change the default
 # file extensions from .so to .dll
 #
-
 
 ################################################################################
 # pgsql ########################################################################
@@ -607,12 +437,10 @@ done
 		fi
 	fi
 
-
 %preun pgsql
 	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
 	  %{__perl} -pi -e "s|^extension=pgsql.so|;extension=pgsql.so|" %{_sysconfdir}/php.ini
 	fi
-
 
 	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini.rpmnew ] ; then
 	  %{__perl} -pi -e "s|^extension=pgsql.so|;extension=pgsql.so|" %{_sysconfdir}/php.ini.rpmnew
@@ -624,7 +452,6 @@ done
 %files mysql
 	%defattr(-,root,root)
 	%{_libdir}/php4/mysql.so
-
 
 %post mysql
 	if %{__grep} -q "extension=mysql.so" %{_sysconfdir}/php.ini; then
@@ -652,7 +479,6 @@ done
 %files odbc
 	%defattr(-,root,root)
 	%{_libdir}/php4/odbc.so
-
 
 %post odbc
 	if %{__grep} -q "extension=odbc.so" %{_sysconfdir}/php.ini; then
@@ -682,7 +508,6 @@ done
 	%defattr(-,root,root)
 	%{_libdir}/php4/oci8.so
 
-
 %post oci8
 	if %{__grep} -q "extension=oci8.so" %{_sysconfdir}/php.ini; then
 		%{__perl} -pi -e "s|^;extension=oci8.so|extension=oci8.so|" %{_sysconfdir}/php.ini
@@ -711,7 +536,6 @@ done
 	%defattr(-,root,root)
 	%{_libdir}/php4/imap.so
 
-
 %post imap
 	if %{__grep} -q "extension=imap.so" %{_sysconfdir}/php.ini; then
 		%{__perl} -pi -e "s|^;extension=imap.so|extension=imap.so|" %{_sysconfdir}/php.ini
@@ -738,7 +562,6 @@ done
 %files ldap
 	%defattr(-,root,root)
 	%{_libdir}/php4/ldap.so
-
 
 %post ldap
 	if %{__grep} -q "extension=ldap.so" %{_sysconfdir}/php.ini; then
@@ -767,7 +590,6 @@ done
 	%defattr(-,root,root)
 	%{_libdir}/php4/snmp.so
 
-
 %post snmp
 	if %{__grep} -q "extension=snmp.so" %{_sysconfdir}/php.ini; then
 		%{__perl} -pi -e "s|^;extension=snmp.so|extension=snmp.so|" %{_sysconfdir}/php.ini
@@ -792,7 +614,6 @@ done
 
 ################################################################################
 
-
 %files manual
 	%defattr(-,root,root)
 	%{contentdir}/icons/*
@@ -806,19 +627,20 @@ done
 	%lang(ko) %{contentdir}/manual/mod/mod_php4/ko
 	%lang(pt) %{contentdir}/manual/mod/mod_php4/pt_BR
 
-
 %changelog
-* Wed Jun 11 2003 Joe Orton <jorton@redhat.com> 4.2.2-8.0.8
-- add bug fixes for #74761, #84828, #85820, #91019, #91279
-- add security fix for CAN-2003-0442
+* Mon Dec  2 2002 Joe Orton <jorton@redhat.com> 4.2.2-10
+- remove ldconfig invocation in post/postun
+- add fixes for #73516, #78586, #75029, #75712, #75878
 
-* Wed Jan 22 2003 Joe Orton <jorton@redhat.com> 4.2.2-8.0.7
-- security fix for wordwrap() overflow, CAN-2002-1396
-- bug fixes in Apache httpd 2.0 compatibility: #73516 (partially), #74396,
- #75029, #75712, #75878, #78586
-- add missing buildprereqs for zlib-devel, imap-devel (#74819)
-- own the /usr/lib/php4 directory (#73894)
-- pass _smp_mflags to make
+* Wed Nov  6 2002 Joe Orton <jorton@redhat.com> 4.2.2-9
+- fixes for libdir=/usr/lib64, based on SuSE's patches.
+- add build prereqs for zlib-devel, imap-devel, curl-devel (#74819)
+- remove unpackaged files from install root
+- libtoolize; use configure cache to speed up build
+
+* Mon Sep 23 2002 Philip Copeland <bryce@redhat.com> 4.2.2-8.0.6
+- PHP cannot determine which UID is being used, so safe
+  mode restrictions were always applied. Fixed. (#74396)
 
 * Tue Sep 3 2002 Philip Copeland <bryce@redhat.com> 4.2.2-8.0.4
 - zts support seems to crash out httpd on a *second* sighup
