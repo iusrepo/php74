@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.4
-Release: 7
+Release: 10.1
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -45,6 +45,7 @@ BuildRequires: libstdc++-devel, ncurses-devel, openssl-devel
 BuildRequires: zlib-devel, pcre-devel
 BuildRequires: bzip2, fileutils, perl, libtool >= 1.4.3
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php
+%{!?_with_imap:Obsoletes: php-imap} 
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 Requires: php-pear
@@ -331,7 +332,7 @@ ln -sf ../configure
 	--with-dom=shared,%{_prefix} \
         --with-dom-xslt=%{_prefix} --with-dom-exslt=%{_prefix} \
         --with-xmlrpc=shared \
-        --with-pcre=%{_prefix} \
+        --with-pcre-regex=%{_prefix} \
 	--with-zlib \
 	--with-layout=GNU \
 	--enable-bcmath \
@@ -358,7 +359,7 @@ ln -sf ../configure
 	--with-snmp=shared,%{_prefix} \
 	--with-snmp=shared \
 	--enable-ucd-snmp-hack \
-	--with-unixODBC=shared \
+	--with-unixODBC=shared,%{_prefix} \
 	--enable-memory-limit \
 	--enable-bcmath \
 	--enable-shmop \
@@ -514,6 +515,19 @@ exit 0
 %files xmlrpc -f files.xmlrpc
 
 %changelog
+* Tue Mar 02 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Wed Feb 18 2004 Joe Orton <jorton@redhat.com> 4.3.4-10
+- eliminate /usr/local/lib RPATH in odbc.so
+- really use system pcre library
+
+* Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com> 4.3.4-9
+- rebuilt
+
+* Mon Feb  2 2004 Bill Nottingham <notting@redhat.com> 4.3.4-8
+- obsolete php-imap if we're not building it
+
 * Wed Jan 28 2004 Joe Orton <jorton@redhat.com> 4.3.4-7
 - gd fix for build with recent Freetype2 (from upstream)
 - remove easter egg (Oden Eriksson, Mandrake)
