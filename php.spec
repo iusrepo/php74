@@ -5,8 +5,8 @@
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
-Version: 4.3.8
-Release: 12
+Version: 4.3.9
+Release: 1
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -23,16 +23,13 @@ Patch6: php-4.3.1-tests.patch
 Patch7: php-4.3.2-libtool15.patch
 Patch8: php-4.3.3-miscfix.patch
 Patch9: php-4.3.6-umask.patch
-Patch10: php-4.3.7-handler.patch
 Patch11: php-4.3.7-select.patch
-Patch12: php-4.3.8-gottest.patch
 Patch13: php-4.3.8-round.patch
 Patch14: php-4.3.8-dval2lval.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.2-db4.patch
-Patch23: php-4.3.7-gmppowm.patch
 Patch24: php-4.3.8-gdnspace.patch
 
 # Functional changes
@@ -271,15 +268,12 @@ support for using the gd graphics library to PHP.
 %patch7 -p1 -b .libtool15
 %patch8 -p1 -b .miscfix
 %patch9 -p1 -b .umask
-%patch10 -p1 -b .handler
 %patch11 -p1 -b .select
-%patch12 -p1 -b .gottest
 %patch13 -p1 -b .round
 %patch14 -p1 -b .dval2lval
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
-%patch23 -p1 -b .gmppowm
 %patch24 -p1 -b .gdnspace
 
 %patch30 -p1 -b .dlopen
@@ -536,7 +530,8 @@ rm files.*
 %endif
 
 %changelog
-* Thu Sep 23 2004 Joe Orton <jorton@redhat.com> 4.3.8-12
+* Mon Sep 27 2004 Joe Orton <jorton@redhat.com> 4.3.9-1
+- update to 4.3.9 (#133467, Robert Scheck)
 - use new RTLD_DEEPBIND to load extension modules
 
 * Thu Sep  9 2004 Joe Orton <jorton@redhat.com> 4.3.8-11
