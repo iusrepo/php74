@@ -1,32 +1,51 @@
-Summary: The PHP scripting language.
+%define contentdir /var/www
+%define manual_langs en pt_BR cs nl fr de hu it ja kr es
+
+%{!?oracle:%define oracle 0}
+
+Summary: The PHP HTML-embedded scripting language.
 Name: php
-Version: 4.0.4pl1
-Release: 10
+Version: 4.0.6
+Release: 5
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
-Source1: http://www.php.net/distributions/manual.tar.gz
+Source1: php-manual-en.tar.gz
+#Source2: php-manual-pt_BR.tar.gz
+#Source3: php-manual-cs.tar.gz
+#Source4: php-manual-nl.tar.gz
+#Source5: php-manual-fr.tar.gz
+#Source6: php-manual-de.tar.gz
+#Source7: php-manual-hu.tar.gz
+#Source8: php-manual-it.tar.gz
+#Source9: php-manual-ja.tar.gz
+#Source10: php-manual-kr.tar.gz
+#Source11: php-manual-es.tar.gz
+Source12: php-get-manuals
 #Icon: php3.gif
-Patch1: php-4.0.4-redhat.patch
-Patch2: php-4.0.0-extensions.patch
-Patch3: php-4.0.4pl1-pear.patch
-Patch4: php-4.0.3-required.patch
-Patch5: php-4.0.4pl1-quotes.patch
-Patch6: php-4.0.4pl1-parse.patch
-Copyright: PHP
+Patch0: php-4.0.6-redhat.patch
+Patch1: php-4.0.3-required.patch
+Patch2: php-4.0.4pl1-linkage.patch
+Patch3: php-4.0.6-libtool.patch
+Patch4: php-4.0.5-db.patch
+Patch5: php-4.0.5-ext.patch
+License: PHP
 BuildRoot: %{_tmppath}/%{name}-root
 Obsoletes: mod_php, php3, phpfi
-BuildPrereq: apache-devel, db2-devel, db3-devel, imap-devel,
-BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel
+BuildPrereq: apache-devel, db2-devel, db3-devel, gdbm-devel, imap-devel >= 2000-9
+BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel, pam-devel
 BuildPrereq: freetype-devel, gd-devel, libjpeg-devel, libpng-devel, zlib-devel
-
-%define contentdir /var/www
+BuildPrereq: unixODBC-devel, libxml2-devel, pspell-devel
 
 %description
-PHP is an HTML-embeddable scripting language.  PHP offers built-in database
-integration for several commercial and non-commercial database management
-systems, so writing a database-enabled script with PHP is fairly simple.  The
-most common use of PHP coding is probably as a replacement for CGI scripts.
+PHP is an HTML-embedded scripting language. PHP attempts to make it
+easy for developers to write dynamically generated webpages. PHP also
+offers built-in database integration for several commercial and
+non-commercial database management systems, so writing a
+database-enabled webpage with PHP is fairly simple. The most common
+use of PHP coding is probably as a replacement for CGI scripts. The
+mod_php module enables the Apache Web server to understand and process
+the embedded PHP language in Web pages.
 
 %package devel
 Group: Development/Libraries
@@ -34,7 +53,7 @@ Summary: Files needed for building PHP extensions.
 
 %description devel
 The php-devel package contains the files needed for building PHP
-extensions.  If you need to compile your own PHP extensions, you will
+extensions. If you need to compile your own PHP extensions, you will
 need to install this package.
 
 %package imap
@@ -42,16 +61,17 @@ Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl
 Requires: krb5-libs, pam
 Obsoletes: mod_php3-imap
-Summary: A module for PHP applications that use IMAP.
+Summary: An Apache module for PHP applications that use IMAP.
 BuildPrereq: imap-devel, krb5-devel
 
 %description imap
-The php-imap package contains a dynamic shared object that will add IMAP
-(Internet Message Access Protocol) support to PHP. IMAP is a protocol
-for retrieving, uploading, and manipulating e-mail messages on mail servers.
-PHP is an HTML-embeddable scripting language.  If you need IMAP support
-for PHP applications, you will need to install this package and the php
-package.
+The php-imap package contains a dynamic shared object (DSO) for the
+Apache Web server. When compiled into Apache, the php-imap module will
+add IMAP (Internet Message Access Protocol) support to PHP. IMAP is a
+protocol for retrieving and uploading e-mail messages on mail
+servers. PHP is an HTML-embedded scripting language. If you need IMAP
+support for PHP applications, you will need to install this package
+and the php package.
 
 %package ldap
 Group: Development/Languages
@@ -62,12 +82,12 @@ BuildPrereq: openldap-devel
 Requires: openldap
 
 %description ldap
-The php-ldap package contains a dynamic shared object that will add LDAP
-(Lightweight Directory Access Protocol) support to PHP. LDAP is a set
-of protocols for accessing directory services over the Internet.
-PHP is an HTML-embeddable scripting language.  If you need LDAP support
-for PHP applications, you will need to install this package and the php
-package.
+The php-ldap package is a dynamic shared object (DSO) for the Apache
+Web server that adds Lightweight Directory Access Protocol (LDAP)
+support to PHP. LDAP is a set of protocols for accessing directory
+services over the Internet. PHP is an HTML-embedded scripting
+language. If you need LDAP support for PHP applications, you will
+need to install this package in addition to the php package.
 
 %package manual
 Obsoletes: mod_php3-manual
@@ -77,7 +97,8 @@ Prereq: php = %{version}-%{release}
 
 %description manual
 The php-manual package provides comprehensive documentation for the
-PHP HTML-embedded scripting language, in HTML format.
+PHP HTML-embedded scripting language, in HTML format. PHP is an
+HTML-embedded scripting language.
 
 %package mysql
 Group: Development/Languages
@@ -90,56 +111,86 @@ Requires: mysql
 
 %description mysql
 The php-mysql package contains a dynamic shared object that will add
-MySQL database support to PHP.  MySQL is an object-relational database
-management system.  PHP is an HTML-embeddable scripting language.  If
+MySQL database support to PHP. MySQL is an object-relational database
+management system. PHP is an HTML-embeddable scripting language. If
 you need MySQL support for PHP applications, you will need to install
-this package and the php package.
+this package and the php or mod_php package.
 
 %package pgsql
 Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl
-Summary: A module for PHP applications that use PostgreSQL databases.
+Summary: A PostgreSQL database module for PHP.
 Provides: php_database
 Obsoletes: mod_php3-pgsql
 BuildPrereq: postgresql-devel
 Requires: postgresql
 
 %description pgsql
-The php-pgsql package contains a dynamic shared object that will add
-PostgreSQL database support to PHP.  PostgreSQL is an object-relational
-database management system that supports almost all SQL constructs.
-PHP is an HTML-embeddable scripting language.  If you need PostgreSQL
-support for PHP applications, you will need to install this package and
-the php package.
+The php-pgsql package includes a dynamic shared object (DSO) that can
+be compiled in to the Apache Web server to add PostgreSQL database
+support to PHP. PostgreSQL is an object-relational database management
+system that supports almost all SQL constructs. PHP is an
+HTML-embedded scripting language. If you need back-end support for
+PostgreSQL, you should install this package in addition to the main
+php package.
 
+%package odbc
+Group: Development/Languages
+Prereq: php = %{version}-%{release}, perl
+Summary: A module for PHP applications that use ODBC databases.
+Provides: php_database
+BuildPrereq: unixODBC-devel
+Requires: unixODBC
+
+%description odbc
+The php-odbc package contains a dynamic shared object that will add
+database support through ODBC to PHP. ODBC is an open specification
+which provides a consistent API for developers to use for accessing
+data sources (which are often, but not always, databases). PHP is an
+HTML-embeddable scripting language. If you need ODBC support for PHP
+applications, you will need to install this package and the php
+package.
+
+%if %{oracle}
+%package oci8
+%description oci8
+%endif
 %prep
-%setup -q
-%patch1 -p1 -b .redhat
-%patch2 -p1 -b .extensions
-%patch3 -p1 -b .pear
-%patch4 -p1 -b .required
-%patch5 -p1 -b .quotes
-%patch6 -p1 -b .parse
-
-mkdir manual
-gzip -dc %{SOURCE1} | tar -xf - -C manual
+%setup -q -c
+pushd %{name}-%{version}
+%patch0 -p1 -b .redhat
+%patch1 -p1 -b .required
+%patch2 -p1 -b .linkage
+%patch3 -p1 -b .libtool
+%patch4 -p1 -b .db
+%patch5 -p1 -b .ext
 
 cp Zend/LICENSE Zend/ZEND_LICENSE
 
-# Set things up for IMAP.  The library's named c-cliant.a, not libc-client.a,
-# otherwise this wouldn't be necessary.
+# Set things up for IMAP.  The library's named c-client.a, not libc-client.a,
+# otherwise this mightn't be necessary.
 ln -s %{_includedir} ext/imap/
 mkdir ext/imap/lib
 cp -fv %{_libdir}/c-client.a ext/imap/lib/libc-client.a
+
+# Rebuild configure and friends.
 ./buildconf
 
+popd
+
+# Create another source tree like this one.
+cp -a %{name}-%{version} %{name}-%{version}-cgi
+
 %build
+%define __libtoolize :
 krb5libs="-L/usr/kerberos/lib -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
 ssllibs="-lssl -lcrypto"
 sasllibs="-lsasl $krb5libs $ssllibs"
 
-CFLAGS="$RPM_OPT_FLAGS -fPIC -ggdb"; export CFLAGS
-LIBS="-lttf -lpng -ljpeg -lz"; export LIBS
+CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
+LIBS="-lttf -lfreetype -lpng -ljpeg -lz"; export LIBS
+REDO_ALL=yes; export REDO_ALL
+EXTENSION_DIR=%{_libdir}/php4; export EXTENSION_DIR
 
 compile() {
 ./configure \
@@ -147,19 +198,21 @@ compile() {
 	--with-config-file-path=%{_sysconfdir} \
 	--disable-debug \
 	--enable-pic \
-	--enable-shared \
 	--enable-inline-optimization \
 	$* \
+	--with-dom \
 	--with-exec-dir=%{_bindir} \
 	--with-regex=system \
 	--with-gettext \
 	--with-gd \
 	--with-jpeg-dir=%{_prefix} \
 	--with-png \
+	--with-ttf \
 	--with-zlib \
-	--with-db2 \
 	--with-db3 \
 	--with-gdbm \
+	--with-openssl \
+	--with-layout=GNU \
 	--enable-debugger \
 	--enable-magic-quotes \
 	--enable-safe-mode \
@@ -171,24 +224,27 @@ compile() {
 	--enable-ftp \
 	--enable-wddx \
 	--without-mysql \
+	--without-unixODBC \
 	--without-oracle \
 	--without-oci8 \
+	--with-pspell \
 	--with-xml
+sh ltconfig ltmain.sh
 make
 }
 
 # Build a standalone binary.
-make distclean || :
+pushd %{name}-%{version}-cgi
 compile --enable-force-cgi-redirect
-cp php php_standalone
+popd
 
 # Build a module.
-make distclean
+pushd %{name}-%{version}
 compile --with-apxs=%{_sbindir}/apxs
 
 # Build individual PHP modules.
 build_ext() {
-%{__cc} -fPIC -shared $RPM_OPT_FLAGS -DHAVE_CONFIG_H \
+%{__cc} -fPIC -shared $RPM_OPT_FLAGS \
 	-DCOMPILE_DL_`echo $1 | tr '[a-z]' '[A-Z]'` \
 	-DHAVE_`echo $1 | tr '[a-z]' '[A-Z]'` \
 	-I. -I./TSRM -I./main -I`%{_sbindir}/apxs -q INCLUDEDIR` -I./Zend \
@@ -198,32 +254,58 @@ build_ext() {
 	`grep ^CPPFLAGS Zend/Makefile | cut -f2- -d=` \
 	$4 $2 -o $1.so -L.libs $3 -lc
 }
-build_ext imap ext/imap/php_imap.c "%{_libdir}/c-client.a $krb5libs $ssllibs -lpam -ldl"
+build_ext imap ext/imap/php_imap.c "%{_libdir}/c-client.a $krb5libs $ssllibs -lpam" "-DHAVE_IMAP2000 -DHAVE_IMAP_SSL"
 build_ext ldap ext/ldap/ldap.c "-lldap -llber"
 build_ext pgsql ext/pgsql/pgsql.c "-lpq" -DHAVE_PQCMDTUPLES
 build_ext mysql ext/mysql/php_mysql.c "-L/usr/lib/mysql -lmysqlclient" "-DHAVE_MYSQL_MYSQL_H -DHAVE_MYSQL_REAL_CONNECT"
+build_ext odbc ext/odbc/php_odbc.c "-lodbc" "-DHAVE_UNIXODBC -DHAVE_UODBC"
+%if %{oracle}
+build_ext oci8 ext/oci8/oci8.c "-I${ORACLE_HOME}/rdbms/public -I${ORACLE_HOME}/rdbms/demo -L${ORACLE_HOME}/lib -lclntsh"
+%endif
+
+popd
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+pushd %{name}-%{version}
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/{apache,php4}
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/httpd
 mkdir -p $RPM_BUILD_ROOT%{contentdir}/icons
-mkdir -p $RPM_BUILD_ROOT%{_bindir}
-install -m 755 php_standalone $RPM_BUILD_ROOT%{_bindir}/php
-install -m 755 .libs/libphp4.so $RPM_BUILD_ROOT%{_libdir}/apache/
-strip -g $RPM_BUILD_ROOT%{_libdir}/apache/*
+
+./libtool install -m755 libphp4.la $RPM_BUILD_ROOT%{_libdir}/apache/
+
+pushd ../%{name}-%{version}-cgi
+./libtool install -m755 libphp4.la $RPM_BUILD_ROOT%{_libdir}/
+./libtool install -m755 php $RPM_BUILD_ROOT%{_bindir}/php
+popd
+
 install -m 755 pgsql.so $RPM_BUILD_ROOT%{_libdir}/php4/
 install -m 755 imap.so $RPM_BUILD_ROOT%{_libdir}/php4/
 install -m 755 ldap.so $RPM_BUILD_ROOT%{_libdir}/php4/
 install -m 755 mysql.so $RPM_BUILD_ROOT%{_libdir}/php4/
-strip -g $RPM_BUILD_ROOT%{_libdir}/php4/*
+install -m 755 odbc.so $RPM_BUILD_ROOT%{_libdir}/php4/
+%if %{oracle}
+install -m 755 oci8.so $RPM_BUILD_ROOT%{_libdir}/php4/
+%endif
 install -m 644 php.ini-dist $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 install -m 644 *.gif $RPM_BUILD_ROOT%{contentdir}/icons/
 
 # manual
-mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4
-cp manual/*.html $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4
-ln -s manual.html $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4/index.html
+for lang in %{manual_langs} ; do
+if test x${lang} = xen ; then
+	# put english where the old single manual package used to be
+	mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4/
+	gzip -dc $RPM_SOURCE_DIR/php-manual-${lang}.tar.gz | tar -x -C $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4/ -f -
+elif test x${lang} = xkr ; then
+	# put english where the old single manual package used to be
+	mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4/ko/
+	gzip -dc $RPM_SOURCE_DIR/php-manual-${lang}.tar.gz | tar -x -C $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4/ko/ -f -
+else
+	mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4/${lang}/
+	gzip -dc $RPM_SOURCE_DIR/php-manual-${lang}.tar.gz | tar -x -C $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4/${lang} -f -
+fi
+done
 
 # pear and development files
 %{makeinstall} -C pear peardir=$RPM_BUILD_ROOT%{_datadir}/php
@@ -234,7 +316,7 @@ done
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
-%triggerpostun -- php <= 3.0.15-1
+%triggerpostun -- php < 4.0.0
 perl -pi -e 's|^#LoadModule php3_module|LoadModule php3_module|g' \
 	/etc/httpd/conf/httpd.conf
 perl -pi -e 's|^#AddModule mod_php3.c|AddModule mod_php3.c|g' \
@@ -242,30 +324,36 @@ perl -pi -e 's|^#AddModule mod_php3.c|AddModule mod_php3.c|g' \
 
 %files
 %defattr(-,root,root)
-%doc CODING_STANDARDS CREDITS FUNCTION_LIST.txt INSTALL LICENSE
-%doc NEWS README.* Zend/ZEND_*
-%config %{_sysconfdir}/php.ini
+%doc %{name}-%{version}/{CODING_STANDARDS,CREDITS,EXTENSIONS,INSTALL}
+%doc %{name}-%{version}/{LICENSE,NEWS,README.*,Zend/ZEND_*}
+%config(noreplace) %{_sysconfdir}/php.ini
 %{_bindir}/php
 %{_datadir}/php
 %{_libdir}/apache/libphp4.so
+%{_libdir}/libphp4.so.0.0.0
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files devel
+%defattr(-,root,root)
+%{_bindir}/pear
+%{_bindir}/php-config
+%{_bindir}/phpize
+%{_bindir}/phpextdist
+%{_includedir}/php
+%{_libdir}/php/build
 
 %files pgsql
 %defattr(-,root,root)
 %{_libdir}/php4/pgsql.so
 
-%files devel
-%defattr(-,root,root)
-%{_bindir}/php-config
-%{_bindir}/phpize
-%{_bindir}/phpextdist
-%{_includedir}/php
-%{_libdir}/php4/build
-
 %post pgsql
 %{__perl} -pi -e "s|^;extension=pgsql.so|extension=pgsql.so|" %{_sysconfdir}/php.ini
 
 %preun pgsql
-if [ $1 = 0 ] ; then
+if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
   %{__perl} -pi -e "s|^extension=pgsql.so|;extension=pgsql.so|" %{_sysconfdir}/php.ini
 fi
 
@@ -277,9 +365,35 @@ fi
 %{__perl} -pi -e "s|^;extension=mysql.so|extension=mysql.so|" %{_sysconfdir}/php.ini
 
 %preun mysql
-if [ $1 = 0 ] ; then
+if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
   %{__perl} -pi -e "s|^extension=mysql.so|;extension=mysql.so|" %{_sysconfdir}/php.ini
 fi
+
+%files odbc
+%defattr(-,root,root)
+%{_libdir}/php4/odbc.so
+
+%post odbc
+%{__perl} -pi -e "s|^;extension=odbc.so|extension=odbc.so|" %{_sysconfdir}/php.ini
+
+%preun odbc
+if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
+  %{__perl} -pi -e "s|^extension=odbc.so|;extension=odbc.so|" %{_sysconfdir}/php.ini
+fi
+
+%if %{oracle}
+%files oci8
+%defattr(-,root,root)
+%{_libdir}/php4/oci8.so
+
+%post oci8
+%{__perl} -pi -e "s|^;extension=oci8.so|extension=oci8.so|" %{_sysconfdir}/php.ini
+
+%preun oci8
+if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
+  %{__perl} -pi -e "s|^extension=oci8.so|;extension=oci8.so|" %{_sysconfdir}/php.ini
+fi
+%endif
 
 %files imap
 %defattr(-,root,root)
@@ -308,9 +422,71 @@ fi
 %files manual
 %defattr(-,root,root)
 %{contentdir}/icons/*
-%{contentdir}/html/manual/mod/mod_php4
+%dir %{contentdir}/html/manual/mod/mod_php4/
+%{contentdir}/html/manual/mod/mod_php4/*.html
+#%lang(cs) %{contentdir}/html/manual/mod/mod_php4/cs
+#%lang(de) %{contentdir}/html/manual/mod/mod_php4/de
+#%lang(es) %{contentdir}/html/manual/mod/mod_php4/es
+#%lang(fr) %{contentdir}/html/manual/mod/mod_php4/fr
+#%lang(hu) %{contentdir}/html/manual/mod/mod_php4/hu
+#%lang(it) %{contentdir}/html/manual/mod/mod_php4/it
+#%lang(ja) %{contentdir}/html/manual/mod/mod_php4/ja
+#%lang(ko) %{contentdir}/html/manual/mod/mod_php4/ko
+#%lang(nl) %{contentdir}/html/manual/mod/mod_php4/nl
+#%lang(pt) %{contentdir}/html/manual/mod/mod_php4/pt_BR
 
 %changelog
+* Fri Aug 10 2001 Tim Powers <timp@redhat.com>
+- only english in php-manuals, space constraints :P
+
+* Thu Aug  9 2001 Nalin Dahyabhai <nalin@redhat.com>
+- include %{_libdir}/%{name}/build instead of %{_libdir}/%{name}4/build (#51141)
+
+* Mon Aug  6 2001 Nalin Dahyabhai <nalin@redhat.com>
+- add build deps on pam-devel, pspell-devel, gdbm-devel (#49878)
+- add some conditional logic if %%{oracle} is defined (from Antony Nguyen)
+
+* Mon Jul  9 2001 Nalin Dahyabhai <nalin@redhat.com>
+- don't obsolete subpackages we ended up not merging
+
+* Mon Jul  2 2001 Nalin Dahyabhai <nalin@redhat.com>
+- cleanups
+- add manuals in multiple languages (using ko instead of kr for Korean)
+- merge all of the manuals into a single -manual subpackage
+- use libtool to install binary files which libtool builds
+- don't strip any binaries; let the buildroot policies take care of it
+
+* Thu Jun 28 2001 Nalin Dahyabhai <nalin@redhat.com>
+- update to 4.0.6 (preliminary)
+
+* Mon Jun 25 2001 Nalin Dahyabhai <nalin@redhat.com>
+- enable ttf in the build because the gd support needs it
+- add -lfreetype to the LIBS for the same reason
+
+* Wed Jun  6 2001 Nalin Dahyabhai <nalin@redhat.com>
+- rebuild in new environment
+
+* Wed May 16 2001 Nalin Dahyabhai <nalin@redhat.com>
+- actually use two source trees to build things
+- add %%post and %%postun scriptlets to run ldconfig
+
+* Tue May 15 2001 Nalin Dahyabhai <nalin@redhat.com>
+- quote part of the AC_ADD_LIBRARY macro to make newer autoconf happy
+
+* Mon May 14 2001 Nalin Dahyabhai <nalin@redhat.com>
+- fix error in %%install
+- depend on the imap-devel which supplies linkage.c
+- modify trigger to disable php versions less than 4.0.0 instead of 3.0.15
+- enable DOM support via libxml2 (suggested by Sylvain Bergé)
+- build the OpenSSL extension again
+
+* Mon May  7 2001 Nalin Dahyabhai <nalin@redhat.com>
+- enable pspell extensions
+- update to 4.0.5
+
+* Mon Apr 30 2001 Nalin Dahyabhai <nalin@redhat.com>
+- build the ODBC extension
+
 * Mon Apr 30 2001 Bill Nottingham <notting@redhat.com>
 - build on ia64
 
