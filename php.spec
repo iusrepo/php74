@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.8
-Release: 10
+Release: 11
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -359,7 +359,6 @@ ln -sf ../configure
 	--with-openssl \
 	--with-png \
 	--with-pspell \
-	--with-regex=system \
 	--with-xml \
 	--with-expat-dir=%{_prefix} \
 	--with-dom=shared,%{_prefix} \
@@ -543,6 +542,9 @@ rm files.*
 %endif
 
 %changelog
+* Thu Sep  9 2004 Joe Orton <jorton@redhat.com> 4.3.8-11
+- don't use --with-regex=system, it's ignored for apache* SAPIs
+
 * Fri Aug 27 2004 Joe Orton <jorton@redhat.com> 4.3.8-10
 - do apply the Zend double->long conversion fix
 - run make test in %%check and fail build on test failure
