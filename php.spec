@@ -2,12 +2,12 @@
 %define with_oci8 %{?_with_oci8:1}%{!?_with_oci8:0}
 %define with_mssql %{?_with_mssql:1}%{!?_with_mssql:0}
 %define with_mhash %{?_with_mhash:1}%{!?_with_mhash:0}
-%define with_imap %{?_with_imap:1}%{!?_with_imap:0}
+%define with_imap %{!?_without_imap:1}%{?_without_imap:0}
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.4
-Release: 10.1
+Release: 11
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -85,7 +85,7 @@ Summary: An Apache module for PHP applications that use IMAP.
 Group: Development/Languages
 Requires: php = %{version}-%{release}
 Obsoletes: mod_php3-imap, stronghold-php-imap
-BuildRequires: krb5-devel, openssl-devel, imap-devel
+BuildRequires: krb5-devel, openssl-devel, libc-client-devel
 
 %description imap
 The php-imap package contains a dynamic shared object (DSO) for the
@@ -275,17 +275,14 @@ rm -f ext/standard/tests/file/bug22414.phpt \
       ext/standard/tests/math/abs.phpt \
       ext/iconv/tests/bug16069.phpt
 
+: Build for imap=%{with_imap} oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash}
+
 %build
 
 CFLAGS="$RPM_OPT_FLAGS -Wall -fno-strict-aliasing"; export CFLAGS
 
 # Install extension modules in %{_libdir}/php4.
 EXTENSION_DIR=%{_libdir}/php4; export EXTENSION_DIR
-
-%if %{with_imap}
-# This pulls the static /usr/lib/libc-client.a into the IMAP extension module.
-IMAP_SHARED_LIBADD=-lc-client ; export IMAP_SHARED_LIBADD
-%endif
 
 # pull latest ltmain.sh, AC_PROG_LIBTOOL
 libtoolize --force --copy
@@ -317,7 +314,7 @@ ln -sf ../configure
 	--with-png-dir=%{_prefix} \
 	--with-gd \
 	--enable-gd-native-ttf \
-	--with-gdbm \
+	--without-gdbm \
 	--with-gettext \
 	--with-ncurses \
 	--with-gmp \
@@ -348,7 +345,7 @@ ln -sf ../configure
 	--enable-yp \
 	--enable-wddx \
 	--with-pear=/usr/share/pear \
-	%{?_with_imap:--with-imap=shared --with-imap-ssl} \
+	%{?!_without_imap:--with-imap=shared --with-imap-ssl} \
 	--with-kerberos \
 	--with-ldap=shared \
 	--with-mysql=shared,%{_prefix} \
@@ -425,7 +422,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql odbc ldap snmp domxml xmlrpc \
-    %{?_with_imap:imap} %{?_with_oci8:oci8} %{?_with_mssql:mssql} \
+    %{?!_without_imap:imap} %{?_with_oci8:oci8} %{?_with_mssql:mssql} \
     %{?_with_mhash:mhash}; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
@@ -453,7 +450,7 @@ rm files.*
 
 # remove extension= lines for packaged modules from php.ini (#112470)
 %triggerpostun -- php < 4.3.4-5
-perl -pi.rpmold -e 's/^extension=(pgsql|mysql|odbc|ldap|snmp|imap).so\n//' /etc/php.ini
+%{_bindir}/perl -pi.rpmold -e 's/^extension=(pgsql|mysql|odbc|ldap|snmp|imap).so\n//' /etc/php.ini
 exit 0
 
 %files
@@ -515,6 +512,9 @@ exit 0
 %files xmlrpc -f files.xmlrpc
 
 %changelog
+* Wed Apr  7 2004 Joe Orton <jorton@redhat.com> 4.3.4-11
+- add back imap subpackage, using libc-client (#115535)
+
 * Tue Mar 02 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
