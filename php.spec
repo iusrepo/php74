@@ -495,7 +495,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql odbc ldap snmp xmlrpc imap \
-    mbstring ncurses gd dom xsl \
+    mbstring ncurses gd dom xsl soap \
     %{?_with_oci8:oci8} %{?_with_mssql:mssql} %{?_with_mhash:mhash} \
     %{?_with_ibase:interbase}; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
