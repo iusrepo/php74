@@ -392,7 +392,7 @@ ln -sf ../configure
         --enable-mbstring=shared --enable-mbstr-enc-trans \
         --enable-mbregex \
         --with-mime-magic=%{_datadir}/file/magic.mime \
-	$* || tail -300 config.log
+	$* || tail -500 config.log
 
 make %{?_smp_mflags}
 }
