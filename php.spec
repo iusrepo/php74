@@ -9,7 +9,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.2.2
-Release: 17.1
+Release: 17.2
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -216,6 +216,7 @@ will need to install this package and the php package.
 # Security fixes
 %patch30 -p1 -b .mailsec
 %patch31 -p1 -b .wrap
+%patch32 -p1 -b .sessid
 
 # Prevent %doc confusion over LICENSE & Zend/LICENSE
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -464,6 +465,9 @@ rm files.*
 %files snmp -f files.snmp
 
 %changelog
+* Sun Jun 29 2003 Joe Orton <jorton@redhat.com> 4.2.2-17.2
+- fix to apply CAN-2003-0442 patch
+
 * Wed Jun 11 2003 Joe Orton <jorton@redhat.com> 4.2.2-17.1
 - add bug fixes for #82967, #84460, #84828, #85820, #91019, #91279
 - add security fix for CAN-2003-0442
