@@ -1,7 +1,7 @@
 Summary: The PHP scripting language.
 Name: php
 Version: 4.0.4pl1
-Release: 9
+Release: 10
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
@@ -19,7 +19,6 @@ Obsoletes: mod_php, php3, phpfi
 BuildPrereq: apache-devel, db2-devel, db3-devel, imap-devel,
 BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel
 BuildPrereq: freetype-devel, gd-devel, libjpeg-devel, libpng-devel, zlib-devel
-ExcludeArch: ia64
 
 %define contentdir /var/www
 
@@ -312,6 +311,9 @@ fi
 %{contentdir}/html/manual/mod/mod_php4
 
 %changelog
+* Mon Apr 30 2001 Bill Nottingham <notting@redhat.com>
+- build on ia64
+
 * Fri Mar  2 2001 Nalin Dahyabhai <nalin@redhat.com>
 - rebuild in new environment
 
