@@ -1,15 +1,17 @@
 %define contentdir /var/www
-%define manual_langs en pt_BR cs nl fr de hu it ja kr es
+%define manual_langs en
+# pt_BR cs nl fr de hu it ja kr es
 
 %{!?oracle:%define oracle 0}
 
 Summary: The PHP HTML-embedded scripting language.
 Name: php
 Version: 4.0.6
-Release: 5
+Release: 6
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
+# Manuals from http://www.php.net/distributions/manual/
 Source1: php-manual-en.tar.gz
 #Source2: php-manual-pt_BR.tar.gz
 #Source3: php-manual-cs.tar.gz
@@ -35,7 +37,8 @@ Obsoletes: mod_php, php3, phpfi
 BuildPrereq: apache-devel, db2-devel, db3-devel, gdbm-devel, imap-devel >= 2000-9
 BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel, pam-devel
 BuildPrereq: freetype-devel, gd-devel, libjpeg-devel, libpng-devel, zlib-devel
-BuildPrereq: unixODBC-devel, libxml2-devel, pspell-devel
+BuildPrereq: unixODBC-devel, libxml2-devel, pspell-devel, curl-devel >= 7.8
+BuildPrereq: bzip2-devel >= 1.0.0, mm-devel
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -182,38 +185,42 @@ popd
 cp -a %{name}-%{version} %{name}-%{version}-cgi
 
 %build
-%define __libtoolize :
 krb5libs="-L/usr/kerberos/lib -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
 ssllibs="-lssl -lcrypto"
 sasllibs="-lsasl $krb5libs $ssllibs"
 
 CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
-LIBS="-lttf -lfreetype -lpng -ljpeg -lz"; export LIBS
+LIBS="-lttf -lfreetype -lpng -ljpeg -lz -lnsl"; export LIBS
 REDO_ALL=yes; export REDO_ALL
 EXTENSION_DIR=%{_libdir}/php4; export EXTENSION_DIR
 
 compile() {
-./configure \
+%configure \
 	--prefix=%{_prefix} \
 	--with-config-file-path=%{_sysconfdir} \
 	--disable-debug \
 	--enable-pic \
+	--disable-rpath \
 	--enable-inline-optimization \
 	$* \
+	--with-bz2 \
+	--with-curl \
+	--with-db3 \
 	--with-dom \
 	--with-exec-dir=%{_bindir} \
-	--with-regex=system \
-	--with-gettext \
 	--with-gd \
+	--with-gdbm \
+	--with-gettext \
 	--with-jpeg-dir=%{_prefix} \
+	--with-mm \
+	--with-openssl \
 	--with-png \
+	--with-regex=system \
 	--with-ttf \
 	--with-zlib \
-	--with-db3 \
-	--with-gdbm \
-	--with-openssl \
 	--with-layout=GNU \
 	--enable-debugger \
+	--enable-ftp \
 	--enable-magic-quotes \
 	--enable-safe-mode \
 	--enable-sockets \
@@ -221,7 +228,6 @@ compile() {
 	--enable-sysvshm \
 	--enable-track-vars \
 	--enable-yp \
-	--enable-ftp \
 	--enable-wddx \
 	--without-mysql \
 	--without-unixODBC \
@@ -229,7 +235,6 @@ compile() {
 	--without-oci8 \
 	--with-pspell \
 	--with-xml
-sh ltconfig ltmain.sh
 make
 }
 
@@ -244,6 +249,7 @@ compile --with-apxs=%{_sbindir}/apxs
 
 # Build individual PHP modules.
 build_ext() {
+./libtool --mode=link \
 %{__cc} -fPIC -shared $RPM_OPT_FLAGS \
 	-DCOMPILE_DL_`echo $1 | tr '[a-z]' '[A-Z]'` \
 	-DHAVE_`echo $1 | tr '[a-z]' '[A-Z]'` \
@@ -276,7 +282,6 @@ mkdir -p $RPM_BUILD_ROOT%{contentdir}/icons
 ./libtool install -m755 libphp4.la $RPM_BUILD_ROOT%{_libdir}/apache/
 
 pushd ../%{name}-%{version}-cgi
-./libtool install -m755 libphp4.la $RPM_BUILD_ROOT%{_libdir}/
 ./libtool install -m755 php $RPM_BUILD_ROOT%{_bindir}/php
 popd
 
@@ -330,7 +335,6 @@ perl -pi -e 's|^#AddModule mod_php3.c|AddModule mod_php3.c|g' \
 %{_bindir}/php
 %{_datadir}/php
 %{_libdir}/apache/libphp4.so
-%{_libdir}/libphp4.so.0.0.0
 
 %post -p /sbin/ldconfig
 
@@ -436,8 +440,14 @@ fi
 #%lang(pt) %{contentdir}/html/manual/mod/mod_php4/pt_BR
 
 %changelog
+* Fri Aug 17 2001 Nalin Dahyabhai <nalin@redhat.com>
+- enable bzip2 extension
+- enable curl extension
+- enable use of mm
+- clean up use of libtool (#51958)
+
 * Fri Aug 10 2001 Tim Powers <timp@redhat.com>
-- only english in php-manuals, space constraints :P
+- only english in php-manuals, space constraints
 
 * Thu Aug  9 2001 Nalin Dahyabhai <nalin@redhat.com>
 - include %{_libdir}/%{name}/build instead of %{_libdir}/%{name}4/build (#51141)
