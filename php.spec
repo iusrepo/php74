@@ -11,7 +11,7 @@ ExcludeArch: x86_64
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.2.2
-Release: 10
+Release: 13a
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -30,20 +30,17 @@ Source50: php.conf
 
 # Patch to get around a dumb assumption that size_t is always 4 bytes
 Patch0: php-4.2.1-64bit-iconv.patch
-# Fix for ldap module
 Patch1: php-4.2.1-ldap-TSRM.patch
-# php.ini defaults
 Patch2: php-4.2.1-php.ini-dist.patch
 # use -DUCD_COMPATIBLE to make net-snmp backwards-compatible
 Patch3: php-4.2.1-snmp.patch
 # Fix for #67853
 Patch4: php-4.2.2-cookies.patch
-# Apache 2.0 compatibility fixes
 Patch5: php-4.2.2-apache2.patch
-# Patch to get around php dropping variables
 Patch6: php-4.1.2-missing-vars.patch
-# Fixes for libdir = /usr/lib64; based on SuSE's patches.
 Patch9: php-4.2.2-lib64.patch
+Patch10: php-4.2.2-inidir.patch
+Patch11: php-4.2.2-openssl097.patch
 
 # Where are we going to build the install set to?
 #
@@ -54,9 +51,8 @@ BuildRequires: gd-devel >= 1.8.4, gdbm-devel, gmp-devel, pspell-devel
 BuildRequires: httpd-devel >= 2.0.40-6, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, libxml2-devel, ncurses-devel, openssl-devel
 BuildRequires: zlib-devel
-BuildRequires: bzip2, fileutils
+BuildRequires: bzip2, fileutils, perl
 Obsoletes: php-dbg, mod_php, php3, phpfi
-PreReq: perl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn)
 
@@ -82,7 +78,7 @@ need to install this package.
 %package imap
 Summary: An Apache module for PHP applications that use IMAP.
 Group: Development/Languages
-Prereq: php = %{version}-%{release}, perl
+Requires: php = %{version}-%{release}
 Obsoletes: mod_php3-imap
 BuildRequires: krb5-devel, openssl-devel, imap-devel
 
@@ -98,7 +94,7 @@ and the php package.
 %package ldap
 Summary: A module for PHP applications that use LDAP.
 Group: Development/Languages
-Prereq: php = %{version}-%{release}, perl
+Requires: php = %{version}-%{release}
 Obsoletes: mod_php3-ldap
 BuildRequires: cyrus-sasl-devel, openldap-devel, openssl-devel
 
@@ -114,7 +110,7 @@ need to install this package in addition to the php package.
 Obsoletes: mod_php3-manual
 Group: Documentation
 Summary: The PHP manual, in HTML format.
-Prereq: php = %{version}-%{release}
+Requires: php = %{version}-%{release}
 
 %description manual
 The php-manual package provides comprehensive documentation for the
@@ -124,7 +120,7 @@ HTML-embedded scripting language.
 %package mysql
 Summary: A module for PHP applications that use MySQL databases.
 Group: Development/Languages
-Prereq: php = %{version}-%{release}, perl, grep
+Requires: php = %{version}-%{release}
 Provides: php_database
 Obsoletes: mod_php3-mysql
 BuildRequires: mysql-devel
@@ -141,7 +137,7 @@ this package and the php or mod_php package.
 %package pgsql
 Summary: A PostgreSQL database module for PHP.
 Group: Development/Languages
-Prereq: php = %{version}-%{release}, perl
+Requires: php = %{version}-%{release}
 Provides: php_database
 Obsoletes: mod_php3-pgsql
 BuildRequires: krb5-devel, openssl-devel, postgresql-devel
@@ -160,7 +156,7 @@ php package.
 
 %package odbc
 Group: Development/Languages
-Prereq: php = %{version}-%{release}, perl, grep
+Requires: php = %{version}-%{release}
 Summary: A module for PHP applications that use ODBC databases.
 Provides: php_database
 BuildRequires: unixODBC-devel
@@ -178,8 +174,7 @@ package.
 %if %{oracle}
 %package oci8
 Group: Development/Languages
-Prereq: php = %{version}-%{release}
-Prereq: perl
+Requires: php = %{version}-%{release}
 Summary: A module for PHP applications that use OCI8 databases.
 Provides: php_database
 
@@ -191,7 +186,7 @@ support for accessing OCI8 databases to PHP.
 %package snmp
 Summary: A module for PHP applications that query SNMP-managed devices.
 Group: Development/Languages
-Prereq: php = %{version}-%{release}, perl
+Requires: php = %{version}-%{release}
 BuildRequires: net-snmp-devel
 
 %description snmp
@@ -204,12 +199,14 @@ will need to install this package and the php package.
 %setup -q
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
+%patch2 -p1 -b .conf
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1 -b .ap2
 %patch6 -p1
 %patch9 -p1
+%patch10 -p1 -b .inidir
+%patch11 -p1 -b .ossl097
 
 # Prevent %doc confusion over LICENSE & Zend/LICENSE
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -219,6 +216,7 @@ mkdir build-cgi build-apache
 
 # Use correct libdir
 perl -pi -e 's|\$\(prefix\)/lib|%{_libdir}|' pear/Makefile.in
+perl -pi -e 's|%{_prefix}/lib|%{_libdir}|' php-ini.dist
 
 %build
 
@@ -226,12 +224,12 @@ CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
 
 # Add the Kerberos library path to the default LDFLAGS so that the IMAP checks
 # will be able to find the GSSAPI libraries.
-LDFLAGS="-L/usr/kerberos/lib"; export LDFLAGS
+LDFLAGS="-L/usr/kerberos/%{_lib}"; export LDFLAGS
 
 # Configure may or may not catch these (mostly second-order) dependencies.
 LIBS="-lttf -lfreetype -lpng -ljpeg -lz -lnsl"; export LIBS
 
-# This causes the shared extension modules to be installed into %{_libdir}/php4.
+# Install extension modules in %{_libdir}/php4.
 EXTENSION_DIR=%{_libdir}/php4; export EXTENSION_DIR
 
 # This pulls the static /usr/lib/libc-client.a into the IMAP extension module.
@@ -252,6 +250,7 @@ ln -sf ../configure
 	--prefix=%{_prefix} \
 	--cache-file=../config.cache \
 	--with-config-file-path=%{_sysconfdir} \
+	--with-config-file-scan-dir=%{_sysconfdir}/php.d \
 	--enable-force-cgi-redirect \
 	--disable-debug \
 	--enable-pic \
@@ -320,7 +319,7 @@ ln -sf ../configure
 	$*
 
 # Fixup the config_vars to not include the '-a' on lines which call apxs.
-#
+# FIXME: redundant with INSTALL_IT setting below?
 cat config_vars.mk > config_vars.mk.old
 awk '/^INSTALL_IT.*apxs.*-a -n/ {sub("-a -n ","-n ");} {print $0;}' \
 	config_vars.mk.old > config_vars.mk
@@ -346,16 +345,14 @@ pushd build-cgi
 make install INSTALL_ROOT=$RPM_BUILD_ROOT 
 popd
 
-# Second, install the Apache tree.  Note that this overwrites the modules which
-# were installed as part of the CGI build.  Lucky for us they're compatible.
-#
+### TODO: only configure shared modules for the one of the two builds
+# Install the Apache tree, overwriting the shared modules from before.
+# INSTALL_IT=echo prevents "apxs -a -i" from trying to modify httpd.conf
 pushd build-apache
 make install INSTALL_ROOT=$RPM_BUILD_ROOT INSTALL_IT="echo "
 popd
 
-# Install the default configuration file and some icons which can be used to
-# indicate that this site uses PHP.
-#
+# Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
 install -m 644    php.ini-dist $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 install -m 755 -d $RPM_BUILD_ROOT%{contentdir}/icons
@@ -383,14 +380,31 @@ for lang in %{manual_langs} ; do
 	bzip2 -dc $RPM_SOURCE_DIR/php_manual_${lang}.tar.bz2 | tar -x -C $RPM_BUILD_ROOT%{contentdir}/manual/mod/mod_php4/${target_lang} -f -
 done
 
+install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
+
+%if %{oracle}
+ocimod=oci8
+%endif
+# Generate files lists and stub .ini files for each subpackage
+for mod in pgsql mysql odbc imap ldap snmp ${ocimod}; do
+    cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
+; Enable ${mod} extension module
+extension=${mod}.so
+EOF
+    cat > files.${mod} <<EOF
+%attr(755,root,root) %{_libdir}/php4/${mod}.so
+%config(noreplace) %attr(644,root,root) %{_sysconfdir}/php.d/${mod}.ini
+EOF
+done
+
 # Remove unpackaged files
 rm -f $RPM_BUILD_ROOT%{_libdir}/php4/*.a \
       $RPM_BUILD_ROOT%{_bindir}/{phptar,pearize}
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+rm files.*
 
-### Files for main package
 %files
 %defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
@@ -399,10 +413,11 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/php4/*.a \
 %{_bindir}/php
 %{_bindir}/pear
 %{_datadir}/pear
+%dir %{_libdir}/php4
 %{_libdir}/httpd/modules/libphp4.so
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/php.conf
+%dir %{_sysconfdir}/php.d
 
-### Files for -devel package
 %files devel
 %defattr(-,root,root)
 %{_bindir}/php-config
@@ -411,226 +426,54 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/php4/*.a \
 %{_includedir}/php
 %{_libdir}/php
 
-################################################################################
-# From here on in we need to make php-(extension) alter the php.ini
-# file to activate usage of each module in installation and deactivation
-# on removal. We'll do this using perl.
-# Just to make things annoying, upstream has decided to change the default
-# file extensions from .so to .dll
-#
+%files manual
+%defattr(-,root,root)
+%{contentdir}/icons/*
+%dir %{contentdir}/manual/mod/mod_php4/
+%{contentdir}/manual/mod/mod_php4/*.html
+%lang(de) %{contentdir}/manual/mod/mod_php4/de
+%lang(es) %{contentdir}/manual/mod/mod_php4/es
+%lang(fr) %{contentdir}/manual/mod/mod_php4/fr
+%lang(it) %{contentdir}/manual/mod/mod_php4/it
+%lang(ja) %{contentdir}/manual/mod/mod_php4/ja
+%lang(ko) %{contentdir}/manual/mod/mod_php4/ko
+%lang(pt) %{contentdir}/manual/mod/mod_php4/pt_BR
 
-################################################################################
-# pgsql ########################################################################
-#
-%files pgsql
-	%defattr(-,root,root)
-	%{_libdir}/php4/pgsql.so
+%files pgsql -f files.pgsql
 
-%post pgsql
-	if %{__grep} -q "extension=pgsql.so" %{_sysconfdir}/php.ini; then
-		%{__perl} -pi -e "s|^;extension=pgsql.so|extension=pgsql.so|" %{_sysconfdir}/php.ini
-	fi
+%files mysql -f files.mysql
 
-	if [ -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		if %{__grep} -q "extension=pgsql.so" %{_sysconfdir}/php.ini.rpmnew; then
-			%{__perl} -pi -e "s|^;extension=pgsql.so|extension=pgsql.so|" %{_sysconfdir}/php.ini.rpmnew
-		fi
-	fi
+%files odbc -f files.odbc
 
-%preun pgsql
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
-	  %{__perl} -pi -e "s|^extension=pgsql.so|;extension=pgsql.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-	  %{__perl} -pi -e "s|^extension=pgsql.so|;extension=pgsql.so|" %{_sysconfdir}/php.ini.rpmnew
-	fi
-
-################################################################################
-# mysql ########################################################################
-#
-%files mysql
-	%defattr(-,root,root)
-	%{_libdir}/php4/mysql.so
-
-%post mysql
-	if %{__grep} -q "extension=mysql.so" %{_sysconfdir}/php.ini; then
-		%{__perl} -pi -e "s|^;extension=mysql.so|extension=mysql.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		if %{__grep} -q "extension=mysql.so" %{_sysconfdir}/php.ini.rpmnew; then
-			%{__perl} -pi -e "s|^;extension=mysql.so|extension=mysql.so|" %{_sysconfdir}/php.ini.rpmnew
-		fi
-	fi
-
-%preun mysql
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
-		%{__perl} -pi -e "s|^extension=mysql.so|;extension=mysql.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		%{__perl} -pi -e "s|^extension=mysql.so|;extension=mysql.so|" %{_sysconfdir}/php.ini.rpmnew
-	fi
-
-################################################################################
-# odbc #########################################################################
-#
-%files odbc
-	%defattr(-,root,root)
-	%{_libdir}/php4/odbc.so
-
-%post odbc
-	if %{__grep} -q "extension=odbc.so" %{_sysconfdir}/php.ini; then
-		%{__perl} -pi -e "s|^;extension=odbc.so|extension=odbc.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		if %{__grep} -q "extension=odbc.so" %{_sysconfdir}/php.ini.rpmnew; then
-			%{__perl} -pi -e "s|^;extension=odbc.so|extension=odbc.so|" %{_sysconfdir}/php.ini.rpmnew
-		fi
-	fi
-
-%preun odbc
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
-		%{__perl} -pi -e "s|^extension=odbc.so|;extension=odbc.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
-		%{__perl} -pi -e "s|^extension=odbc.so|;extension=odbc.so|" %{_sysconfdir}/php.ini.rpmnew
-	fi
-
-################################################################################
-# oracle #######################################################################
-#
 %if %{oracle}
-%files oci8
-	%defattr(-,root,root)
-	%{_libdir}/php4/oci8.so
-
-%post oci8
-	if %{__grep} -q "extension=oci8.so" %{_sysconfdir}/php.ini; then
-		%{__perl} -pi -e "s|^;extension=oci8.so|extension=oci8.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		if %{__grep} -q "extension=oci8.so" %{_sysconfdir}/php.ini.rpmnew; then
-			%{__perl} -pi -e "s|^;extension=oci8.so|extension=oci8.so|" %{_sysconfdir}/php.ini.rpmnew
-		fi
-	fi
-
-%preun oci8
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
-		%{__perl} -pi -e "s|^extension=oci8.so|;extension=oci8.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		%{__perl} -pi -e "s|^extension=oci8.so|;extension=oci8.so|" %{_sysconfdir}/php.ini.rpmnew
-	fi
+%files oci8 -f files.oci8
 %endif
 
-################################################################################
-# imap #########################################################################
-#
-%files imap
-	%defattr(-,root,root)
-	%{_libdir}/php4/imap.so
+%files imap -f files.imap
 
-%post imap
-	if %{__grep} -q "extension=imap.so" %{_sysconfdir}/php.ini; then
-		%{__perl} -pi -e "s|^;extension=imap.so|extension=imap.so|" %{_sysconfdir}/php.ini
-	fi
+%files ldap -f files.ldap
 
-	if [ -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		if %{__grep} -q "extension=imap.so" %{_sysconfdir}/php.ini.rpmnew; then
-			%{__perl} -pi -e "s|^;extension=imap.so|extension=imap.so|" %{_sysconfdir}/php.ini.rpmnew
-		fi
-	fi
-
-%preun imap
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
-		%{__perl} -pi -e "s|^extension=imap.so|;extension=imap.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		%{__perl} -pi -e "s|^extension=imap.so|;extension=imap.so|" %{_sysconfdir}/php.ini.rpmnew
-	fi
-
-################################################################################
-# ldap #########################################################################
-#
-%files ldap
-	%defattr(-,root,root)
-	%{_libdir}/php4/ldap.so
-
-%post ldap
-	if %{__grep} -q "extension=ldap.so" %{_sysconfdir}/php.ini; then
-		%{__perl} -pi -e "s|^;extension=ldap.so|extension=ldap.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		if %{__grep} -q "extension=ldap.so" %{_sysconfdir}/php.ini.rpmnew; then
-			%{__perl} -pi -e "s|^;extension=ldap.so|extension=ldap.so|" %{_sysconfdir}/php.ini.rpmnew
-		fi
-	fi
-
-%preun ldap
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
-		%{__perl} -pi -e "s|^extension=ldap.so|;extension=ldap.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		%{__perl} -pi -e "s|^extension=ldap.so|;extension=ldap.so|" %{_sysconfdir}/php.ini.rpmnew
-	fi
-
-################################################################################
-# snmp #########################################################################
-#
-%files snmp
-	%defattr(-,root,root)
-	%{_libdir}/php4/snmp.so
-
-%post snmp
-	if %{__grep} -q "extension=snmp.so" %{_sysconfdir}/php.ini; then
-		%{__perl} -pi -e "s|^;extension=snmp.so|extension=snmp.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		if %{__grep} -q "extension=snmp.so" %{_sysconfdir}/php.ini.rpmnew; then
-			%{__perl} -pi -e "s|^;extension=snmp.so|extension=snmp.so|" %{_sysconfdir}/php.ini.rpmnew
-		fi
-	fi
-
-%preun snmp
-	if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
-		%{__perl} -pi -e "s|^extension=snmp.so|;extension=snmp.so|" %{_sysconfdir}/php.ini
-	fi
-
-	if [ -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-		if [ $1 = 0 -a -f %{_sysconfdir}/php.ini.rpmnew ] ; then
-			%{__perl} -pi -e "s|^extension=snmp.so|;extension=snmp.so|" %{_sysconfdir}/php.ini.rpmnew
-		fi
-	fi
-
-################################################################################
-
-%files manual
-	%defattr(-,root,root)
-	%{contentdir}/icons/*
-	%dir %{contentdir}/manual/mod/mod_php4/
-	%{contentdir}/manual/mod/mod_php4/*.html
-	%lang(de) %{contentdir}/manual/mod/mod_php4/de
-	%lang(es) %{contentdir}/manual/mod/mod_php4/es
-	%lang(fr) %{contentdir}/manual/mod/mod_php4/fr
-	%lang(it) %{contentdir}/manual/mod/mod_php4/it
-	%lang(ja) %{contentdir}/manual/mod/mod_php4/ja
-	%lang(ko) %{contentdir}/manual/mod/mod_php4/ko
-	%lang(pt) %{contentdir}/manual/mod/mod_php4/pt_BR
+%files snmp -f files.snmp
 
 %changelog
+* Tue Dec 17 2002 Joe Orton <jorton@redhat.com> 4.2.2-13
+- drop prereq for perl, grep in subpackages
+- rebuild and patch for OpenSSL 0.9.7
+
+* Tue Dec 10 2002 Joe Orton <jorton@redhat.com> 4.2.2-12
+- backport "ini dir scanning" patch from CVS HEAD; /etc/php.d/*.ini
+  are now loaded at startup; each subpackage places an ini file
+  in that directory rather than munging /etc/php.ini in post/postun.
+- default config changes: enable short_open_tag; remove settings for
+  php-dbg extension
+
+* Wed Dec  4 2002 Joe Orton <jorton@redhat.com> 4.2.2-11
+- own the /usr/lib/php4 directory (#73894)
+- reinstate dropped patch to unconditionally disable ZTS
+
 * Mon Dec  2 2002 Joe Orton <jorton@redhat.com> 4.2.2-10
 - remove ldconfig invocation in post/postun
-- add fixes for #73516, #78586, #75029, #75712, #75878
+- fixes for #73516 (partially), #78586, #75029, #75712, #75878
 
 * Wed Nov  6 2002 Joe Orton <jorton@redhat.com> 4.2.2-9
 - fixes for libdir=/usr/lib64, based on SuSE's patches.
