@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.3
-Release: 4
+Release: 5
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -31,6 +31,8 @@ Patch14: php-5.0.3-sprintf.patch
 Patch15: php-5.0.3-zstrtod.patch
 Patch16: php-5.0.3-gdheaders.patch
 Patch17: php-5.0.3-gcc4.patch
+Patch18: php-5.0.3-memset0.patch
+Patch19: php-5.0.3-zendwarn.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -122,7 +124,7 @@ Group: Development/Languages
 Requires: php = %{version}-%{release}
 Provides: php_database, php-mysqli
 Obsoletes: mod_php3-mysql, stronghold-php-mysql
-BuildRequires: mysql-devel
+BuildRequires: mysql-devel >= 4.1.0
 
 %description mysql
 The php-mysql package contains a dynamic shared object that will add
@@ -283,7 +285,7 @@ Requires: php = %{version}-%{release}
 BuildRequires: ncurses-devel
 
 %description ncurses
-The php-mbstring package contains a dynamic shared object that will add
+The php-ncurses package contains a dynamic shared object that will add
 support for using the ncurses terminal output interfaces.
 
 %package gd
@@ -293,7 +295,7 @@ Requires: php = %{version}-%{release}
 BuildRequires: gd-devel, freetype-devel
 
 %description gd
-The php-mbstring package contains a dynamic shared object that will add
+The php-gd package contains a dynamic shared object that will add
 support for using the gd graphics library to PHP.
 
 %prep
@@ -313,6 +315,8 @@ support for using the gd graphics library to PHP.
 %patch15 -p1 -b .zstrtod
 %patch16 -p1 -b .gdheaders
 %patch17 -p1 -b .gcc4
+%patch18 -p1 -b .memset0
+%patch19 -p1 -b .zendwarn
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .libmbfl
@@ -599,6 +603,13 @@ rm files.*
 %endif
 
 %changelog
+* Wed Mar 30 2005 Joe Orton <jorton@redhat.com> 5.0.3-5
+- BuildRequire mysql-devel >= 4.1
+- don't mark php.ini as noreplace to make upgrades work (#152171)
+- fix subpackage descriptions (#152628)
+- fix memset(,,0) in Zend (thanks to Dave Jones)
+- fix various compiler warnings in Zend
+
 * Thu Mar 24 2005 Joe Orton <jorton@redhat.com> 5.0.3-4
 - package mysqli extension in php-mysql
 - really enable pcntl (#142903)
