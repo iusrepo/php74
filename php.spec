@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.7
-Release: 3
+Release: 4
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -60,6 +60,7 @@ the embedded PHP language in Web pages.
 %package devel
 Group: Development/Libraries
 Summary: Files needed for building PHP extensions.
+Requires: php = %{version}-%{release}
 
 %description devel
 The php-devel package contains the files needed for building PHP
@@ -300,6 +301,7 @@ perl -pi -e 's|%{_prefix}/lib|%{_libdir}|' php.ini-recommended
 # is not defined by C standard, so don't presume anything.
 rm -f ext/standard/tests/file/bug21131.phpt
 
+%if 0
 # Tests that fail.
 rm -f ext/standard/tests/file/bug22414.phpt \
       ext/session/tests/019.phpt \
@@ -307,6 +309,7 @@ rm -f ext/standard/tests/file/bug22414.phpt \
       ext/standard/tests/math/round.phpt \
       ext/standard/tests/math/abs.phpt \
       ext/iconv/tests/bug16069.phpt
+%endif
 
 : Build for oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash}
 
@@ -395,10 +398,9 @@ ln -sf ../configure
 	--enable-calendar \
 	--enable-dbx \
 	--enable-dio \
-	--enable-mcal \
         --enable-mbstring=shared --enable-mbstr-enc-trans \
         --enable-mbregex \
-	$* || cat config.log
+	$* || tail -300 config.log
 
 make %{?_smp_mflags}
 }
@@ -407,13 +409,18 @@ make %{?_smp_mflags}
 pushd build-cgi
 build --enable-force-cgi-redirect
 # Run tests
-export NO_INTERACTION=1 REPORT_EXIT_STATUS=1
-if ! TZ= LANG= LC_ALL= make test; then
+export NO_INTERACTION=1 REPORT_EXIT_STATUS=1 MALLOC_CHECK_=2
+unset TZ LANG LC_ALL
+if ! make test; then
+  set +x
   for f in `find .. -name \*.diff -type f -print`; do
-    echo "TEST FAILURE -- $f --"
-    cat $f
+    echo "TEST FAILURE: $f --"
+    cat "$f"
+    echo "-- $f result ends."
   done
+  set -x
 fi
+unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 popd
 
 # Build Apache module
@@ -489,7 +496,7 @@ rm files.*
 %{_bindir}/php
 %dir %{_libdir}/php4
 %dir %{_localstatedir}/lib/php
-%attr(0700,apache,apache) %dir %{_localstatedir}/lib/php/session
+%attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
 %{_libdir}/httpd/modules/libphp4.so
 %config %{_sysconfdir}/httpd/conf.d/php.conf
 %dir %{_sysconfdir}/php.d
@@ -534,6 +541,10 @@ rm files.*
 %endif
 
 %changelog
+* Mon Jun 21 2004 Joe Orton <jorton@redhat.com> 4.3.7-4
+- pick up test failures again
+- have -devel require php of save release
+
 * Thu Jun 17 2004 Joe Orton <jorton@redhat.com> 4.3.7-3
 - add gmp_powm fix (Oskari Saarenmaa, #124318)
 - split mbstring, ncurses, gd, openssl extns into subpackages
