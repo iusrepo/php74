@@ -2,21 +2,19 @@
 %define with_oci8 %{?_with_oci8:1}%{!?_with_oci8:0}
 %define with_mssql %{?_with_mssql:1}%{!?_with_mssql:0}
 %define with_mhash %{?_with_mhash:1}%{!?_with_mhash:0}
-%define with_imap %{!?_without_imap:1}%{?_without_imap:0}
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
-Version: 4.3.4
-Release: 11
+Version: 4.3.7
+Release: 1
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
 
-Source0:  http://www.php.net/distributions/php-%{version}.tar.bz2
+Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 
 Source50: php.conf
 
-Patch1: php-4.2.1-ldap-TSRM.patch
 Patch2: php-4.3.4-config.patch
 Patch3: php-4.2.2-lib64.patch
 Patch4: php-4.2.2-cxx.patch
@@ -24,13 +22,11 @@ Patch5: php-4.3.3-install.patch
 Patch6: php-4.3.1-tests.patch
 Patch7: php-4.3.2-libtool15.patch
 Patch8: php-4.3.3-miscfix.patch
-Patch9: php-4.3.4-setenv.patch
-Patch10: php-4.3.4-xmlrpc.patch
+Patch9: php-4.3.6-umask.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.2-db4.patch
-Patch23: php-4.3.4-libgd.patch
 
 # Functional changes
 Patch30: php-4.3.1-dlopen.patch
@@ -39,13 +35,12 @@ Patch31: php-4.3.4-easter.patch
 BuildRoot: %{_tmppath}/%{name}-root
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel, freetype-devel
-BuildRequires: gd-devel >= 1.8.4, gdbm-devel, gmp-devel, aspell-devel >= 0.50.0
+BuildRequires: gd-devel >= 1.8.4, gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, ncurses-devel, openssl-devel
-BuildRequires: zlib-devel, pcre-devel
+BuildRequires: zlib-devel, pcre-devel, smtpdaemon
 BuildRequires: bzip2, fileutils, perl, libtool >= 1.4.3
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php
-%{!?_with_imap:Obsoletes: php-imap} 
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 Requires: php-pear
@@ -72,14 +67,13 @@ need to install this package.
 %package pear
 Group: Development/Languages
 Summary: PHP Extension and Application Repository Components
-Requires: php
+Requires: php = %{version}-%{release}
 
 %description pear
 PEAR is a framework and distribution system for reusable PHP
 components.  This package contains a set of PHP components from the
 PEAR repository.
 
-%if %{with_imap} 
 %package imap
 Summary: An Apache module for PHP applications that use IMAP.
 Group: Development/Languages
@@ -95,7 +89,6 @@ protocol for retrieving and uploading e-mail messages on mail
 servers. PHP is an HTML-embedded scripting language. If you need IMAP
 support for PHP applications, you will need to install this package
 and the php package.
-%endif
 
 %package ldap
 Summary: A module for PHP applications that use LDAP.
@@ -233,7 +226,6 @@ support for the XML-RPC protocol to PHP.
 
 %prep
 %setup -q
-%patch1 -p1
 %patch2 -p1 -b .config
 %patch3 -p1 -b .lib64
 %patch4 -p1 -b .cxx
@@ -241,12 +233,10 @@ support for the XML-RPC protocol to PHP.
 %patch6 -p1 -b .tests
 %patch7 -p1 -b .libtool15
 %patch8 -p1 -b .miscfix
-%patch9 -p1 -b .setenv
-%patch10 -p1 -b .xmlrpc
+%patch9 -p1 -b .umask
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
-%patch23 -p1 -b .libgd
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -275,7 +265,7 @@ rm -f ext/standard/tests/file/bug22414.phpt \
       ext/standard/tests/math/abs.phpt \
       ext/iconv/tests/bug16069.phpt
 
-: Build for imap=%{with_imap} oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash}
+: Build for oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash}
 
 %build
 
@@ -312,7 +302,7 @@ ln -sf ../configure
 	--with-exec-dir=%{_bindir} \
 	--with-freetype-dir=%{_prefix} \
 	--with-png-dir=%{_prefix} \
-	--with-gd \
+	--with-gd=%{_prefix} \
 	--enable-gd-native-ttf \
 	--without-gdbm \
 	--with-gettext \
@@ -345,7 +335,7 @@ ln -sf ../configure
 	--enable-yp \
 	--enable-wddx \
 	--with-pear=/usr/share/pear \
-	%{?!_without_imap:--with-imap=shared --with-imap-ssl} \
+	--with-imap=shared --with-imap-ssl \
 	--with-kerberos \
 	--with-ldap=shared \
 	--with-mysql=shared,%{_prefix} \
@@ -421,9 +411,8 @@ install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php
 install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
-for mod in pgsql mysql odbc ldap snmp domxml xmlrpc \
-    %{?!_without_imap:imap} %{?_with_oci8:oci8} %{?_with_mssql:mssql} \
-    %{?_with_mhash:mhash}; do
+for mod in pgsql mysql odbc ldap snmp domxml xmlrpc imap \
+    %{?_with_oci8:oci8} %{?_with_mssql:mssql} %{?_with_mhash:mhash}; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -442,16 +431,11 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/php4/*.a \
       $RPM_BUILD_ROOT%{_bindir}/{phptar,pearize}
 
 # Remove irrelevant docs
-rm README.{Zeus,QNX,CVS-RULES}
+rm -f README.{Zeus,QNX,CVS-RULES}
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 rm files.*
-
-# remove extension= lines for packaged modules from php.ini (#112470)
-%triggerpostun -- php < 4.3.4-5
-%{_bindir}/perl -pi.rpmold -e 's/^extension=(pgsql|mysql|odbc|ldap|snmp|imap).so\n//' /etc/php.ini
-exit 0
 
 %files
 %defattr(-,root,root)
@@ -499,9 +483,7 @@ exit 0
 %files mhash -f files.mhash
 %endif
 
-%if %{with_imap}
 %files imap -f files.imap
-%endif
 
 %files ldap -f files.ldap
 
@@ -512,6 +494,32 @@ exit 0
 %files xmlrpc -f files.xmlrpc
 
 %changelog
+* Thu Jun  3 2004 Joe Orton <jorton@redhat.com> 4.3.7-1
+- update to 4.3.7
+- have -pear subpackage require php of same VR
+
+* Wed May 26 2004 Joe Orton <jorton@redhat.com> 4.3.6-6
+- buildrequire smtpdaemon (#124430)
+- try switching to system libgd again (prevent symbol conflicts
+  when e.g. mod_perl loads the system libgd library.)
+
+* Wed May 19 2004 Joe Orton <jorton@redhat.com> 4.3.6-5
+- don't obsolete php-imap (#123580)
+- unconditionally build -imap subpackage
+
+* Thu May 13 2004 Joe Orton <jorton@redhat.com> 4.3.6-4
+- remove trigger
+
+* Thu Apr 22 2004 Joe Orton <jorton@redhat.com> 4.3.6-3
+- fix umask reset "feature" (#121454)
+- don't use DL_GLOBAL when dlopen'ing extension modules
+
+* Sun Apr 18 2004 Joe Orton <jorton@redhat.com> 4.3.6-2
+- fix segfault on httpd SIGHUP (upstream #27810)
+
+* Fri Apr 16 2004 Joe Orton <jorton@redhat.com> 4.3.6-1
+- update to 4.3.6 (Robert Scheck, #121011)
+
 * Wed Apr  7 2004 Joe Orton <jorton@redhat.com> 4.3.4-11
 - add back imap subpackage, using libc-client (#115535)
 
