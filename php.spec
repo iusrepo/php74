@@ -28,6 +28,7 @@ Patch10: php-5.0.2-gdnspace.patch
 Patch11: php-4.3.8-round.patch
 Patch13: php-5.0.2-phpize64.patch
 Patch14: php-5.0.3-sprintf.patch
+Patch15: php-5.0.3-zstrtod.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -300,6 +301,7 @@ support for using the gd graphics library to PHP.
 %patch11 -p1 -b .round
 %patch13 -p1 -b .phpize64
 %patch14 -p1 -b .sprintf
+%patch15 -p1 -b .zstrtod
 
 %patch21 -p1 -b .odbc
 
@@ -584,6 +586,9 @@ rm files.*
 - enable xsl extension (#142174)
 - package both the xsl and dom extensions in php-xml
 - enable soap extension, shared (php-soap package) (#142901)
+- add patches from upstream 5.0 branch:
+ * Zend_strtod.c compile fixes
+ * correct php_sprintf return value usage
 
 * Mon Nov 22 2004 Joe Orton <jorton@redhat.com> 5.0.2-8
 - update for db4-4.3 (Robert Scheck, #140167)
