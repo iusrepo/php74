@@ -52,6 +52,9 @@ Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 Requires: php-pear, file >= 4.0
 
+### temporary workaround for #147564
+BuildRequires: sqlite3-devel
+
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
 easy for developers to write dynamically generated webpages. PHP also
