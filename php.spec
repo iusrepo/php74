@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language.
 Name: php
 Version: 4.0.6
-Release: 6
+Release: 7
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
@@ -31,6 +31,7 @@ Patch2: php-4.0.4pl1-linkage.patch
 Patch3: php-4.0.6-libtool.patch
 Patch4: php-4.0.5-db.patch
 Patch5: php-4.0.5-ext.patch
+Patch6: php-4.0.6-ZVAL.patch
 License: PHP
 BuildRoot: %{_tmppath}/%{name}-root
 Obsoletes: mod_php, php3, phpfi
@@ -167,6 +168,7 @@ pushd %{name}-%{version}
 %patch3 -p1 -b .libtool
 %patch4 -p1 -b .db
 %patch5 -p1 -b .ext
+%patch6 -p1 -b .ZVAL
 
 cp Zend/LICENSE Zend/ZEND_LICENSE
 
@@ -440,6 +442,10 @@ fi
 #%lang(pt) %{contentdir}/html/manual/mod/mod_php4/pt_BR
 
 %changelog
+* Mon Aug 27 2001 Nalin Dahyabhai <nalin@redhat.com>
+- add patch from pzb at scyld.com to fix the ZVAL_TRUE and ZVAL_FALSE macros
+  (#52501)
+
 * Fri Aug 17 2001 Nalin Dahyabhai <nalin@redhat.com>
 - enable bzip2 extension
 - enable curl extension
