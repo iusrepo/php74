@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.8
-Release: 11
+Release: 12
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -304,12 +304,6 @@ rm -f ext/standard/tests/file/bug21131.phpt
 # Tests that fail.
 rm -f ext/standard/tests/file/bug22414.phpt \
       ext/iconv/tests/bug16069.phpt
-%if 0
-      ext/session/tests/019.phpt \
-      ext/standard/tests/math/pow.phpt \
-      ext/standard/tests/math/round.phpt \
-      ext/standard/tests/math/abs.phpt \
-%endif
 
 : Build for oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash}
 
@@ -542,6 +536,9 @@ rm files.*
 %endif
 
 %changelog
+* Thu Sep 23 2004 Joe Orton <jorton@redhat.com> 4.3.8-12
+- use new RTLD_DEEPBIND to load extension modules
+
 * Thu Sep  9 2004 Joe Orton <jorton@redhat.com> 4.3.8-11
 - don't use --with-regex=system, it's ignored for apache* SAPIs
 
