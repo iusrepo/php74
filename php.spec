@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.8
-Release: 9
+Release: 10
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -27,6 +27,7 @@ Patch10: php-4.3.7-handler.patch
 Patch11: php-4.3.7-select.patch
 Patch12: php-4.3.8-gottest.patch
 Patch13: php-4.3.8-round.patch
+Patch14: php-4.3.8-dval2lval.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -274,6 +275,7 @@ support for using the gd graphics library to PHP.
 %patch11 -p1 -b .select
 %patch12 -p1 -b .gottest
 %patch13 -p1 -b .round
+%patch14 -p1 -b .dval2lval
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
@@ -407,7 +409,16 @@ make %{?_smp_mflags}
 # Build standalone /usr/bin/php
 pushd build-cgi
 build --enable-force-cgi-redirect
+popd
+
+# Build Apache module
+pushd build-apache
+build --with-apxs2=%{_sbindir}/apxs
+popd
+
+%check
 # Run tests
+cd build-cgi
 export NO_INTERACTION=1 REPORT_EXIT_STATUS=1 MALLOC_CHECK_=2
 unset TZ LANG LC_ALL
 if ! make test; then
@@ -417,15 +428,8 @@ if ! make test; then
     cat "$f"
     echo "-- $f result ends."
   done
-  set -x
+  exit 1
 fi
-unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
-popd
-
-# Build Apache module
-pushd build-apache
-build --with-apxs2=%{_sbindir}/apxs
-popd
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -539,6 +543,10 @@ rm files.*
 %endif
 
 %changelog
+* Fri Aug 27 2004 Joe Orton <jorton@redhat.com> 4.3.8-10
+- do apply the Zend double->long conversion fix
+- run make test in %%check and fail build on test failure
+
 * Fri Aug 27 2004 Joe Orton <jorton@redhat.com> 4.3.8-9
 - require recent 'file' package (#131054, Robert Scheck)
 - fix Zend double->long conversion
