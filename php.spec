@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language.
 Name: php
 Version: 4.0.6
-Release: 7
+Release: 9
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
@@ -442,6 +442,12 @@ fi
 #%lang(pt) %{contentdir}/html/manual/mod/mod_php4/pt_BR
 
 %changelog
+* Mon Sep 17 2001 Tim Powers <timp@redhat.com>
+- rebuilt against newer posgresql libs
+
+* Wed Sep 12 2001 Tim Powers <timp@redhat.com>
+- rebuild with new gcc and binutils
+
 * Mon Aug 27 2001 Nalin Dahyabhai <nalin@redhat.com>
 - add patch from pzb at scyld.com to fix the ZVAL_TRUE and ZVAL_FALSE macros
   (#52501)
