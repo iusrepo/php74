@@ -45,7 +45,7 @@ BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
 BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel
-BuildRequires: zlib-devel, pcre-devel >= 5.0, smtpdaemon
+BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon
 BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
