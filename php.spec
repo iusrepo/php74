@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.9
-Release: 3
+Release: 4
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -32,6 +32,7 @@ Patch15: php-4.3.9-phpvar.patch
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.2-db4.patch
 Patch24: php-4.3.8-gdnspace.patch
+Patch25: php-4.3.9-mysql3.patch
 
 # Functional changes
 Patch30: php-4.3.1-dlopen.patch
@@ -117,7 +118,7 @@ Group: Development/Languages
 Requires: php = %{version}-%{release}
 Provides: php_database
 Obsoletes: mod_php3-mysql, stronghold-php-mysql
-BuildRequires: mysql-devel
+BuildRequires: mysqlclient10-devel
 
 %description mysql
 The php-mysql package contains a dynamic shared object that will add
@@ -277,6 +278,7 @@ support for using the gd graphics library to PHP.
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
 %patch24 -p1 -b .gdnspace
+%patch25 -p1 -b .mysql3
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -532,6 +534,9 @@ rm files.*
 %endif
 
 %changelog
+* Fri Oct 29 2004 Joe Orton <jorton@redhat.com> 4.3.9-4
+- rebuild aginst mysqlclient10-devel
+
 * Wed Oct 20 2004 Joe Orton <jorton@redhat.com> 4.3.9-3
 - fix segfault introduced upstream in CAN-2004-0958 patch
 
