@@ -4,13 +4,10 @@
 %define with_mhash %{?_with_mhash:1}%{!?_with_mhash:0}
 %define with_ibase %{?_with_ibase:1}%{!?_with_ibase:0}
 
-### CHANGES STILL TO MERGE FOR 5.0: 
-# select/FD_SETSIZE workarounds before 5.0.3 release with Wez's fixes
-
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
-Version: 5.0.2
-Release: 8
+Version: 5.0.3
+Release: 1
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -29,12 +26,11 @@ Patch8: php-4.3.3-miscfix.patch
 Patch9: php-4.3.6-umask.patch
 Patch10: php-5.0.2-gdnspace.patch
 Patch11: php-4.3.8-round.patch
-Patch12: php-5.0.2-phpvar.patch
 Patch13: php-5.0.2-phpize64.patch
+Patch14: php-5.0.3-sprintf.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
-Patch22: php-4.3.2-db4.patch
 
 # Functional changes
 Patch30: php-4.3.1-dlopen.patch
@@ -163,6 +159,16 @@ HTML-embeddable scripting language. If you need ODBC support for PHP
 applications, you will need to install this package and the php
 package.
 
+%package soap
+Group: Development/Languages
+Requires: php = %{version}-%{release}
+Summary: A module for PHP applications that use the SOAP protocol
+BuildRequires: libxml2-devel
+
+%description soap
+The php-soap package contains a dynamic shared object that will add
+support to PHP for using the SOAP web services protocol.
+
 %if %{with_ibase}
 %package interbase
 Group: Development/Languages
@@ -228,16 +234,18 @@ support for querying SNMP devices to PHP.  PHP is an HTML-embeddable
 scripting language. If you need SNMP support for PHP applications, you
 will need to install this package and the php package.
 
-%package dom
-Summary: A module for PHP applications which manipulate DOM trees
+%package xml
+Summary: A module for PHP applications which use XML
 Group: Development/Languages
 Requires: php = %{version}-%{release}
-Obsoletes: php-domxml
+Obsoletes: php-domxml, php-dom
+Provides: php-dom, php-xsl
 BuildRequires: libxslt-devel >= 1.0.18-1, libxml2-devel >= 2.4.14-1
 
-%description dom
-The php-dom package contains a dynamic shared object that will add
-support for manipulating XML data as a DOM tree to PHP.
+%description xml
+The php-xml package contains dynamic shared objects which add support
+to PHP for manipulating XML documents using the DOM tree,
+and performing XSL transformations on XML documents.
 
 %package xmlrpc
 Summary: A module for PHP applications which use the XML-RPC protocol
@@ -290,11 +298,10 @@ support for using the gd graphics library to PHP.
 %patch9 -p1 -b .umask
 %patch10 -p1 -b .gdnspace
 %patch11 -p1 -b .round
-%patch12 -p1 -b .phpvar
 %patch13 -p1 -b .phpize64
+%patch14 -p1 -b .sprintf
 
 %patch21 -p1 -b .odbc
-%patch22 -p1 -b .db4
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -366,7 +373,6 @@ ln -sf ../configure
 	--with-openssl \
 	--with-png \
 	--with-pspell \
-	--with-xml \
 	--with-expat-dir=%{_prefix} \
         --with-pcre-regex=%{_prefix} \
 	--with-zlib \
@@ -394,6 +400,8 @@ ln -sf ../configure
 	--enable-dio \
         --with-mime-magic=%{_datadir}/file/magic.mime \
         --without-sqlite \
+        --with-libxml-dir=%{_prefix} \
+	--with-xml \
 	$* 
 if test $? != 0; then 
   tail -500 config.log
@@ -423,7 +431,9 @@ build --enable-force-cgi-redirect \
       --enable-dom=shared \
       --with-dom-xslt=%{_prefix} --with-dom-exslt=%{_prefix} \
       --with-pgsql=shared \
-      --with-snmp=shared,%{_prefix}
+      --with-snmp=shared,%{_prefix} \
+      --enable-soap=shared \
+      --with-xsl=shared,%{_prefix}
 popd
 
 # Build Apache module
@@ -483,7 +493,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql odbc ldap snmp xmlrpc imap \
-    mbstring ncurses gd dom \
+    mbstring ncurses gd dom xsl \
     %{?_with_oci8:oci8} %{?_with_mssql:mssql} %{?_with_mhash:mhash} \
     %{?_with_ibase:interbase}; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
@@ -495,6 +505,9 @@ EOF
 %config(noreplace) %attr(644,root,root) %{_sysconfdir}/php.d/${mod}.ini
 EOF
 done
+
+# The dom and xsl modules are both packaged in php-xml
+cat files.dom files.xsl > files.xml
 
 # Remove PEAR testsuite
 rm -rf $RPM_BUILD_ROOT%{_datadir}/pear/tests
@@ -545,11 +558,12 @@ rm files.*
 %files imap -f files.imap
 %files ldap -f files.ldap
 %files snmp -f files.snmp
-%files dom -f files.dom
+%files xml -f files.xml
 %files xmlrpc -f files.xmlrpc
 %files mbstring -f files.mbstring
 %files ncurses -f files.ncurses
 %files gd -f files.gd
+%files soap -f files.soap
 
 %if %{with_oci8}
 %files oci8 -f files.oci8
@@ -565,6 +579,12 @@ rm files.*
 %endif
 
 %changelog
+* Wed Jan 12 2005 Joe Orton <jorton@redhat.com> 5.0.3-1
+- update to 5.0.3 (thanks to Robert Scheck et al, #143101)
+- enable xsl extension (#142174)
+- package both the xsl and dom extensions in php-xml
+- enable soap extension, shared (php-soap package) (#142901)
+
 * Mon Nov 22 2004 Joe Orton <jorton@redhat.com> 5.0.2-8
 - update for db4-4.3 (Robert Scheck, #140167)
 - build against mysql-devel
