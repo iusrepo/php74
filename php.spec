@@ -1,8 +1,6 @@
 %define contentdir /var/www
 %define manual_langs de en es fr it ja ko pt_BR
 
-ExcludeArch: x86_64
-
 # For those wanting to recompile with Oracle libraries
 # rpm --rebuild --define 'oracle 1' php4.2.1-x.src.rpm
 #
@@ -11,7 +9,7 @@ ExcludeArch: x86_64
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.2.2
-Release: 13a
+Release: 17
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -41,6 +39,11 @@ Patch6: php-4.1.2-missing-vars.patch
 Patch9: php-4.2.2-lib64.patch
 Patch10: php-4.2.2-inidir.patch
 Patch11: php-4.2.2-openssl097.patch
+Patch12: php-4.2.2-snmp.patch
+
+# Security fixes
+Patch30: php-4.2.2-mailsec.patch
+Patch31: php-4.2.2-wrap.patch
 
 # Where are we going to build the install set to?
 #
@@ -54,7 +57,7 @@ BuildRequires: zlib-devel
 BuildRequires: bzip2, fileutils, perl
 Obsoletes: php-dbg, mod_php, php3, phpfi
 # Enforce Apache module ABI compatibility
-Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn)
+Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -124,8 +127,6 @@ Requires: php = %{version}-%{release}
 Provides: php_database
 Obsoletes: mod_php3-mysql
 BuildRequires: mysql-devel
-Requires: mysql
-Requires: zlib
 
 %description mysql
 The php-mysql package contains a dynamic shared object that will add
@@ -141,9 +142,6 @@ Requires: php = %{version}-%{release}
 Provides: php_database
 Obsoletes: mod_php3-pgsql
 BuildRequires: krb5-devel, openssl-devel, postgresql-devel
-Requires: krb5-libs
-Requires: openssl
-Requires: postgresql-libs
 
 %description pgsql
 The php-pgsql package includes a dynamic shared object (DSO) that can
@@ -160,7 +158,6 @@ Requires: php = %{version}-%{release}
 Summary: A module for PHP applications that use ODBC databases.
 Provides: php_database
 BuildRequires: unixODBC-devel
-Requires: unixODBC
 
 %description odbc
 The php-odbc package contains a dynamic shared object that will add
@@ -204,9 +201,14 @@ will need to install this package and the php package.
 %patch4 -p1
 %patch5 -p1 -b .ap2
 %patch6 -p1
-%patch9 -p1
+%patch9 -p1 -b .lib64
 %patch10 -p1 -b .inidir
 %patch11 -p1 -b .ossl097
+%patch12 -p1 -b .snmp
+
+# Security fixes
+%patch30 -p1 -b .mailsec
+%patch31 -p1 -b .wrap
 
 # Prevent %doc confusion over LICENSE & Zend/LICENSE
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -216,7 +218,7 @@ mkdir build-cgi build-apache
 
 # Use correct libdir
 perl -pi -e 's|\$\(prefix\)/lib|%{_libdir}|' pear/Makefile.in
-perl -pi -e 's|%{_prefix}/lib|%{_libdir}|' php-ini.dist
+perl -pi -e 's|%{_prefix}/lib|%{_libdir}|' php.ini-dist
 
 %build
 
@@ -247,7 +249,6 @@ touch acinclude.m4
 build() {
 ln -sf ../configure
 %configure \
-	--prefix=%{_prefix} \
 	--cache-file=../config.cache \
 	--with-config-file-path=%{_sysconfdir} \
 	--with-config-file-scan-dir=%{_sysconfdir}/php.d \
@@ -456,6 +457,21 @@ rm files.*
 %files snmp -f files.snmp
 
 %changelog
+* Mon Feb 24 2003 Joe Orton <jorton@redhat.com> 4.2.2-17
+- restrict SNMP patch to minimal changes, fixing segv on startup (#84607)
+
+* Wed Feb 12 2003 Joe Orton <jorton@redhat.com> 4.2.2-16
+- prevent startup if using httpd.worker to avoid thread-safety issues.
+- fix parsing private keys in OpenSSL extension (#83994)
+- fixes for SNMP extension (backport from 4.3) (#74761)
+
+* Wed Jan 29 2003 Joe Orton <jorton@redhat.com> 4.2.2-15
+- add security fixes for wordwrap() and mail()
+
+* Mon Jan 13 2003 Joe Orton <jorton@redhat.com> 4.2.2-14
+- drop explicit Requires in subpackages, rely on automatic deps.
+- further fixes for libdir=lib64
+
 * Tue Dec 17 2002 Joe Orton <jorton@redhat.com> 4.2.2-13
 - drop prereq for perl, grep in subpackages
 - rebuild and patch for OpenSSL 0.9.7
