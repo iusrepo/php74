@@ -14,6 +14,8 @@ URL: http://www.php.net/
 
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 
+Source10: pear-RunTest.php
+
 Source50: php.conf
 
 Patch2: php-5.0.1-config.patch
@@ -331,6 +333,9 @@ rm -f ext/standard/tests/file/bug21131.phpt
 rm -f ext/standard/tests/file/bug22414.phpt \
       ext/iconv/tests/bug16069.phpt
 
+# Missing file in 5.0.4 PEAR bundle:
+cp $RPM_SOURCE_DIR/pear-RunTest.php pear/PEAR/RunTest.php
+
 : Build for oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash} ibase=%{with_ibase}
 
 %build
@@ -589,6 +594,7 @@ rm files.*
 * Fri Apr  1 2005 Joe Orton <jorton@redhat.com> 5.0.4-1
 - update to 5.0.4 (#153068)
 - add .phps AddType to php.conf (#152973)
+- better gcc4 fix for libxmlrpc
 
 * Wed Mar 30 2005 Joe Orton <jorton@redhat.com> 5.0.3-5
 - BuildRequire mysql-devel >= 4.1
