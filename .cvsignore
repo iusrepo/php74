@@ -1,14 +1,3 @@
-php-4.0.6.tar.gz
-php_manual_cs.tar.bz2
-php_manual_de.tar.bz2
-php_manual_en.tar.bz2
-php_manual_es.tar.bz2
-php_manual_fr.tar.bz2
-php_manual_hu.tar.bz2
-php_manual_it.tar.bz2
-php_manual_ja.tar.bz2
-php_manual_ko.tar.bz2
-php_manual_nl.tar.bz2
-php_manual_pt_BR.tar.bz2
-php_manual_tr.tar.bz2
-rfc1867.c.diff-4.0.6.gz
+php-4.1.0.tar.gz
+php-manual-en.tar.gz
+php.tar.gz

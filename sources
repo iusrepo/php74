@@ -1,14 +1,3 @@
-5f698521cf2b392cf9bfa87fc1a0fe90  php-4.0.6.tar.gz
-6b523d9a77d39c5f735eedb197119a4b  php_manual_cs.tar.bz2
-a766df8b21609b167a99ea9563425d9e  php_manual_de.tar.bz2
-a738430f7cc2c16688b3a2d19a65b6a2  php_manual_en.tar.bz2
-b06d5a1228327dfe373a92f12be79e48  php_manual_es.tar.bz2
-5ad1306685c796a3ed6e85aeba1bfd7f  php_manual_fr.tar.bz2
-3c955303e5409e82b1345bf5e2e239c8  php_manual_hu.tar.bz2
-5e87d936312b9223ac5391b98d5260dd  php_manual_it.tar.bz2
-d175e5a69766f10e8929eece91767902  php_manual_ja.tar.bz2
-f7cd525f5f3109adb5cb83805c4fb30b  php_manual_ko.tar.bz2
-d40ed60a9349ccfda58326b6614168eb  php_manual_nl.tar.bz2
-8356fe5f5da3be07b3eb35380f4e0c29  php_manual_pt_BR.tar.bz2
-4cf687198c0a1a57e00a290e97c5c328  php_manual_tr.tar.bz2
-2fcb7e1c4762a8253f30d08476f147dc  rfc1867.c.diff-4.0.6.gz
+4c2bfcc3cfc0b5b49d855316d78a3afc  php-4.1.0.tar.gz
+2ab9addc3ba5679b04b8de2913708615  php-manual-en.tar.gz
+48ecc547ef50bb8eea6d003f36f96425  php.tar.gz

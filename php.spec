@@ -1,83 +1,43 @@
 %define contentdir /var/www
-%define manual_langs en pt_BR cs nl fr de hu it ja ko es tr
-# Build these extension subpackages.
-%define odbc 1
-%define snmp 0
-# Build these extensions in.
-%define ext_curl 1
-%define ext_dom  1
-%define ext_expat  1
-%define ext_gd_freetype 1
-%define ext_iconv  1
-%define ext_mm 1
-%define ext_openssl 1
+%define manual_langs en
+# pt_BR cs nl fr de hu it ja kr es
 
 %{!?oracle:%define oracle 0}
 
 Summary: The PHP HTML-embedded scripting language.
 Name: php
-Version: 4.0.6
-Release: 16
+Version: 4.1.0
+Release: 2
 Group: Development/Languages
 URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
-Source1: http://www.php.net/distributions/manual/php_manual_en.tar.bz2
-Source2: http://www.php.net/distributions/manual/php_manual_pt_BR.tar.bz2
-Source3: http://www.php.net/distributions/manual/php_manual_cs.tar.bz2
-Source4: http://www.php.net/distributions/manual/php_manual_nl.tar.bz2
-Source5: http://www.php.net/distributions/manual/php_manual_fr.tar.bz2
-Source6: http://www.php.net/distributions/manual/php_manual_de.tar.bz2
-Source7: http://www.php.net/distributions/manual/php_manual_hu.tar.bz2
-Source8: http://www.php.net/distributions/manual/php_manual_it.tar.bz2
-Source9: http://www.php.net/distributions/manual/php_manual_ja.tar.bz2
-Source10: http://www.php.net/distributions/manual/php_manual_ko.tar.bz2
-Source11: http://www.php.net/distributions/manual/php_manual_es.tar.bz2
-Source12: http://www.php.net/distributions/manual/php_manual_tr.tar.bz2
+# Manuals from http://www.php.net/distributions/manual/
+Source1: php-manual-en.tar.gz
+#Source2: php-manual-pt_BR.tar.gz
+#Source3: php-manual-cs.tar.gz
+#Source4: php-manual-nl.tar.gz
+#Source5: php-manual-fr.tar.gz
+#Source6: php-manual-de.tar.gz
+#Source7: php-manual-hu.tar.gz
+#Source8: php-manual-it.tar.gz
+#Source9: php-manual-ja.tar.gz
+#Source10: php-manual-kr.tar.gz
+#Source11: php-manual-es.tar.gz
+Source12: php-get-manuals
+Source13: php.tar.gz
 #Icon: php3.gif
 Patch0: php-4.0.6-redhat.patch
 Patch1: php-4.0.3-required.patch
-Patch2: php-4.0.4pl1-linkage.patch
-Patch3: php-4.0.6-libtool.patch
-Patch4: php-4.0.6-db.patch
-Patch5: php-4.0.6-ZVAL.patch
-Patch6: php-4.0.6-dom.patch
-Patch7: http://www.php.net/distributions/rfc1867.c.diff-4.0.6.gz
-Patch8: php-4.0.6-xml2.patch
-Patch9: php-4.0.6-mysql-path.patch
-Patch10: php-4.0.6-rfc1867.c.fixfix
-License: PHP License
+Patch4: php-4.0.5-db.patch
+License: PHP
 BuildRoot: %{_tmppath}/%{name}-root
 Obsoletes: mod_php, php3, phpfi
-BuildPrereq: apache-devel, db2-devel, db3-devel, gdbm-devel
-BuildPrereq: imap-devel >= 2000-9, krb5-devel, mysql-devel, postgresql-devel
-BuildPrereq: gd-devel, libjpeg-devel, libpng-devel, zlib-devel
-BuildPrereq: bzip2, bzip2-devel >= 1.0.0, gmp-devel, pspell-devel
-BuildPrereq: autoconf, automake, libtool
-BuildPrereq: /usr/include/security/pam_appl.h
-%if %{odbc}
-BuildPrereq: unixODBC-devel
-%endif
-%if %{snmp}
-BuildPrereq: ucd-snmp-devel
-%endif
-%if %{ext_curl}
-BuildPrereq: curl-devel >= 7.8
-%endif
-%if %{ext_dom}
-BuildPrereq: libxml2-devel
-%endif
-%if %{ext_expat}
-BuildPrereq: expat-devel
-%endif
-%if %{ext_gd_freetype}
-BuildPrereq: freetype-devel
-%endif
-%if %{ext_mm}
-BuildPrereq: mm-devel
-%endif
-%if %{ext_openssl}
-BuildPrereq: openssl-devel
-%endif
+BuildPrereq: apache-devel, db2-devel, db3-devel, gdbm-devel, imap-devel >= 2000-9
+BuildPrereq: krb5-devel, mysql-devel, openssl-devel, postgresql-devel, pam-devel
+BuildPrereq: freetype-devel, gd-devel, libjpeg-devel, libpng-devel, zlib-devel
+BuildPrereq: unixODBC-devel, libxml2-devel, pspell-devel, curl-devel >= 7.8
+BuildPrereq: bzip2-devel >= 1.0.0, mm-devel
+Requires: %(cat %{_includedir}/apache/.eapi-tag)
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -101,7 +61,7 @@ need to install this package.
 %package imap
 Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl
-Requires: pam
+Requires: krb5-libs, pam
 Obsoletes: mod_php3-imap
 Summary: An Apache module for PHP applications that use IMAP.
 BuildPrereq: imap-devel, krb5-devel
@@ -176,7 +136,6 @@ HTML-embedded scripting language. If you need back-end support for
 PostgreSQL, you should install this package in addition to the main
 php package.
 
-%if %{odbc}
 %package odbc
 Group: Development/Languages
 Prereq: php = %{version}-%{release}, perl
@@ -194,105 +153,68 @@ HTML-embeddable scripting language. If you need ODBC support for PHP
 applications, you will need to install this package and the php
 package.
 
-%endif
 %if %{oracle}
 %package oci8
 %description oci8
 %endif
-%if %{snmp}
-%package snmp
-%description snmp
-%endif
 %prep
-%setup -q
+%setup -q -c
+pushd %{name}-%{version}
 %patch0 -p1 -b .redhat
 %patch1 -p1 -b .required
-%patch2 -p1 -b .linkage
-%patch3 -p1 -b .libtool
-%patch4 -p0 -b .db
-%patch5 -p1 -b .ZVAL
-%patch6 -p1 -b .dom
-pushd main
-%patch7 -p0 -b .file_uploads
-popd
-%patch8 -p1 -b .xml2
-%patch9 -p1 -b .mysql-path
-%patch10 -p0 -b .fixfix
-cp Zend/LICENSE Zend/ZEND_LICENSE
-mkdir build-cgi build-apache
+%patch4 -p1 -b .db
 
-# Buildconf expects the system libtool to be the same as the one in the build
-# tree, and we can't change that, so....
-rm ltmain.sh ltconfig
-libtoolize --force
+cp Zend/LICENSE Zend/ZEND_LICENSE
+
+# Set things up for IMAP.  The library's named c-client.a, not libc-client.a,
+# otherwise this mightn't be necessary.
+ln -s %{_includedir} ext/imap/
+mkdir ext/imap/lib
+cp -fv %{_libdir}/c-client.a ext/imap/lib/libc-client.a
+
+# Rebuild configure and friends.
 ./buildconf
 
-%build
-# Add -fPIC to RPM_OPT_FLAGS.
-CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
-# Add the Kerberos library path to the default LDFLAGS so that the IMAP checks
-# will be able to find the GSSAPI libraries.
-LDFLAGS="-L/usr/kerberos/lib"; export LDFLAGS
-# Configure may or may not catch these (mostly second-order) dependencies.
-%if %{ext_gd_freetype}
-FTLIB=-lfreetype
-%endif
-LIBS="-lttf $FTLIB -lpng -ljpeg -lz -lnsl"; export LIBS
-# This causes the shared extension modules to be installed into %{_libdir}/php4.
-EXTENSION_DIR=%{_libdir}/php4; export EXTENSION_DIR
-# This pulls the static /usr/lib/libc-client.a into the IMAP extension module.
-IMAP_SHARED_LIBADD=-lc-client ; export IMAP_SHARED_LIBADD
+popd
 
-# Shell function to configure and build a PHP tree.
-build() {
-ln -sf ../configure
+# Create another source tree like this one.
+cp -a %{name}-%{version} %{name}-%{version}-cgi
+
+%build
+krb5libs="-L/usr/kerberos/lib -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
+ssllibs="-lssl -lcrypto"
+sasllibs="-lsasl $krb5libs $ssllibs"
+
+CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
+LIBS="-lttf -lfreetype -lpng -ljpeg -lz -lnsl"; export LIBS
+REDO_ALL=yes; export REDO_ALL
+EXTENSION_DIR=%{_libdir}/php4; export EXTENSION_DIR
+
+compile() {
 %configure \
 	--prefix=%{_prefix} \
 	--with-config-file-path=%{_sysconfdir} \
-	--enable-force-cgi-redirect \
 	--disable-debug \
 	--enable-pic \
 	--disable-rpath \
 	--enable-inline-optimization \
+	$* \
 	--with-bz2 \
-%if %{ext_curl}
 	--with-curl \
-%endif
 	--with-db3 \
-%if %{ext_dom}
-	--with-dom=%{_prefix} \
-%endif
+	--with-dom \
 	--with-exec-dir=%{_bindir} \
-%if %{ext_gd_freetype}
-	--with-freetype-dir=%{_prefix} \
-%endif
 	--with-gd \
 	--with-gdbm \
 	--with-gettext \
-	--with-gmp \
-%if %{ext_iconv}
-	--with-iconv \
-%endif
 	--with-jpeg-dir=%{_prefix} \
-%if %{ext_mm}
 	--with-mm \
-%endif
-%if %{ext_openssl}
 	--with-openssl \
-%endif
 	--with-png \
-	--with-pspell \
 	--with-regex=system \
-%if %{ext_gd_freetype}
 	--with-ttf \
-%endif
-	--with-xml \
-%if %{ext_expat}
-	--with-expat-dir=%{_prefix} \
-%endif
 	--with-zlib \
 	--with-layout=GNU \
-	--enable-bcmath \
 	--enable-debugger \
 	--enable-ftp \
 	--enable-magic-quotes \
@@ -301,68 +223,100 @@ ln -sf ../configure
 	--enable-sysvsem \
 	--enable-sysvshm \
 	--enable-track-vars \
-	--enable-trans-sid \
 	--enable-yp \
 	--enable-wddx \
+	--without-mysql \
+	--without-unixODBC \
+	--without-oracle \
 	--without-oci8 \
-	--with-imap=shared --with-imap-ssl --with-kerberos=/usr/kerberos \
-	--with-ldap=shared,%{_prefix} \
-	--with-mysql=shared,%{_prefix} \
-%if %{oracle}
-	--with-oci8=shared \
-%endif
-	--with-pgsql=shared,%{_prefix} \
-%if %{snmp}
-	--with-snmp=shared,%{_prefix} --enable-ucd-snmp-hack \
-%endif
-	--with-unixODBC=shared,%{_prefix} \
-	$@
-# Fixup the config_vars to not include the -a on lines which call apxs.
-cat config_vars.mk > config_vars.mk.old
-awk '/^INSTALL_IT.*apxs.*-a -n/ {sub("-a -n ","-n ");} {print $0;}' \
-	config_vars.mk.old > config_vars.mk
-ln -sf libtool shlibtool
+	--with-pspell \
+	--with-xml
 make
 }
-# First, build a CGI tree.
-pushd build-cgi
-build
+
+# Build a standalone binary.
+pushd %{name}-%{version}-cgi
+compile --enable-force-cgi-redirect
 popd
-# Second, build an Apache tree.
-pushd build-apache
-build --with-apxs=%{_sbindir}/apxs
+
+# Build a module.
+pushd %{name}-%{version}
+compile --with-apxs=%{_sbindir}/apxs
+
+# Build individual PHP modules.
+build_ext() {
+./libtool --mode=link \
+%{__cc} -fPIC -shared $RPM_OPT_FLAGS \
+	-DCOMPILE_DL_`echo $1 | tr '[a-z]' '[A-Z]'` \
+	-DHAVE_`echo $1 | tr '[a-z]' '[A-Z]'` \
+	-I. -I./TSRM -I./main -I`%{_sbindir}/apxs -q INCLUDEDIR` -I./Zend \
+	-I/usr/include/freetype -I/usr/include/$1 \
+	-I./ext/$1 -I./ext/$1/lib$1 \
+	-I./ext/xml/expat/xmltok -I./ext/xml/expat/xmlparse \
+	`grep ^CPPFLAGS Zend/Makefile | cut -f2- -d=` \
+	$4 $2 -o $1.so -L.libs $3 -lc
+}
+build_ext imap ext/imap/php_imap.c "%{_libdir}/c-client.a $krb5libs $ssllibs -lpam" "-DHAVE_IMAP2000 -DHAVE_IMAP_SSL"
+build_ext ldap ext/ldap/ldap.c "-lldap -llber"
+build_ext pgsql ext/pgsql/pgsql.c "-lpq" -DHAVE_PQCMDTUPLES
+build_ext mysql ext/mysql/php_mysql.c "-L/usr/lib/mysql -lmysqlclient" "-DHAVE_MYSQL_MYSQL_H -DHAVE_MYSQL_REAL_CONNECT"
+build_ext odbc ext/odbc/php_odbc.c "-lodbc" "-DHAVE_UNIXODBC -DHAVE_UODBC"
+%if %{oracle}
+build_ext oci8 ext/oci8/oci8.c "-I${ORACLE_HOME}/rdbms/public -I${ORACLE_HOME}/rdbms/demo -L${ORACLE_HOME}/lib -lclntsh"
+%endif
+
 popd
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-# First, install the CGI tree.
-pushd build-cgi
-make install INSTALL_ROOT=$RPM_BUILD_ROOT
-popd
-# Second, install the Apache tree.  Note that this overwrites the modules which
-# were installed as part of the CGI build.  Lucky for us they're compatible.
-pushd build-apache
-make install INSTALL_ROOT=$RPM_BUILD_ROOT
+pushd %{name}-%{version}
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/{apache,php4}
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/httpd
+mkdir -p $RPM_BUILD_ROOT%{contentdir}/icons
+
+./libtool install -m755 libphp4.la $RPM_BUILD_ROOT%{_libdir}/apache/
+
+pushd ../%{name}-%{version}-cgi
+./libtool install -m755 php $RPM_BUILD_ROOT%{_bindir}/php
 popd
 
-# Install the default configuration file and some icons which can be used to
-# indicate that this site uses PHP.
-install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
+install -m 755 pgsql.so $RPM_BUILD_ROOT%{_libdir}/php4/
+install -m 755 imap.so $RPM_BUILD_ROOT%{_libdir}/php4/
+install -m 755 ldap.so $RPM_BUILD_ROOT%{_libdir}/php4/
+install -m 755 mysql.so $RPM_BUILD_ROOT%{_libdir}/php4/
+install -m 755 odbc.so $RPM_BUILD_ROOT%{_libdir}/php4/
+%if %{oracle}
+install -m 755 oci8.so $RPM_BUILD_ROOT%{_libdir}/php4/
+%endif
 install -m 644 php.ini-dist $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
-install -m 755 -d $RPM_BUILD_ROOT%{contentdir}/icons
 install -m 644 *.gif $RPM_BUILD_ROOT%{contentdir}/icons/
 
-# Manuals -- we'll place English (en) in the location where the only version
-# of the manual was before, and langify the rest.
+# manual
 for lang in %{manual_langs} ; do
-	if test x${lang} = xen ; then
-		target_lang=""
-	else
-		target_lang=${lang}
-	fi
-	mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4/${target_lang}
-	bzip2 -dc $RPM_SOURCE_DIR/php_manual_${lang}.tar.bz2 | tar -x -C $RPM_BUILD_ROOT%{contentdir}/html/manual/mod/mod_php4/${target_lang} -f -
+if test x${lang} = xen ; then
+	# put English where the old single manual package used to be
+	mkdir -p $RPM_BUILD_ROOT%{contentdir}/manual/apache/mod/mod_php4/
+	gzip -dc $RPM_SOURCE_DIR/php-manual-${lang}.tar.gz | tar -x -C $RPM_BUILD_ROOT%{contentdir}/manual/apache/mod/mod_php4/ -f -
+elif test x${lang} = xkr ; then
+	# put Korean where the old single manual package used to be
+	mkdir -p $RPM_BUILD_ROOT%{contentdir}/manual/apache/mod/mod_php4/ko/
+	gzip -dc $RPM_SOURCE_DIR/php-manual-${lang}.tar.gz | tar -x -C $RPM_BUILD_ROOT%{contentdir}/manual/apache/mod/mod_php4/ko/ -f -
+else
+	mkdir -p $RPM_BUILD_ROOT%{contentdir}/manual/apache/mod/mod_php4/${lang}/
+	gzip -dc $RPM_SOURCE_DIR/php-manual-${lang}.tar.gz | tar -x -C $RPM_BUILD_ROOT%{contentdir}/manual/apache/mod/mod_php4/${lang} -f -
+fi
 done
+
+# pear and development files
+%{makeinstall} -C pear peardir=$RPM_BUILD_ROOT%{_datadir}/php
+for file in php-config phpextdist phpize ; do
+	perl -pi -e "s|$RPM_BUILD_ROOT||g" $RPM_BUILD_ROOT%{_bindir}/${file}
+done
+
+# examples
+%{__mkdir_p} $RPM_BUILD_ROOT%{contentdir}/stronghold/examples
+%{__gzip} -dc %{SOURCE13} | tar -x -C $RPM_BUILD_ROOT%{contentdir}/stronghold/examples -f -
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -375,12 +329,13 @@ perl -pi -e 's|^#AddModule mod_php3.c|AddModule mod_php3.c|g' \
 
 %files
 %defattr(-,root,root)
-%doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
-%doc Zend/ZEND_*
+%doc %{name}-%{version}/{CODING_STANDARDS,CREDITS,EXTENSIONS,INSTALL}
+%doc %{name}-%{version}/{LICENSE,NEWS,README.*,Zend/ZEND_*}
 %config(noreplace) %{_sysconfdir}/php.ini
 %{_bindir}/php
-%{_datadir}/pear
+%{_datadir}/php
 %{_libdir}/apache/libphp4.so
+%{contentdir}/stronghold/examples/php
 
 %post -p /sbin/ldconfig
 
@@ -393,7 +348,7 @@ perl -pi -e 's|^#AddModule mod_php3.c|AddModule mod_php3.c|g' \
 %{_bindir}/phpize
 %{_bindir}/phpextdist
 %{_includedir}/php
-%{_libdir}/php
+%{_libdir}/php/build
 
 %files pgsql
 %defattr(-,root,root)
@@ -419,7 +374,6 @@ if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
   %{__perl} -pi -e "s|^extension=mysql.so|;extension=mysql.so|" %{_sysconfdir}/php.ini
 fi
 
-%if %{odbc}
 %files odbc
 %defattr(-,root,root)
 %{_libdir}/php4/odbc.so
@@ -431,7 +385,6 @@ fi
 if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
   %{__perl} -pi -e "s|^extension=odbc.so|;extension=odbc.so|" %{_sysconfdir}/php.ini
 fi
-%endif
 
 %if %{oracle}
 %files oci8
@@ -471,100 +424,35 @@ if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
   %{__perl} -pi -e "s|^extension=ldap.so|;extension=ldap.so|" %{_sysconfdir}/php.ini
 fi
 
-%if %{snmp}
-%files snmp
-%defattr(-,root,root)
-%{_libdir}/php4/snmp.so
-
-%post snmp
-%{__perl} -pi -e "s|^;extension=snmp.so|extension=snmp.so|" %{_sysconfdir}/php.ini
-
-%preun snmp
-if [ $1 = 0 -a -f %{_sysconfdir}/php.ini ] ; then
-  %{__perl} -pi -e "s|^extension=snmp.so|;extension=snmp.so|" %{_sysconfdir}/php.ini
-fi
-%endif
-
 %files manual
 %defattr(-,root,root)
 %{contentdir}/icons/*
-%dir %{contentdir}/html/manual/mod/mod_php4/
-%{contentdir}/html/manual/mod/mod_php4/*.html
-%lang(cs) %{contentdir}/html/manual/mod/mod_php4/cs
-%lang(de) %{contentdir}/html/manual/mod/mod_php4/de
-%lang(es) %{contentdir}/html/manual/mod/mod_php4/es
-%lang(fr) %{contentdir}/html/manual/mod/mod_php4/fr
-%lang(hu) %{contentdir}/html/manual/mod/mod_php4/hu
-%lang(it) %{contentdir}/html/manual/mod/mod_php4/it
-%lang(ja) %{contentdir}/html/manual/mod/mod_php4/ja
-%lang(ko) %{contentdir}/html/manual/mod/mod_php4/ko
-%lang(nl) %{contentdir}/html/manual/mod/mod_php4/nl
-%lang(pt) %{contentdir}/html/manual/mod/mod_php4/pt_BR
-%lang(tr) %{contentdir}/html/manual/mod/mod_php4/tr
+%dir %{contentdir}/manual/apache/mod/mod_php4/
+%{contentdir}/manual/apache/mod/mod_php4/*.html
+#%lang(cs) %{contentdir}/manual/apache/mod/mod_php4/cs
+#%lang(de) %{contentdir}/manual/apache/mod/mod_php4/de
+#%lang(es) %{contentdir}/manual/apache/mod/mod_php4/es
+#%lang(fr) %{contentdir}/manual/apache/mod/mod_php4/fr
+#%lang(hu) %{contentdir}/manual/apache/mod/mod_php4/hu
+#%lang(it) %{contentdir}/manual/apache/mod/mod_php4/it
+#%lang(ja) %{contentdir}/manual/apache/mod/mod_php4/ja
+#%lang(ko) %{contentdir}/manual/apache/mod/mod_php4/ko
+#%lang(nl) %{contentdir}/manual/apache/mod/mod_php4/nl
+#%lang(pt) %{contentdir}/manual/apache/mod/mod_php4/pt_BR
 
 %changelog
-* Mon Mar 25 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-16
-- rebuild
+* Wed Feb 13 2002 Gary Benson <gbenson@redhat.com> 4.1.0-2
+- move the manual from /var/www/manual to /var/www/manual/apache.
 
-* Fri Mar  8 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-15
-- rebuild for RHL 7.2
+* Wed Jan 23 2002 Gary Benson <gbenson@redhat.com>
+- add examples.
 
-* Fri Mar  8 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-14
-- rebuild for RHL 7.1
+* Mon Jan 21 2002 Gary Benson <gbenson@redhat.com>
+- Move manual from /var/www/html/manual to /var/www/manual
+  (safely out of Tux's way)
 
-* Fri Mar  8 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-13
-- rebuild for RHL 7
-
-* Wed Mar  6 2002 Nalin Dahyabhai <nalin@redhat.com>
-- build the mysql extension using the system mysql library, not the bundled
-  one which can lead to conflicting symbol hilarity
-
-* Tue Mar  5 2002 Nalin Dahyabhai <nalin@redhat.com>
-- fix some off-by-ones in the mime parsing code, from Charlie Brady by way
-  of Adrian Chung (#60523)
-
-* Mon Mar  4 2002 Nalin Dahyabhai <nalin@redhat.com>
-- better fix for the mysql socket test (from Bryce, use mysql_config)
-
-* Fri Mar  1 2002 Nalin Dahyabhai <nalin@redhat.com>
-- begin prep for PHP errata o' doom
-- require pam-devel by file (/usr/include/security/pam_appl.h), not package name
-- make use of curl, dom, external expat, gd-freetype, mm, and openssl extensions
-  optional
-- make odbc subpackage conditional
-- make the default location of the mysql socket be determined by the MYSQL_SOCK
-  environment variable (if defined) and define it
-- FIXME: incorporate an improved fix for the php_mime_split bugs
-
-* Wed Feb 27 2002 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-12
-- add (now known to be flawed) patch to fix use of memchr() in multipart
-  MIME parsing
-
-* Tue Nov 20 2001 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-11
-- don't build the snmp module
-- don't activate the module for Apache when we install it into the buildroot
-
-* Mon Nov 19 2001 Nalin Dahyabhai <nalin@redhat.com>
-- link the IMAP module with c-client.a
-
-* Fri Nov 16 2001 Nalin Dahyabhai <nalin@redhat.com> 4.0.6-10
-- use shared expat for XML support, add buildprereq on expat-devel
-- update to latest manuals from the web site
-- %{_datadir}/php -> %{_datadir}/pear
-- miscellaneous cleanups
-
-* Tue Nov 13 2001 Nalin Dahyabhai <nalin@redhat.com>
-- remove explicit dependency on krb5-libs
-
-* Fri Nov  9 2001 Nalin Dahyabhai <nalin@redhat.com>
-- enable transparent session id support, configure freetype and gmp extensions
-  (suggestion and patch Jason Costomiris)
-
-* Mon Sep 17 2001 Tim Powers <timp@redhat.com> 4.0.6-9
-- rebuilt against newer posgresql libs
-
-* Wed Sep 12 2001 Tim Powers <timp@redhat.com>
-- rebuild with new gcc and binutils
+* Tue Jan 15 2002 Joe Orton <jorton@redhat.com>
+- update to 4.1.0
 
 * Mon Aug 27 2001 Nalin Dahyabhai <nalin@redhat.com>
 - add patch from pzb at scyld.com to fix the ZVAL_TRUE and ZVAL_FALSE macros
