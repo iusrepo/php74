@@ -1,15 +1,13 @@
 %define contentdir /var/www
-
-# "rpm --define 'oracle 1' ..." to enable Oracle support
-%{!?oracle:%define oracle 0}
-
-# "rpmbuild --define 'mssql 1' ..." to enable mssql support
-%{!?mssql:%define mssql 0}
+%define with_oci8 %{?_with_oci8:1}%{!?_with_oci8:0}
+%define with_mssql %{?_with_mssql:1}%{!?_with_mssql:0}
+%define with_mhash %{?_with_mhash:1}%{!?_with_mhash:0}
+%define with_imap %{?_with_imap:1}%{!?_with_imap:0}
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.4
-Release: 1.1
+Release: 7
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -19,7 +17,7 @@ Source0:  http://www.php.net/distributions/php-%{version}.tar.bz2
 Source50: php.conf
 
 Patch1: php-4.2.1-ldap-TSRM.patch
-Patch2: php-4.3.1-config.patch
+Patch2: php-4.3.4-config.patch
 Patch3: php-4.2.2-lib64.patch
 Patch4: php-4.2.2-cxx.patch
 Patch5: php-4.3.3-install.patch
@@ -32,9 +30,11 @@ Patch10: php-4.3.4-xmlrpc.patch
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.2-db4.patch
+Patch23: php-4.3.4-libgd.patch
 
 # Functional changes
 Patch30: php-4.3.1-dlopen.patch
+Patch31: php-4.3.4-easter.patch
 
 BuildRoot: %{_tmppath}/%{name}-root
 
@@ -44,9 +44,10 @@ BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, ncurses-devel, openssl-devel
 BuildRequires: zlib-devel, pcre-devel
 BuildRequires: bzip2, fileutils, perl, libtool >= 1.4.3
-Obsoletes: php-dbg, mod_php, php3, phpfi, php-manual
+Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
+Requires: php-pear
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -67,11 +68,22 @@ The php-devel package contains the files needed for building PHP
 extensions. If you need to compile your own PHP extensions, you will
 need to install this package.
 
+%package pear
+Group: Development/Languages
+Summary: PHP Extension and Application Repository Components
+Requires: php
+
+%description pear
+PEAR is a framework and distribution system for reusable PHP
+components.  This package contains a set of PHP components from the
+PEAR repository.
+
+%if %{with_imap} 
 %package imap
 Summary: An Apache module for PHP applications that use IMAP.
 Group: Development/Languages
 Requires: php = %{version}-%{release}
-Obsoletes: mod_php3-imap
+Obsoletes: mod_php3-imap, stronghold-php-imap
 BuildRequires: krb5-devel, openssl-devel, imap-devel
 
 %description imap
@@ -82,12 +94,13 @@ protocol for retrieving and uploading e-mail messages on mail
 servers. PHP is an HTML-embedded scripting language. If you need IMAP
 support for PHP applications, you will need to install this package
 and the php package.
+%endif
 
 %package ldap
 Summary: A module for PHP applications that use LDAP.
 Group: Development/Languages
 Requires: php = %{version}-%{release}
-Obsoletes: mod_php3-ldap
+Obsoletes: mod_php3-ldap, stronghold-php-ldap
 BuildRequires: cyrus-sasl-devel, openldap-devel, openssl-devel
 
 %description ldap
@@ -103,7 +116,7 @@ Summary: A module for PHP applications that use MySQL databases.
 Group: Development/Languages
 Requires: php = %{version}-%{release}
 Provides: php_database
-Obsoletes: mod_php3-mysql
+Obsoletes: mod_php3-mysql, stronghold-php-mysql
 BuildRequires: mysql-devel
 
 %description mysql
@@ -118,7 +131,7 @@ Summary: A PostgreSQL database module for PHP.
 Group: Development/Languages
 Requires: php = %{version}-%{release}
 Provides: php_database
-Obsoletes: mod_php3-pgsql
+Obsoletes: mod_php3-pgsql, stronghold-php-pgsql
 BuildRequires: krb5-devel, openssl-devel, postgresql-devel
 
 %description pgsql
@@ -135,6 +148,7 @@ Group: Development/Languages
 Requires: php = %{version}-%{release}
 Summary: A module for PHP applications that use ODBC databases.
 Provides: php_database
+Obsoletes: stronghold-php-odbc
 BuildRequires: unixODBC-devel
 
 %description odbc
@@ -146,7 +160,7 @@ HTML-embeddable scripting language. If you need ODBC support for PHP
 applications, you will need to install this package and the php
 package.
 
-%if %{oracle}
+%if %{with_oci8}
 %package oci8
 Group: Development/Languages
 Requires: php = %{version}-%{release}
@@ -158,7 +172,7 @@ The php-oci8 package contains a dynamic shared object that will add
 support for accessing OCI8 databases to PHP.
 %endif
 
-%if %{mssql}
+%if %{with_mssql}
 %package mssql
 Group: Development/Languages
 Requires: php = %{version}-%{release}, freetds
@@ -169,6 +183,18 @@ BuildRequires: freetds-devel
 %description mssql
 The mssql package contains a dynamic shared object that will add
 support for accessing MSSQL databases to PHP.
+%endif
+
+%if %{with_mhash}
+%package mhash
+Summary: A module for PHP applications that use Mhash.
+Group: Development/Languages
+Requires: php = %{version}-%{release}
+BuildRequires: mhash-devel
+
+%description mhash
+The php-mhash package is a dynamic shared object (DSO) for the Apache
+Web server that adds Mhash support to PHP.
 %endif
 
 %package snmp
@@ -219,8 +245,10 @@ support for the XML-RPC protocol to PHP.
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
+%patch23 -p1 -b .libgd
 
 %patch30 -p1 -b .dlopen
+%patch31 -p1 -b .easter
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -232,7 +260,7 @@ cp ext/gd/libgd/README gd_README
 mkdir build-cgi build-apache
 
 # Use correct libdir
-perl -pi -e 's|%{_prefix}/lib|%{_libdir}|' php.ini-dist
+perl -pi -e 's|%{_prefix}/lib|%{_libdir}|' php.ini-recommended
 
 # Remove bogus test; position of read position after fopen(, "a+")
 # is not defined by C standard, so don't presume anything.
@@ -250,19 +278,13 @@ rm -f ext/standard/tests/file/bug22414.phpt \
 
 CFLAGS="$RPM_OPT_FLAGS -Wall -fno-strict-aliasing"; export CFLAGS
 
-# Configure may or may not catch these (mostly second-order) dependencies.
-LIBS="-lfreetype -lpng -ljpeg -lz -lnsl"; export LIBS
-
 # Install extension modules in %{_libdir}/php4.
 EXTENSION_DIR=%{_libdir}/php4; export EXTENSION_DIR
 
+%if %{with_imap}
 # This pulls the static /usr/lib/libc-client.a into the IMAP extension module.
 IMAP_SHARED_LIBADD=-lc-client ; export IMAP_SHARED_LIBADD
-
-if pkg-config openssl; then
-    CFLAGS="$CFLAGS `pkg-config --cflags openssl`"
-    LIBS="$LIBS `pkg-config --libs openssl`"
-fi
+%endif
 
 # pull latest ltmain.sh, AC_PROG_LIBTOOL
 libtoolize --force --copy
@@ -275,7 +297,7 @@ touch acinclude.m4
 # Shell function to configure and build a PHP tree.
 build() {
 # bison-1.875-2 seems to produce a broken parser; workaround.
-mkdir Zend && cp ../Zend/zend_{language,ini}_parser.[ch] Zend
+mkdir Zend && cp ../Zend/zend_{language,ini}_{parser,scanner}.[ch] Zend
 ln -sf ../configure
 %configure \
 	--cache-file=../config.cache \
@@ -320,24 +342,18 @@ ln -sf ../configure
 	--enable-sockets \
 	--enable-sysvsem \
 	--enable-sysvshm \
-	--enable-discard-path \
 	--enable-track-vars \
 	--enable-trans-sid \
 	--enable-yp \
 	--enable-wddx \
-	--without-oci8 \
 	--with-pear=/usr/share/pear \
-	--with-imap=shared \
-	--with-imap-ssl \
+	%{?_with_imap:--with-imap=shared --with-imap-ssl} \
 	--with-kerberos \
 	--with-ldap=shared \
 	--with-mysql=shared,%{_prefix} \
-%if %{oracle}
-	--with-oci8=shared \
-%endif
-%if %{mssql}
-	--with-mssql=shared \
-%endif
+        %{?_with_oci8:--with-oci8=shared} \
+        %{?_with_mssql:--with-mssql=shared} \
+        %{?_with_mhash:--with-mhash=shared} \
 	--with-pgsql=shared \
 	--with-snmp=shared,%{_prefix} \
 	--with-snmp=shared \
@@ -360,8 +376,14 @@ make %{?_smp_mflags}
 # Build standalone /usr/bin/php
 pushd build-cgi
 build --enable-force-cgi-redirect
-NO_INTERACTION=1 REPORT_EXIT_STATUS=1 \
-make test || true
+# Run tests
+export NO_INTERACTION=1 REPORT_EXIT_STATUS=1
+if ! TZ= LANG= LC_ALL= make test; then
+  for f in `find .. -name \*.diff -type f -print`; do
+    echo "TEST FAILURE -- $f --"
+    cat $f
+  done
+fi
 popd
 
 # Build Apache module
@@ -384,7 +406,7 @@ popd
 
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
-install -m 644    php.ini-dist $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
+install -m 644    php.ini-recommended $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 install -m 755 -d $RPM_BUILD_ROOT%{contentdir}/icons
 install -m 644    *.gif $RPM_BUILD_ROOT%{contentdir}/icons/
 
@@ -397,9 +419,13 @@ install -m 755 -d $RPM_BUILD_ROOT/etc/httpd/conf.d
 install -m 644 $RPM_SOURCE_DIR/php.conf $RPM_BUILD_ROOT/etc/httpd/conf.d
 
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
+install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php
+install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
-for mod in pgsql mysql odbc imap ldap snmp domxml xmlrpc %{!?oracle:oci8} %{!?mssql:mssql}; do
+for mod in pgsql mysql odbc ldap snmp domxml xmlrpc \
+    %{?_with_imap:imap} %{?_with_oci8:oci8} %{?_with_mssql:mssql} \
+    %{?_with_mhash:mhash}; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -424,6 +450,11 @@ rm README.{Zeus,QNX,CVS-RULES}
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 rm files.*
 
+# remove extension= lines for packaged modules from php.ini (#112470)
+%triggerpostun -- php < 4.3.4-5
+perl -pi.rpmold -e 's/^extension=(pgsql|mysql|odbc|ldap|snmp|imap).so\n//' /etc/php.ini
+exit 0
+
 %files
 %defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
@@ -431,13 +462,18 @@ rm files.*
 %config(noreplace) %{_sysconfdir}/php.ini
 %config %{_sysconfdir}/pear.conf
 %{_bindir}/php
-%{_bindir}/pear
-%{_datadir}/pear
 %dir %{_libdir}/php4
+%dir %{_localstatedir}/lib/php
+%attr(0700,apache,apache) %dir %{_localstatedir}/lib/php/session
 %{_libdir}/httpd/modules/libphp4.so
 %config %{_sysconfdir}/httpd/conf.d/php.conf
 %dir %{_sysconfdir}/php.d
 %{contentdir}/icons/php.gif
+
+%files pear
+%defattr(-,root,root)
+%{_bindir}/pear
+%{_datadir}/pear
 
 %files devel
 %defattr(-,root,root)
@@ -453,15 +489,21 @@ rm files.*
 
 %files odbc -f files.odbc
 
-%if %{oracle}
+%if %{with_oci8}
 %files oci8 -f files.oci8
 %endif
 
-%if %{mssql}
+%if %{with_mssql}
 %files mssql -f files.mssql
 %endif
 
+%if %{with_mhash}
+%files mhash -f files.mhash
+%endif
+
+%if %{with_imap}
 %files imap -f files.imap
+%endif
 
 %files ldap -f files.ldap
 
@@ -472,6 +514,38 @@ rm files.*
 %files xmlrpc -f files.xmlrpc
 
 %changelog
+* Wed Jan 28 2004 Joe Orton <jorton@redhat.com> 4.3.4-7
+- gd fix for build with recent Freetype2 (from upstream)
+- remove easter egg (Oden Eriksson, Mandrake)
+
+* Wed Jan 21 2004 Joe Orton <jorton@redhat.com> 4.3.4-6
+- php-pear requires php
+- also remove extension=imap from php.ini in upgrade trigger
+- merge from Taroon: allow upgrade from Stronghold 4.0
+
+* Wed Jan 21 2004 Joe Orton <jorton@redhat.com> 4.3.4-5
+- add defattr for php-pear subpackage
+- restore defaults: output_buffering=Off, register_argc_argv=On
+- add trigger to handle php.ini upgrades smoothly (#112470)
+
+* Tue Jan 13 2004 Joe Orton <jorton@redhat.com> 4.3.4-4
+- conditionalize support for imap extension for the time being
+- switch /etc/php.ini to use php.ini-recommended (but leave
+  variables_order as EGPCS) (#97765)
+- set session.path to /var/lib/php/session by default (#89975)
+- own /var/lib/php{,/session} and have apache own the latter
+- split off php-pear subpackage (#83771)
+
+* Sat Dec 13 2003 Jeff Johnson <jbj@jbj.org> 4.3.4-3
+- rebuild against db-4.2.52.
+
+* Mon Dec  1 2003 Joe Orton <jorton@redhat.com> 4.3.4-2
+- rebuild for new libxslt (#110658) 
+- use --with-{mssql,oci8} for enabling extensions (#110482)
+- fix rebuild issues (Jan Visser, #110274)
+- remove hard-coded LIBS
+- conditional support for mhash (Aleksander Adamowski, #111251)
+
 * Mon Nov 10 2003 Joe Orton <jorton@redhat.com> 4.3.4-1.1
 - rebuild for FC1 updates
 
@@ -497,6 +571,9 @@ rm files.*
 - fix httpd-devel build requirement (#104341)
 - enable recode extension (#106755)
 - add workaround for #103982
+
+* Thu Sep 25 2003 Jeff Johnson <jbj@jbj.org> 4.3.3-3
+- rebuild against db-4.2.42.
 
 * Sun Sep  7 2003 Joe Orton <jorton@redhat.com> 4.3.3-2
 - don't use --enable-versioning, it depends on libtool being
