@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.9
-Release: 2
+Release: 3
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -26,6 +26,7 @@ Patch9: php-4.3.6-umask.patch
 Patch11: php-4.3.7-select.patch
 Patch13: php-4.3.8-round.patch
 Patch14: php-4.3.8-dval2lval.patch
+Patch15: php-4.3.9-phpvar.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -271,6 +272,7 @@ support for using the gd graphics library to PHP.
 %patch11 -p1 -b .select
 %patch13 -p1 -b .round
 %patch14 -p1 -b .dval2lval
+%patch15 -p1 -b .phpvar
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
@@ -530,6 +532,9 @@ rm files.*
 %endif
 
 %changelog
+* Wed Oct 20 2004 Joe Orton <jorton@redhat.com> 4.3.9-3
+- fix segfault introduced upstream in CAN-2004-0958 patch
+
 * Mon Sep 27 2004 Joe Orton <jorton@redhat.com> 4.3.9-2
 - update to 4.3.9 (#133467, Robert Scheck)
 - use new RTLD_DEEPBIND to load extension modules
