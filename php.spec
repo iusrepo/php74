@@ -8,8 +8,8 @@
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
-Version: 4.3.3
-Release: 6
+Version: 4.3.4
+Release: 1.1
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -26,9 +26,10 @@ Patch5: php-4.3.3-install.patch
 Patch6: php-4.3.1-tests.patch
 Patch7: php-4.3.2-libtool15.patch
 Patch8: php-4.3.3-miscfix.patch
+Patch9: php-4.3.4-setenv.patch
+Patch10: php-4.3.4-xmlrpc.patch
 
 # Fixes for extension modules
-Patch20: php-4.2.2-apache2.patch
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.2-db4.patch
 
@@ -213,15 +214,19 @@ support for the XML-RPC protocol to PHP.
 %patch6 -p1 -b .tests
 %patch7 -p1 -b .libtool15
 %patch8 -p1 -b .miscfix
+%patch9 -p1 -b .setenv
+%patch10 -p1 -b .xmlrpc
 
-## %patch20 -p1 -b .ap2
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
 
 %patch30 -p1 -b .dlopen
 
-# Prevent %doc confusion over LICENSE & Zend/LICENSE
+# Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
+cp TSRM/LICENSE TSRM_LICENSE
+cp regex/COPYRIGHT regex_COPYRIGHT
+cp ext/gd/libgd/README gd_README
 
 # Source is built twice: once for /usr/bin/php, once for the Apache DSO.
 mkdir build-cgi build-apache
@@ -243,7 +248,7 @@ rm -f ext/standard/tests/file/bug22414.phpt \
 
 %build
 
-CFLAGS="$RPM_OPT_FLAGS -fPIC"; export CFLAGS
+CFLAGS="$RPM_OPT_FLAGS -Wall -fno-strict-aliasing"; export CFLAGS
 
 # Configure may or may not catch these (mostly second-order) dependencies.
 LIBS="-lfreetype -lpng -ljpeg -lz -lnsl"; export LIBS
@@ -412,6 +417,9 @@ rm -rf $RPM_BUILD_ROOT%{_datadir}/pear/tests
 rm -f $RPM_BUILD_ROOT%{_libdir}/php4/*.a \
       $RPM_BUILD_ROOT%{_bindir}/{phptar,pearize}
 
+# Remove irrelevant docs
+rm README.{Zeus,QNX,CVS-RULES}
+
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 rm files.*
@@ -419,7 +427,7 @@ rm files.*
 %files
 %defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
-%doc Zend/ZEND_*
+%doc Zend/ZEND_* gd_README TSRM_LICENSE regex_COPYRIGHT
 %config(noreplace) %{_sysconfdir}/php.ini
 %config %{_sysconfdir}/pear.conf
 %{_bindir}/php
@@ -464,6 +472,14 @@ rm files.*
 %files xmlrpc -f files.xmlrpc
 
 %changelog
+* Mon Nov 10 2003 Joe Orton <jorton@redhat.com> 4.3.4-1.1
+- rebuild for FC1 updates
+
+* Mon Nov 10 2003 Joe Orton <jorton@redhat.com> 4.3.4-1
+- update to 4.3.4
+- include all licence files
+- libxmlrpc fixes
+
 * Mon Oct 20 2003 Joe Orton <jorton@redhat.com> 4.3.3-6
 - use bundled libgd (#107407)
 - remove manual: up-to-date manual sources are no longer DFSG-free;
