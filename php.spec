@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.8
-Release: 5
+Release: 6
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -26,6 +26,7 @@ Patch9: php-4.3.6-umask.patch
 Patch10: php-4.3.7-handler.patch
 Patch11: php-4.3.7-select.patch
 Patch12: php-4.3.8-gottest.patch
+Patch13: php-4.3.8-round.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -44,7 +45,7 @@ BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: zlib-devel, pcre-devel, smtpdaemon
-BuildRequires: bzip2, fileutils, perl, libtool >= 1.4.3
+BuildRequires: bzip2, fileutils, file, perl, libtool >= 1.4.3
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
@@ -253,7 +254,7 @@ support for using the ncurses terminal output interfaces.
 Summary: A module for PHP applications for using the gd graphics library
 Group: Development/Languages
 Requires: php = %{version}-%{release}
-BuildRequires: gd-devel, freetype-devel
+BuildRequires: freetype-devel
 
 %description gd
 The php-mbstring package contains a dynamic shared object that will add
@@ -282,6 +283,7 @@ support for using the OpenSSL toolkit to PHP.
 %patch10 -p1 -b .handler
 %patch11 -p1 -b .select
 %patch12 -p1 -b .gottest
+%patch13 -p1 -b .round
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .db4
@@ -548,6 +550,12 @@ rm files.*
 %endif
 
 %changelog
+* Thu Aug 19 2004 Joe Orton <jorton@redhat.com> 4.3.8-6
+- fix phpize for libdir=lib64
+- "fix" round() fudging for recent gcc on x86
+- drop unnecessary gd-devel build dependency again
+- use RTLD_GLOBAL to load extensions again (#127518)
+
 * Thu Aug 19 2004 Joe Orton <jorton@redhat.com> 4.3.8-5
 - add fix for bundled libgd symbol conflicts (#124530)
 - enable mime_magic extension and Require: file (#130276)
