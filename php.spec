@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.3
-Release: 2
+Release: 3
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -30,6 +30,7 @@ Patch13: php-5.0.2-phpize64.patch
 Patch14: php-5.0.3-sprintf.patch
 Patch15: php-5.0.3-zstrtod.patch
 Patch16: php-5.0.3-gdheaders.patch
+Patch17: php-5.0.3-gcc4.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -51,9 +52,6 @@ Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 Requires: php-pear, file >= 4.0
-
-### temporary workaround for #147564
-BuildRequires: sqlite3-devel
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -308,6 +306,7 @@ support for using the gd graphics library to PHP.
 %patch14 -p1 -b .sprintf
 %patch15 -p1 -b .zstrtod
 %patch16 -p1 -b .gdheaders
+%patch17 -p1 -b .gcc4
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .libmbfl
@@ -351,6 +350,8 @@ touch acinclude.m4
 
 # Regenerate configure scripts (patches change config.m4's)
 ./buildconf --force
+
+export CC=gcc4
 
 # Shell function to configure and build a PHP tree.
 build() {
@@ -588,6 +589,9 @@ rm files.*
 %endif
 
 %changelog
+* Fri Feb 18 2005 Joe Orton <jorton@redhat.com> 5.0.3-3
+- fix build with GCC 4
+
 * Wed Feb  9 2005 Joe Orton <jorton@redhat.com> 5.0.3-2
 - install the ext/gd headers (#145891)
 - enable pcntl extension in /usr/bin/php (#142903)
