@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 4.3.8
-Release: 7
+Release: 8
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -539,8 +539,12 @@ rm files.*
 %endif
 
 %changelog
+* Thu Aug 26 2004 Joe Orton <jorton@redhat.com> 4.3.8-8
+- fix -select patch bug which break stream_select on s390
+- add an FD_SETSIZE check to php_sock_stream_wait_for_data
+
 * Thu Aug 26 2004 Joe Orton <jorton@redhat.com> 4.3.8-7
-- make openssl extension built-in again (#124582)
+- make openssl extension built-in again (#130953)
 - disable bug16069 test
 
 * Thu Aug 19 2004 Joe Orton <jorton@redhat.com> 4.3.8-6
