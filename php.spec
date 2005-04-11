@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.4
-Release: 2
+Release: 3
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -370,7 +370,7 @@ ln -sf ../configure
 	--with-config-file-scan-dir=%{_sysconfdir}/php.d \
 	--enable-force-cgi-redirect \
 	--disable-debug \
-	--enable-pic \
+	--with-pic \
 	--disable-rpath \
 	--enable-inline-optimization \
 	--with-bz2 \
@@ -598,6 +598,9 @@ rm files.*
 %endif
 
 %changelog
+* Mon Apr 11 2005 Joe Orton <jorton@redhat.com> 5.0.4-3
+- build shared objects as PIC (#154195)
+
 * Mon Apr  4 2005 Joe Orton <jorton@redhat.com> 5.0.4-2
 - fix PEAR installation and bundle PEAR DB-1.7.5 package
 
