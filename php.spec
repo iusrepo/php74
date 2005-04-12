@@ -39,6 +39,7 @@ Patch17: php-5.0.3-gcc4.patch
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
+Patch23: php-5.0.4-bug32282.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -315,6 +316,7 @@ support for using the gd graphics library to PHP.
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
+%patch23 -p1 -b .bug32282
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
