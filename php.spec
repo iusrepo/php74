@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.4
-Release: 3
+Release: 4
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -15,6 +15,11 @@ URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 Source10: pear-RunTest.php
 Source20: http://pear.php.net/get/DB-1.7.5.tgz
+Source21: http://pear.php.net/get/HTTP-1.3.5.tgz
+Source22: http://pear.php.net/get/Mail-1.1.4.tgz
+Source23: http://pear.php.net/get/XML_Parser-1.2.6.tgz
+Source24: http://pear.php.net/get/Net_Socket-1.0.6.tgz
+Source25: http://pear.php.net/get/Net_SMTP-1.2.6.tgz
 Source50: php.conf
 
 Patch2: php-5.0.1-config.patch
@@ -33,6 +38,7 @@ Patch17: php-5.0.3-gcc4.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
+Patch22: php-4.3.11-shutdown.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -308,6 +314,7 @@ support for using the gd graphics library to PHP.
 %patch17 -p1 -b .gcc4
 
 %patch21 -p1 -b .odbc
+%patch22 -p1 -b .shutdown
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -335,12 +342,11 @@ rm -f ext/standard/tests/file/bug22414.phpt \
 # Missing file in 5.0.4 PEAR bundle:
 cp $RPM_SOURCE_DIR/pear-RunTest.php pear/PEAR/RunTest.php
 
-# Unpack PEAR DB package
-pushd pear
- tar xzf %{SOURCE20}
- mv DB-* DB
- sed '/<file /s,name=",name="DB/,' package.xml > package-DB.xml
- rm package.xml
+# Add some standard PEAR packages which are no longer shipped upstream
+pushd pear/packages
+  cp %{SOURCE20} %{SOURCE21} %{SOURCE22} %{SOURCE23} \
+     %{SOURCE24} %{SOURCE25} .
+  gunzip *.tgz
 popd
 
 : Build for oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash} ibase=%{with_ibase}
@@ -598,6 +604,11 @@ rm files.*
 %endif
 
 %changelog
+* Tue Apr 12 2005 Joe Orton <jorton@redhat.com> 5.0.4-4
+- bundle from PEAR: HTTP, Mail, XML_Parser, Net_Socket, Net_SMTP
+- snmp: disable MSHUTDOWN function to prevent error_log noise (#153988)
+- mysqli: add fix for crash on x86_64 (Georg Richter, upstream #32282)
+
 * Mon Apr 11 2005 Joe Orton <jorton@redhat.com> 5.0.4-3
 - build shared objects as PIC (#154195)
 
