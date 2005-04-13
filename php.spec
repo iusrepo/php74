@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.4
-Release: 5
+Release: 6
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -432,8 +432,7 @@ fi
 make %{?_smp_mflags}
 }
 
-# Build standalone /usr/bin/php and shared extension modules that
-# do not need to be built twice.
+# Build /usr/bin/php-cgi with the CGI SAPI, and all the shared extensions
 pushd build-cgi
 build --enable-force-cgi-redirect \
       --enable-pcntl \
@@ -458,7 +457,7 @@ build --enable-force-cgi-redirect \
       --with-xsl=shared,%{_prefix}
 popd
 
-# Build Apache module
+# Build Apache module, and the CLI SAPI, /usr/bin/php
 pushd build-apache
 build --with-apxs2=%{_sbindir}/apxs \
       --without-mysql --without-gd \
@@ -466,8 +465,8 @@ build --with-apxs2=%{_sbindir}/apxs \
 popd
 
 %check
-cd build-cgi
-# Run tests
+cd build-apache
+# Run tests, using the CLI SAPI
 export NO_INTERACTION=1 REPORT_EXIT_STATUS=1 MALLOC_CHECK_=2
 unset TZ LANG LC_ALL
 if ! make test; then
@@ -485,14 +484,16 @@ unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
-# Install from CGI tree
+# Install everything from the CGI SAPI build
 pushd build-cgi
 make install INSTALL_ROOT=$RPM_BUILD_ROOT 
+mv $RPM_BUILD_ROOT%{_bindir}/php $RPM_BUILD_ROOT%{_bindir}/php-cgi
 popd
 
-# Install the Apache module
+# Install the Apache module and CLI
 pushd build-apache
 make install-sapi INSTALL_ROOT=$RPM_BUILD_ROOT
+make install-cli INSTALL_ROOT=$RPM_BUILD_ROOT
 popd
 
 # Install the default configuration file and icons
@@ -552,9 +553,11 @@ rm files.*
 %defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
 %doc Zend/ZEND_* gd_README TSRM_LICENSE regex_COPYRIGHT
-%config(noreplace) %{_sysconfdir}/php.ini
+%config %{_sysconfdir}/php.ini
 %config %{_sysconfdir}/pear.conf
 %{_bindir}/php
+%{_bindir}/php-cgi
+%{_mandir}/man?/*
 %dir %{_libdir}/php
 %dir %{_libdir}/php/modules
 %dir %{_localstatedir}/lib/php
@@ -604,6 +607,12 @@ rm files.*
 %endif
 
 %changelog
+* Wed Apr 13 2005 Joe Orton <jorton@redhat.com> 5.0.4-6
+- build /usr/bin/php with the CLI SAPI, and add /usr/bin/php-cgi,
+  built with the CGI SAPI (thanks to Edward Rudd, #137704)
+- add php(1) man page for CLI
+- fix more test cases to use -n when invoking php
+
 * Wed Apr 13 2005 Joe Orton <jorton@redhat.com> 5.0.4-5
 - rebuild for new libpq soname
 
