@@ -1,0 +1,79 @@
+
+Pass -n to php when running tests, to ensure that the system inidir
+and hence the installed (old) shared extensions are not loaded.
+
+- when running run-tests.php itself
+- passed to run-tests.php to ensure it's passed when running each test case
+- in cases where the PHP executable is run by a test case
+
+--- php-5.0.4/ext/xml/tests/bug32001.phpt.tests
++++ php-5.0.4/ext/xml/tests/bug32001.phpt
+@@ -151,7 +151,7 @@
+ 	new testcase("GB2312",    1),
+ );
+ 
+-preg_match("/^libxml2 Version.*\$/im", `$_ENV[TEST_PHP_EXECUTABLE] -i`, $match);
++preg_match("/^libxml2 Version.*\$/im", `$_ENV[TEST_PHP_EXECUTABLE] -i -n`, $match);
+ 
+ echo $match[0], "\n";
+ 
+--- php-5.0.4/ext/standard/tests/file/proc_open01.phpt.tests
++++ php-5.0.4/ext/standard/tests/file/proc_open01.phpt
+@@ -9,7 +9,7 @@
+ 	die("no php executable defined");
+ } 
+ $proc = proc_open(
+-	$php,
++	$php . " -n",
+ 	array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')),
+ 	$pipes
+ );
+--- php-5.0.4/ext/standard/tests/file/bug26938.phpt.tests
++++ php-5.0.4/ext/standard/tests/file/bug26938.phpt
+@@ -5,7 +5,7 @@
+ $out = array();
+ $status = -1;
+ $php = getenv('TEST_PHP_EXECUTABLE');
+-exec($php . ' -r \'' 
++exec($php . ' -n -r \'' 
+      . '$lengths = array(10,20000,10000,5,10000,3);'
+      . 'foreach($lengths as $length) {'
+      . '  for($i=0;$i<$length;$i++) print chr(65+$i % 27);'
+--- php-5.0.4/ext/standard/tests/file/bug26615.phpt.tests
++++ php-5.0.4/ext/standard/tests/file/bug26615.phpt
+@@ -4,7 +4,7 @@
+ <?php
+ $out = array();
+ $status = -1;
+-exec($_ENV['TEST_PHP_EXECUTABLE'].' -r \'for($i=1;$i<=5000;$i++) print "$i\n";\' | tr \'\n\' \' \'', $out, $status);
++exec($_ENV['TEST_PHP_EXECUTABLE'].' -n -r \'for($i=1;$i<=5000;$i++) print "$i\n";\' | tr \'\n\' \' \'', $out, $status);
+ print_r($out);
+ ?>
+ --EXPECT--
+--- php-5.0.4/tests/lang/bug21800.phpt.tests
++++ php-5.0.4/tests/lang/bug21800.phpt
+@@ -5,7 +5,7 @@
+ --FILE--
+ <?php
+ $exe = getenv('TEST_PHP_EXECUTABLE');
+-$fh = popen("$exe -a", 'w');
++$fh = popen("$exe -a -n", 'w');
+ if ($fh !== false) {
+ 	fwrite($fh, "<?php echo ':test:'; ?>\n\n");
+ 	fclose($fh);
+--- php-5.0.4/Makefile.global.tests
++++ php-5.0.4/Makefile.global
+@@ -51,11 +51,11 @@
+ install-su: install-pear install-tester
+ 
+ test: 
+-	-@if test -x $(SAPI_CLI_PATH) && test ! -z $(SAPI_CLI_PATH); then \
++	@if test -x $(SAPI_CLI_PATH) && test ! -z $(SAPI_CLI_PATH); then \
+ 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
+ 		TEST_PHP_SRCDIR=$(top_srcdir) \
+ 		CC="$(CC)" \
+-			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' $(top_srcdir)/run-tests.php $(TESTS); \
++			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -n -d 'output_buffering=0' $(top_srcdir)/run-tests.php -n $(TESTS); \
+ 	else \
+ 		echo "ERROR: Cannot run tests without CLI sapi."; \
+ 	fi

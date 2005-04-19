@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.4
-Release: 6
+Release: 7
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -26,7 +26,6 @@ Patch2: php-5.0.1-config.patch
 Patch3: php-5.0.4-lib64.patch
 Patch4: php-4.2.2-cxx.patch
 Patch5: php-4.3.3-install.patch
-Patch6: php-4.3.1-tests.patch
 Patch7: php-4.3.2-libtool15.patch
 Patch9: php-4.3.6-umask.patch
 Patch10: php-5.0.2-gdnspace.patch
@@ -45,6 +44,11 @@ Patch23: php-5.0.4-bug32282.patch
 Patch30: php-5.0.4-dlopen.patch
 Patch31: php-5.0.0-easter.patch
 
+# Fixes for tests
+Patch50: php-5.0.4-tests-dashn.patch
+Patch51: php-5.0.4-tests-wddx.patch
+Patch52: php-5.0.4-tests-sunfunc.patch
+
 BuildRoot: %{_tmppath}/%{name}-root
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
@@ -52,7 +56,7 @@ BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon
-BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3
+BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
@@ -299,13 +303,30 @@ BuildRequires: gd-devel, freetype-devel
 The php-gd package contains a dynamic shared object that will add
 support for using the gd graphics library to PHP.
 
+%package bcmath
+Summary: A module for PHP applications for using the bcmath library
+Group: Development/Languages
+Requires: php = %{version}-%{release}
+
+%description bcmath
+The php-bcmath package contains a dynamic shared object that will add
+support for using the bcmath library to PHP.
+
+%package dba
+Summary: A database abstraction layer module for PHP applications
+Group: Development/Languages
+Requires: php = %{version}-%{release}
+
+%description dba
+The php-dba package contains a dynamic shared object that will add
+support for using the DBA database abstraction layer to PHP.
+
 %prep
 %setup -q
 %patch2 -p1 -b .config
 %patch3 -p1 -b .lib64
 %patch4 -p1 -b .cxx
 %patch5 -p1 -b .install
-%patch6 -p1 -b .tests
 %patch7 -p1 -b .libtool15
 %patch9 -p1 -b .umask
 %patch10 -p1 -b .gdnspace
@@ -320,6 +341,10 @@ support for using the gd graphics library to PHP.
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
+
+%patch50 -p1 -b .tests-dashn
+%patch51 -p1 -b .tests-wddx
+%patch52 -p1 -b .tests-sunfunc
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -398,7 +423,6 @@ ln -sf ../configure
         --with-pcre-regex=%{_prefix} \
 	--with-zlib \
 	--with-layout=GNU \
-	--enable-bcmath \
 	--enable-exif \
 	--enable-ftp \
 	--enable-magic-quotes \
@@ -441,6 +465,8 @@ build --enable-force-cgi-redirect \
       --enable-mbregex \
       --with-ncurses=shared \
       --with-gd=shared \
+      --enable-bcmath=shared \
+      --enable-dba=shared \
       --with-xmlrpc=shared \
       --with-ldap=shared \
       --with-mysql=shared,%{_prefix} \
@@ -461,7 +487,8 @@ popd
 pushd build-apache
 build --with-apxs2=%{_sbindir}/apxs \
       --without-mysql --without-gd \
-      --without-odbc --disable-dom
+      --without-odbc --disable-dom \
+      --disable-dba
 popd
 
 %check
@@ -516,7 +543,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
-    mbstring ncurses gd dom xsl soap \
+    mbstring ncurses gd dom xsl soap bcmath dba \
     %{?_with_oci8:oci8} %{?_with_mssql:mssql} %{?_with_mhash:mhash} \
     %{?_with_ibase:interbase}; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
@@ -592,6 +619,8 @@ rm files.*
 %files ncurses -f files.ncurses
 %files gd -f files.gd
 %files soap -f files.soap
+%files bcmath -f files.bcmath
+%files dba -f files.dba
 
 %if %{with_oci8}
 %files oci8 -f files.oci8
@@ -607,6 +636,10 @@ rm files.*
 %endif
 
 %changelog
+* Wed Apr 13 2005 Joe Orton <jorton@redhat.com> 5.0.4-7
+- split out dba and bcmath extensions into subpackages
+- BuildRequire gcc-c++ to avoid AC_PROG_CXX{,CPP} failure (#155221)
+
 * Wed Apr 13 2005 Joe Orton <jorton@redhat.com> 5.0.4-6
 - build /usr/bin/php with the CLI SAPI, and add /usr/bin/php-cgi,
   built with the CGI SAPI (thanks to Edward Rudd, #137704)
