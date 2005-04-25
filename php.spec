@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.4
-Release: 7
+Release: 8
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -405,7 +405,6 @@ ln -sf ../configure
 	--with-pic \
 	--disable-rpath \
 	--with-bz2 \
-	--with-db4=%{_prefix} \
 	--with-curl \
 	--with-exec-dir=%{_bindir} \
 	--with-freetype-dir=%{_prefix} \
@@ -466,7 +465,7 @@ build --enable-force-cgi-redirect \
       --with-ncurses=shared \
       --with-gd=shared \
       --enable-bcmath=shared \
-      --enable-dba=shared \
+      --enable-dba=shared --with-db4=%{_prefix} \
       --with-xmlrpc=shared \
       --with-ldap=shared \
       --with-mysql=shared,%{_prefix} \
@@ -637,6 +636,9 @@ rm files.*
 %endif
 
 %changelog
+* Mon Apr 25 2005 Joe Orton <jorton@redhat.com> 5.0.4-8
+- prevent build of builtin dba as well as shared extension
+
 * Wed Apr 13 2005 Joe Orton <jorton@redhat.com> 5.0.4-7
 - split out dba and bcmath extensions into subpackages
 - BuildRequire gcc-c++ to avoid AC_PROG_CXX{,CPP} failure (#155221)
