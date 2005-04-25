@@ -14,7 +14,7 @@ URL: http://www.php.net/
 
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 Source10: pear-RunTest.php
-Source20: http://pear.php.net/get/DB-1.7.5.tgz
+Source20: http://pear.php.net/get/DB-1.7.6.tgz
 Source21: http://pear.php.net/get/HTTP-1.3.5.tgz
 Source22: http://pear.php.net/get/Mail-1.1.4.tgz
 Source23: http://pear.php.net/get/XML_Parser-1.2.6.tgz
@@ -480,7 +480,8 @@ build --enable-force-cgi-redirect \
       --with-pgsql=shared \
       --with-snmp=shared,%{_prefix} \
       --enable-soap=shared \
-      --with-xsl=shared,%{_prefix}
+      --with-xsl=shared,%{_prefix} \
+      --enable-fastcgi
 popd
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
@@ -639,6 +640,8 @@ rm files.*
 * Wed Apr 13 2005 Joe Orton <jorton@redhat.com> 5.0.4-7
 - split out dba and bcmath extensions into subpackages
 - BuildRequire gcc-c++ to avoid AC_PROG_CXX{,CPP} failure (#155221)
+- pear: update to DB-1.7.6
+- enable FastCGI support in /usr/bin/php-cgi (#149596)
 
 * Wed Apr 13 2005 Joe Orton <jorton@redhat.com> 5.0.4-6
 - build /usr/bin/php with the CLI SAPI, and add /usr/bin/php-cgi,
