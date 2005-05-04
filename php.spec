@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.4
-Release: 8
+Release: 9
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -34,11 +34,13 @@ Patch13: php-5.0.2-phpize64.patch
 Patch14: php-5.0.3-sprintf.patch
 Patch16: php-5.0.3-gdheaders.patch
 Patch17: php-5.0.3-gcc4.patch
+Patch18: php-5.0.4-streamcopy.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
 Patch23: php-5.0.4-bug32282.patch
+Patch24: php-5.0.4-xmldom.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -334,10 +336,12 @@ support for using the DBA database abstraction layer to PHP.
 %patch13 -p1 -b .phpize64
 %patch16 -p1 -b .gdheaders
 %patch17 -p1 -b .gcc4
+%patch18 -p1 -b .streamcopy
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
 %patch23 -p1 -b .bug32282
+%patch24 -p1 -b .xmldom
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -426,8 +430,7 @@ ln -sf ../configure
 	--enable-ftp \
 	--enable-magic-quotes \
 	--enable-sockets \
-	--enable-sysvsem \
-	--enable-sysvshm \
+	--enable-sysvsem --enable-sysvshm --enable-sysvmsg \
 	--enable-track-vars \
 	--enable-trans-sid \
 	--enable-yp \
@@ -515,12 +518,13 @@ unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 pushd build-cgi
 make install INSTALL_ROOT=$RPM_BUILD_ROOT 
 mv $RPM_BUILD_ROOT%{_bindir}/php $RPM_BUILD_ROOT%{_bindir}/php-cgi
+# Install the CLI SAPI as /usr/bin/php
+make install-cli INSTALL_ROOT=$RPM_BUILD_ROOT
 popd
 
-# Install the Apache module and CLI
+# Install the Apache module
 pushd build-apache
 make install-sapi INSTALL_ROOT=$RPM_BUILD_ROOT
-make install-cli INSTALL_ROOT=$RPM_BUILD_ROOT
 popd
 
 # Install the default configuration file and icons
@@ -636,6 +640,12 @@ rm files.*
 %endif
 
 %changelog
+* Tue May  3 2005 Joe Orton <jorton@redhat.com> 5.0.4-9
+- build simplexml_import_dom even with shared dom (#156434)
+- prevent truncation of copied files to ~2Mb (#155916)
+- install /usr/bin/php from CLI build alongside CGI
+- enable sysvmsg extension (#142988)
+
 * Mon Apr 25 2005 Joe Orton <jorton@redhat.com> 5.0.4-8
 - prevent build of builtin dba as well as shared extension
 
