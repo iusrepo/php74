@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.4
-Release: 9
+Release: 10
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -26,6 +26,7 @@ Patch2: php-5.0.1-config.patch
 Patch3: php-5.0.4-lib64.patch
 Patch4: php-4.2.2-cxx.patch
 Patch5: php-4.3.3-install.patch
+Patch6: php-5.0.4-norpath.patch
 Patch7: php-4.3.2-libtool15.patch
 Patch9: php-4.3.6-umask.patch
 Patch10: php-5.0.2-gdnspace.patch
@@ -329,6 +330,7 @@ support for using the DBA database abstraction layer to PHP.
 %patch3 -p1 -b .lib64
 %patch4 -p1 -b .cxx
 %patch5 -p1 -b .install
+%patch6 -p1 -b .norpath
 %patch7 -p1 -b .libtool15
 %patch9 -p1 -b .umask
 %patch10 -p1 -b .gdnspace
@@ -640,6 +642,9 @@ rm files.*
 %endif
 
 %changelog
+* Fri May  6 2005 Joe Orton <jorton@redhat.com> 5.0.4-10
+- disable RPATHs in shared extensions (#156974)
+
 * Tue May  3 2005 Joe Orton <jorton@redhat.com> 5.0.4-9
 - build simplexml_import_dom even with shared dom (#156434)
 - prevent truncation of copied files to ~2Mb (#155916)
