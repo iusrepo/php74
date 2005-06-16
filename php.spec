@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.4
-Release: 10
+Release: 11
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -42,6 +42,7 @@ Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
 Patch23: php-5.0.4-bug32282.patch
 Patch24: php-5.0.4-xmldom.patch
+Patch25: php-5.0.4-ldap.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -344,6 +345,7 @@ support for using the DBA database abstraction layer to PHP.
 %patch22 -p1 -b .shutdown
 %patch23 -p1 -b .bug32282
 %patch24 -p1 -b .xmldom
+%patch25 -p1 -b .ldap
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -392,7 +394,7 @@ cat `aclocal --print-ac-dir`/libtool.m4 > build/libtool.m4
 # Regenerate configure scripts (patches change config.m4's)
 ./buildconf --force
 
-CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"; export CFLAGS
+CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign"; export CFLAGS
 
 # Install extension modules in %{_libdir}/php/modules.
 EXTENSION_DIR=%{_libdir}/php/modules; export EXTENSION_DIR
@@ -642,6 +644,9 @@ rm files.*
 %endif
 
 %changelog
+* Thu Jun 16 2005 Joe Orton <jorton@redhat.com> 5.0.4-11
+- ldap: restore ldap_start_tls() function
+
 * Fri May  6 2005 Joe Orton <jorton@redhat.com> 5.0.4-10
 - disable RPATHs in shared extensions (#156974)
 
