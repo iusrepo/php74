@@ -609,7 +609,6 @@ rm files.*
 %defattr(-,root,root)
 %{_bindir}/php-config
 %{_bindir}/phpize
-%{_bindir}/phpextdist
 %{_includedir}/php
 %{_libdir}/php/build
 
