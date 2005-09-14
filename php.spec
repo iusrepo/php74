@@ -6,8 +6,8 @@
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
-Version: 5.0.4
-Release: 11
+Version: 5.0.5
+Release: 3
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -15,11 +15,12 @@ URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 Source10: pear-RunTest.php
 Source20: http://pear.php.net/get/DB-1.7.6.tgz
-Source21: http://pear.php.net/get/HTTP-1.3.5.tgz
-Source22: http://pear.php.net/get/Mail-1.1.4.tgz
+Source21: http://pear.php.net/get/HTTP-1.3.6.tgz
+Source22: http://pear.php.net/get/Mail-1.1.8.tgz
 Source23: http://pear.php.net/get/XML_Parser-1.2.6.tgz
 Source24: http://pear.php.net/get/Net_Socket-1.0.6.tgz
 Source25: http://pear.php.net/get/Net_SMTP-1.2.6.tgz
+Source26: http://pear.php.net/get/XML_RPC-1.4.1.tgz
 Source50: php.conf
 
 Patch2: php-5.0.1-config.patch
@@ -34,15 +35,14 @@ Patch11: php-4.3.8-round.patch
 Patch13: php-5.0.2-phpize64.patch
 Patch14: php-5.0.3-sprintf.patch
 Patch16: php-5.0.3-gdheaders.patch
-Patch17: php-5.0.3-gcc4.patch
-Patch18: php-5.0.4-streamcopy.patch
+Patch17: php-5.0.4-bug34435.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
-Patch23: php-5.0.4-bug32282.patch
 Patch24: php-5.0.4-xmldom.patch
 Patch25: php-5.0.4-ldap.patch
+Patch26: php-5.0.4-gd.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -79,7 +79,7 @@ the embedded PHP language in Web pages.
 %package devel
 Group: Development/Libraries
 Summary: Files needed for building PHP extensions.
-Requires: php = %{version}-%{release}
+Requires: php = %{version}-%{release}, autoconf, automake
 
 %description devel
 The php-devel package contains the files needed for building PHP
@@ -338,12 +338,10 @@ support for using the DBA database abstraction layer to PHP.
 %patch11 -p1 -b .round
 %patch13 -p1 -b .phpize64
 %patch16 -p1 -b .gdheaders
-%patch17 -p1 -b .gcc4
-%patch18 -p1 -b .streamcopy
+%patch17 -p1 -b .bug34435
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
-%patch23 -p1 -b .bug32282
 %patch24 -p1 -b .xmldom
 %patch25 -p1 -b .ldap
 
@@ -374,13 +372,13 @@ rm -f ext/standard/tests/file/bug21131.phpt
 rm -f ext/standard/tests/file/bug22414.phpt \
       ext/iconv/tests/bug16069.phpt
 
-# Missing file in 5.0.4 PEAR bundle:
-cp $RPM_SOURCE_DIR/pear-RunTest.php pear/PEAR/RunTest.php
+# Replaced by XML_RPC 1.4.1 upgrade:
+rm -f pear/packages/XML_RPC-1.4.0.tgz
 
 # Add some standard PEAR packages which are no longer shipped upstream
 pushd pear/packages
   cp %{SOURCE20} %{SOURCE21} %{SOURCE22} %{SOURCE23} \
-     %{SOURCE24} %{SOURCE25} .
+     %{SOURCE24} %{SOURCE25} %{SOURCE26} .
   gunzip *.tgz
 popd
 
@@ -448,7 +446,7 @@ ln -sf ../configure
 	--enable-calendar \
 	--enable-dbx \
 	--enable-dio \
-        --with-mime-magic=%{_datadir}/file/magic.mime \
+        --with-mime-magic=%{_sysconfdir}/httpd/conf/magic \
         --without-sqlite \
         --with-libxml-dir=%{_prefix} \
 	--with-xml \
@@ -644,6 +642,12 @@ rm files.*
 %endif
 
 %changelog
+* Wed Sep 14 2005 Joe Orton <jorton@redhat.com> 5.0.5-3
+- update to 5.0.5
+- add fix for upstream #34435
+- devel: require autoconf, automake (#159283)
+- pear: update to HTTP-1.3.6, Mail-1.1.8, Net_SMTP-1.2.7, XML_RPC-1.4.1
+
 * Thu Jun 16 2005 Joe Orton <jorton@redhat.com> 5.0.4-11
 - ldap: restore ldap_start_tls() function
 
