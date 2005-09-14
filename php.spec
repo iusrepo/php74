@@ -13,13 +13,12 @@ Group: Development/Languages
 URL: http://www.php.net/
 
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
-Source10: pear-RunTest.php
 Source20: http://pear.php.net/get/DB-1.7.6.tgz
 Source21: http://pear.php.net/get/HTTP-1.3.6.tgz
 Source22: http://pear.php.net/get/Mail-1.1.8.tgz
 Source23: http://pear.php.net/get/XML_Parser-1.2.6.tgz
 Source24: http://pear.php.net/get/Net_Socket-1.0.6.tgz
-Source25: http://pear.php.net/get/Net_SMTP-1.2.6.tgz
+Source25: http://pear.php.net/get/Net_SMTP-1.2.7.tgz
 Source26: http://pear.php.net/get/XML_RPC-1.4.1.tgz
 Source50: php.conf
 
@@ -344,6 +343,7 @@ support for using the DBA database abstraction layer to PHP.
 %patch22 -p1 -b .shutdown
 %patch24 -p1 -b .xmldom
 %patch25 -p1 -b .ldap
+%patch26 -p1 -b .gd
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -647,6 +647,7 @@ rm files.*
 - add fix for upstream #34435
 - devel: require autoconf, automake (#159283)
 - pear: update to HTTP-1.3.6, Mail-1.1.8, Net_SMTP-1.2.7, XML_RPC-1.4.1
+- fix imagettftext et al (upstream, #161001)
 
 * Thu Jun 16 2005 Joe Orton <jorton@redhat.com> 5.0.4-11
 - ldap: restore ldap_start_tls() function
