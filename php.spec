@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.5
-Release: 4
+Release: 5
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -15,11 +15,11 @@ URL: http://www.php.net/
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 Source20: http://pear.php.net/get/DB-1.7.6.tgz
 Source21: http://pear.php.net/get/HTTP-1.3.6.tgz
-Source22: http://pear.php.net/get/Mail-1.1.8.tgz
-Source23: http://pear.php.net/get/XML_Parser-1.2.6.tgz
+Source22: http://pear.php.net/get/Mail-1.1.9.tgz
+Source23: http://pear.php.net/get/XML_Parser-1.2.7.tgz
 Source24: http://pear.php.net/get/Net_Socket-1.0.6.tgz
 Source25: http://pear.php.net/get/Net_SMTP-1.2.7.tgz
-Source26: http://pear.php.net/get/XML_RPC-1.4.1.tgz
+Source26: http://pear.php.net/get/XML_RPC-1.4.4.tgz
 Source50: php.conf
 
 Patch2: php-5.0.1-config.patch
@@ -641,6 +641,9 @@ rm files.*
 %endif
 
 %changelog
+* Mon Nov  7 2005 Joe Orton <jorton@redhat.com> 5.0.5-5
+- pear: update to XML_RPC 1.4.4, XML_Parser 1.2.7, Mail 1.1.9 (#172528)
+
 * Tue Nov  1 2005 Joseph Orton <jorton@redhat.com> 5.0.5-4
 - rebuild for new libnetsnmp
 

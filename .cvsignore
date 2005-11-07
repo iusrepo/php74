@@ -2,3 +2,6 @@
 i386
 *.tgz
 *.tar.gz
+XML_RPC-1.4.4.tgz
+XML_Parser-1.2.7.tgz
+Mail-1.1.9.tgz
