@@ -7,7 +7,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.0.5
-Release: 5
+Release: 6
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -641,6 +641,9 @@ rm files.*
 %endif
 
 %changelog
+* Thu Nov 10 2005 Tomas Mraz <tmraz@redhat.com> 5.0.5-6
+- rebuilt against new openssl
+
 * Mon Nov  7 2005 Joe Orton <jorton@redhat.com> 5.0.5-5
 - pear: update to XML_RPC 1.4.4, XML_Parser 1.2.7, Mail 1.1.9 (#172528)
 
