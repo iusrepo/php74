@@ -1,47 +1,26 @@
 %define contentdir /var/www
-%define with_oci8 %{?_with_oci8:1}%{!?_with_oci8:0}
-%define with_mssql %{?_with_mssql:1}%{!?_with_mssql:0}
-%define with_mhash %{?_with_mhash:1}%{!?_with_mhash:0}
-%define with_ibase %{?_with_ibase:1}%{!?_with_ibase:0}
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
-Version: 5.0.5
-Release: 6
+Version: 5.1.1
+Release: 1.1
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
 
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
-Source20: http://pear.php.net/get/DB-1.7.6.tgz
-Source21: http://pear.php.net/get/HTTP-1.3.6.tgz
-Source22: http://pear.php.net/get/Mail-1.1.9.tgz
-Source23: http://pear.php.net/get/XML_Parser-1.2.7.tgz
-Source24: http://pear.php.net/get/Net_Socket-1.0.6.tgz
-Source25: http://pear.php.net/get/Net_SMTP-1.2.7.tgz
-Source26: http://pear.php.net/get/XML_RPC-1.4.4.tgz
 Source50: php.conf
+Source51: php.ini
 
-Patch2: php-5.0.1-config.patch
-Patch3: php-5.0.4-lib64.patch
 Patch4: php-4.2.2-cxx.patch
 Patch5: php-4.3.3-install.patch
 Patch6: php-5.0.4-norpath.patch
 Patch7: php-4.3.2-libtool15.patch
-Patch9: php-4.3.6-umask.patch
-Patch10: php-5.0.2-gdnspace.patch
-Patch11: php-4.3.8-round.patch
 Patch13: php-5.0.2-phpize64.patch
-Patch14: php-5.0.3-sprintf.patch
-Patch16: php-5.0.3-gdheaders.patch
-Patch17: php-5.0.4-bug34435.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
-Patch24: php-5.0.4-xmldom.patch
-Patch25: php-5.0.4-ldap.patch
-Patch26: php-5.0.4-gd.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -50,20 +29,19 @@ Patch31: php-5.0.0-easter.patch
 # Fixes for tests
 Patch50: php-5.0.4-tests-dashn.patch
 Patch51: php-5.0.4-tests-wddx.patch
-Patch52: php-5.0.4-tests-sunfunc.patch
 
 BuildRoot: %{_tmppath}/%{name}-root
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
 BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
-BuildRequires: libstdc++-devel, openssl-devel
+BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
 BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon
 BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
-Requires: php-pear, file >= 4.0
+Requires: file >= 4.0
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -84,16 +62,6 @@ Requires: php = %{version}-%{release}, autoconf, automake
 The php-devel package contains the files needed for building PHP
 extensions. If you need to compile your own PHP extensions, you will
 need to install this package.
-
-%package pear
-Group: Development/Languages
-Summary: PHP Extension and Application Repository Components
-Requires: php = %{version}-%{release}
-
-%description pear
-PEAR is a framework and distribution system for reusable PHP
-components.  This package contains a set of PHP components from the
-PEAR repository.
 
 %package imap
 Summary: An Apache module for PHP applications that use IMAP.
@@ -126,10 +94,21 @@ services over the Internet. PHP is an HTML-embedded scripting
 language. If you need LDAP support for PHP applications, you will
 need to install this package in addition to the php package.
 
+%package pdo
+Summary: A database access abstraction module for PHP applications
+Group: Development/Languages
+Requires: php = %{version}-%{release}
+
+%description pdo
+The php-pdo package contains a dynamic shared object that will add
+a database access abstraction layer to PHP.  This module provides
+a common interface for accessing MySQL, PostgreSQL or other 
+databases.
+
 %package mysql
 Summary: A module for PHP applications that use MySQL databases.
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php = %{version}-%{release}, php-pdo
 Provides: php_database, php-mysqli
 Obsoletes: mod_php3-mysql, stronghold-php-mysql
 BuildRequires: mysql-devel >= 4.1.0
@@ -144,7 +123,7 @@ this package and the php package.
 %package pgsql
 Summary: A PostgreSQL database module for PHP.
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php = %{version}-%{release}, php-pdo
 Provides: php_database
 Obsoletes: mod_php3-pgsql, stronghold-php-pgsql
 BuildRequires: krb5-devel, openssl-devel, postgresql-devel
@@ -184,63 +163,6 @@ BuildRequires: libxml2-devel
 %description soap
 The php-soap package contains a dynamic shared object that will add
 support to PHP for using the SOAP web services protocol.
-
-%if %{with_ibase}
-%package interbase
-Group: Development/Languages
-Prereq: php = %{version}-%{release}, perl, grep
-Summary: A module for PHP applications that use Interbase databases.
-Provides: php_database
-
-%description interbase
-The php-interbase package contains a dynamic shared object that will add
-database support through Interbase to PHP. Interbase is a commercial
-database system made by the Interbase Corporation. PHP is an
-HTML-embeddable scripting language. If you need Interbase support for 
-PHP applications, you will need to install this package and the php 
-package.
-%endif
-
-%if %{with_oci8}
-%package oci8
-Group: Development/Languages
-Summary: A module for PHP applications that use OCI8 databases.
-Provides: php_database
-BuildRequires: oracle-instantclient-devel >= 10
-Requires: php = %{version}-%{release}
-Provides: php_database
-AutoReq: 0
-Requires: oracle-instantclient-basic >= 10
-
-%description oci8
-The php-oci8 package contains a dynamic shared object that will add
-support for accessing OCI8 databases to PHP.
-%endif
-
-%if %{with_mssql}
-%package mssql
-Group: Development/Languages
-Requires: php = %{version}-%{release}, freetds
-Summary: A module for PHP applications that use MSSQL databases.
-Provides: php_database
-BuildRequires: freetds-devel
-
-%description mssql
-The mssql package contains a dynamic shared object that will add
-support for accessing MSSQL databases to PHP.
-%endif
-
-%if %{with_mhash}
-%package mhash
-Summary: A module for PHP applications that use Mhash.
-Group: Development/Languages
-Requires: php = %{version}-%{release}
-BuildRequires: mhash-devel
-
-%description mhash
-The php-mhash package is a dynamic shared object (DSO) for the Apache
-Web server that adds Mhash support to PHP.
-%endif
 
 %package snmp
 Summary: A module for PHP applications that query SNMP-managed devices.
@@ -326,31 +248,20 @@ support for using the DBA database abstraction layer to PHP.
 
 %prep
 %setup -q
-%patch2 -p1 -b .config
-%patch3 -p1 -b .lib64
-%patch4 -p1 -b .cxx
+#patch4 -p1 -b .cxx
 %patch5 -p1 -b .install
 %patch6 -p1 -b .norpath
 %patch7 -p1 -b .libtool15
-%patch9 -p1 -b .umask
-%patch10 -p1 -b .gdnspace
-%patch11 -p1 -b .round
 %patch13 -p1 -b .phpize64
-%patch16 -p1 -b .gdheaders
-%patch17 -p1 -b .bug34435
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
-%patch24 -p1 -b .xmldom
-%patch25 -p1 -b .ldap
-%patch26 -p1 -b .gd
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
 
 %patch50 -p1 -b .tests-dashn
 %patch51 -p1 -b .tests-wddx
-%patch52 -p1 -b .tests-sunfunc
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -361,9 +272,6 @@ cp ext/gd/libgd/README gd_README
 # Source is built twice: once for /usr/bin/php, once for the Apache DSO.
 mkdir build-cgi build-apache
 
-# Use correct libdir
-perl -pi -e 's|%{_prefix}/lib|%{_libdir}|' php.ini-recommended
-
 # Remove bogus test; position of read position after fopen(, "a+")
 # is not defined by C standard, so don't presume anything.
 rm -f ext/standard/tests/file/bug21131.phpt
@@ -371,18 +279,6 @@ rm -f ext/standard/tests/file/bug21131.phpt
 # Tests that fail.
 rm -f ext/standard/tests/file/bug22414.phpt \
       ext/iconv/tests/bug16069.phpt
-
-# Replaced by XML_RPC 1.4.1 upgrade:
-rm -f pear/packages/XML_RPC-1.4.0.tgz
-
-# Add some standard PEAR packages which are no longer shipped upstream
-pushd pear/packages
-  cp %{SOURCE20} %{SOURCE21} %{SOURCE22} %{SOURCE23} \
-     %{SOURCE24} %{SOURCE25} %{SOURCE26} .
-  gunzip *.tgz
-popd
-
-: Build for oci8=%{with_oci8} mssql=%{with_mssql} mhash=%{with_mhash} ibase=%{with_ibase}
 
 %build
 # Force use of system libtool:
@@ -392,7 +288,8 @@ cat `aclocal --print-ac-dir`/libtool.m4 > build/libtool.m4
 # Regenerate configure scripts (patches change config.m4's)
 ./buildconf --force
 
-CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign"; export CFLAGS
+CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign"
+export CFLAGS
 
 # Install extension modules in %{_libdir}/php/modules.
 EXTENSION_DIR=%{_libdir}/php/modules; export EXTENSION_DIR
@@ -437,7 +334,6 @@ ln -sf ../configure
 	--enable-trans-sid \
 	--enable-yp \
 	--enable-wddx \
-	--with-pear=/usr/share/pear \
 	--with-kerberos \
 	--enable-ucd-snmp-hack \
 	--with-unixODBC=shared,%{_prefix} \
@@ -475,17 +371,18 @@ build --enable-force-cgi-redirect \
       --with-ldap=shared \
       --with-mysql=shared,%{_prefix} \
       --with-mysqli=shared,%{_bindir}/mysql_config \
-      %{?_with_oci8:--with-oci8-instant-client=shared} \
-      %{?_with_mssql:--with-mssql=shared} \
-      %{?_with_mhash:--with-mhash=shared} \
-      %{?_with_ibase:--with-interbase=shared,/opt/interbase} \
       --enable-dom=shared \
       --with-dom-xslt=%{_prefix} --with-dom-exslt=%{_prefix} \
       --with-pgsql=shared \
       --with-snmp=shared,%{_prefix} \
       --enable-soap=shared \
       --with-xsl=shared,%{_prefix} \
-      --enable-fastcgi
+      --enable-fastcgi \
+      --enable-pdo=shared \
+      --with-pdo-odbc=shared,unixODBC,%{_prefix} \
+      --with-pdo-mysql=shared,%{_prefix} \
+      --with-pdo-pgsql=shared,%{_prefix} \
+      --with-pdo-sqlite=shared,%{_prefix}
 popd
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
@@ -493,7 +390,7 @@ pushd build-apache
 build --with-apxs2=%{_sbindir}/apxs \
       --without-mysql --without-gd \
       --without-odbc --disable-dom \
-      --disable-dba
+      --disable-dba --without-unixODBC
 popd
 
 %check
@@ -531,9 +428,12 @@ popd
 
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
-install -m 644    php.ini-recommended $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
+install -m 644 $RPM_SOURCE_DIR/php.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 install -m 755 -d $RPM_BUILD_ROOT%{contentdir}/icons
 install -m 644    *.gif $RPM_BUILD_ROOT%{contentdir}/icons/
+
+# Use correct libdir
+sed -i -e 's|%{_prefix}/lib|%{_libdir}|' $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 
 # install the DSO
 install -m 755 -d $RPM_BUILD_ROOT%{_libdir}/httpd/modules
@@ -550,8 +450,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba \
-    %{?_with_oci8:oci8} %{?_with_mssql:mssql} %{?_with_mhash:mhash} \
-    %{?_with_ibase:interbase}; do
+    pdo pdo_mysql pdo_pgsql pdo_odbc; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -568,12 +467,14 @@ cat files.dom files.xsl > files.xml
 # The mysql and mysqli modules are both packaged in php-mysql
 cat files.mysqli >> files.mysql
 
-# Remove PEAR testsuite
-rm -rf $RPM_BUILD_ROOT%{_datadir}/pear/tests
+# Split out the PDO modules
+cat files.pdo_mysql >> files.mysql
+cat files.pdo_pgsql >> files.pgsql
+cat files.pdo_odbc >> files.odbc
 
 # Remove unpackaged files
 rm -f $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
-      $RPM_BUILD_ROOT%{_bindir}/{phptar,pearize}
+      $RPM_BUILD_ROOT%{_bindir}/{phptar}
 
 # Remove irrelevant docs
 rm -f README.{Zeus,QNX,CVS-RULES}
@@ -587,7 +488,6 @@ rm files.*
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
 %doc Zend/ZEND_* gd_README TSRM_LICENSE regex_COPYRIGHT
 %config %{_sysconfdir}/php.ini
-%config %{_sysconfdir}/pear.conf
 %{_bindir}/php
 %{_bindir}/php-cgi
 %{_mandir}/man?/*
@@ -599,11 +499,6 @@ rm files.*
 %config %{_sysconfdir}/httpd/conf.d/php.conf
 %dir %{_sysconfdir}/php.d
 %{contentdir}/icons/php.gif
-
-%files pear
-%defattr(-,root,root)
-%{_bindir}/pear
-%{_datadir}/pear
 
 %files devel
 %defattr(-,root,root)
@@ -626,28 +521,22 @@ rm files.*
 %files soap -f files.soap
 %files bcmath -f files.bcmath
 %files dba -f files.dba
-
-%if %{with_oci8}
-%files oci8 -f files.oci8
-%endif
-%if %{with_mssql}
-%files mssql -f files.mssql
-%endif
-%if %{with_mhash}
-%files mhash -f files.mhash
-%endif
-%if %{with_ibase}
-%files interbase -f files.interbase
-%endif
+%files pdo -f files.pdo
 
 %changelog
+* Mon Nov 28 2005 Joe Orton <jorton@redhat.com> 5.1.1-2
+- update to 5.1.1
+- remove pear subpackage
+- enable pdo extensions (php-pdo subpackage)
+- remove non-standard conditional module builds
+
 * Thu Nov 10 2005 Tomas Mraz <tmraz@redhat.com> 5.0.5-6
 - rebuilt against new openssl
 
 * Mon Nov  7 2005 Joe Orton <jorton@redhat.com> 5.0.5-5
 - pear: update to XML_RPC 1.4.4, XML_Parser 1.2.7, Mail 1.1.9 (#172528)
 
-* Tue Nov  1 2005 Joseph Orton <jorton@redhat.com> 5.0.5-4
+* Tue Nov  1 2005 Joe Orton <jorton@redhat.com> 5.0.5-4
 - rebuild for new libnetsnmp
 
 * Wed Sep 14 2005 Joe Orton <jorton@redhat.com> 5.0.5-3
