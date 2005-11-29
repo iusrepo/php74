@@ -472,9 +472,14 @@ cat files.pdo_mysql >> files.mysql
 cat files.pdo_pgsql >> files.pgsql
 cat files.pdo_odbc >> files.odbc
 
+# Package pdo_sqlite with pdo; isolating sqlite dependencies
+# isn't useful at this time since rpm itself requires sqlite.
+cat files.pdo_sqlite >> files.pdo
+
 # Remove unpackaged files
 rm -f $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
-      $RPM_BUILD_ROOT%{_bindir}/{phptar}
+      $RPM_BUILD_ROOT%{_bindir}/{phptar} \
+      $RPM_BUILD_ROOT%{_datadir}/pear
 
 # Remove irrelevant docs
 rm -f README.{Zeus,QNX,CVS-RULES}
