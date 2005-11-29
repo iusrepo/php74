@@ -3,7 +3,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.1
-Release: 1.2
+Release: 1.3
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -450,7 +450,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba \
-    pdo pdo_mysql pdo_pgsql pdo_odbc; do
+    pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
