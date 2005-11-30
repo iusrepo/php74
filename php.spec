@@ -3,7 +3,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.1
-Release: 1.3
+Release: 1.4
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -307,6 +307,7 @@ ln -sf ../configure
 	--disable-debug \
 	--with-pic \
 	--disable-rpath \
+	--without-pear \
 	--with-bz2 \
 	--with-curl \
 	--with-exec-dir=%{_bindir} \
