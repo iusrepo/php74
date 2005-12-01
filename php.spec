@@ -378,7 +378,7 @@ build --enable-force-cgi-redirect \
       --with-snmp=shared,%{_prefix} \
       --enable-soap=shared \
       --with-xsl=shared,%{_prefix} \
-      --enable-xmlreader=shared \
+      --with-xmlreader=shared \
       --enable-fastcgi \
       --enable-pdo=shared \
       --with-pdo-odbc=shared,unixODBC,%{_prefix} \
