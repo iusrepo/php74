@@ -3,7 +3,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.1
-Release: 1.4
+Release: 2
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -41,7 +41,7 @@ BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
-Requires: file >= 4.0
+Requires: file >= 4.0, php-pear
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
