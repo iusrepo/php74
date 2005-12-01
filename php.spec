@@ -378,6 +378,7 @@ build --enable-force-cgi-redirect \
       --with-snmp=shared,%{_prefix} \
       --enable-soap=shared \
       --with-xsl=shared,%{_prefix} \
+      --enable-xmlreader=shared \
       --enable-fastcgi \
       --enable-pdo=shared \
       --with-pdo-odbc=shared,unixODBC,%{_prefix} \
@@ -391,7 +392,8 @@ pushd build-apache
 build --with-apxs2=%{_sbindir}/apxs \
       --without-mysql --without-gd \
       --without-odbc --disable-dom \
-      --disable-dba --without-unixODBC
+      --disable-dba --without-unixODBC \
+      --disable-pdo
 popd
 
 %check
@@ -450,7 +452,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
-    mbstring ncurses gd dom xsl soap bcmath dba \
+    mbstring ncurses gd dom xsl soap bcmath dba xmlreader \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
@@ -462,8 +464,8 @@ EOF
 EOF
 done
 
-# The dom and xsl modules are both packaged in php-xml
-cat files.dom files.xsl > files.xml
+# The dom, xsl and xmlreader modules are all packaged in php-xml
+cat files.dom files.xsl files.xmlreader > files.xml
 
 # The mysql and mysqli modules are both packaged in php-mysql
 cat files.mysqli >> files.mysql
@@ -473,7 +475,7 @@ cat files.pdo_mysql >> files.mysql
 cat files.pdo_pgsql >> files.pgsql
 cat files.pdo_odbc >> files.odbc
 
-# Package pdo_sqlite with pdo; isolating sqlite dependencies
+# Package pdo_sqlite with pdo; isolating the sqlite dependency
 # isn't useful at this time since rpm itself requires sqlite.
 cat files.pdo_sqlite >> files.pdo
 
@@ -535,6 +537,7 @@ rm files.*
 - remove pear subpackage
 - enable pdo extensions (php-pdo subpackage)
 - remove non-standard conditional module builds
+- enable xmlreader extension
 
 * Thu Nov 10 2005 Tomas Mraz <tmraz@redhat.com> 5.0.5-6
 - rebuilt against new openssl
