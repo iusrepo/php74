@@ -3,7 +3,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.1
-Release: 3
+Release: 4
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -294,6 +294,11 @@ export CFLAGS
 # Install extension modules in %{_libdir}/php/modules.
 EXTENSION_DIR=%{_libdir}/php/modules; export EXTENSION_DIR
 
+# Set PEAR_INSTALLDIR to ensure that the hard-coded include_path
+# includes the PEAR directory even though pear is packaged
+# separately.
+PEAR_INSTALLDIR=%{_datadir}/pear; export PEAR_INSTALLDIR
+
 # Shell function to configure and build a PHP tree.
 build() {
 # bison-1.875-2 seems to produce a broken parser; workaround.
@@ -532,6 +537,9 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Sun Dec  4 2005 Joe Orton <jorton@redhat.com> 5.1.1-4
+- add /usr/share/pear back to hard-coded include_path (#174885)
+
 * Fri Dec  2 2005 Joe Orton <jorton@redhat.com> 5.1.1-3
 - rebuild for httpd 2.2
 
