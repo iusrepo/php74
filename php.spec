@@ -3,7 +3,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.1
-Release: 4
+Release: 5
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -167,7 +167,7 @@ support to PHP for using the SOAP web services protocol.
 %package snmp
 Summary: A module for PHP applications that query SNMP-managed devices.
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php = %{version}-%{release}, net-snmp
 BuildRequires: net-snmp-devel
 
 %description snmp
@@ -537,6 +537,9 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Thu Dec  8 2005 Joe Orton <jorton@redhat.com> 5.1.1-5
+- require net-snmp for php-snmp (#174800)
+
 * Sun Dec  4 2005 Joe Orton <jorton@redhat.com> 5.1.1-4
 - add /usr/share/pear back to hard-coded include_path (#174885)
 
