@@ -3,7 +3,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.1
-Release: 5
+Release: 5.1
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -537,6 +537,9 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
+- rebuilt
+
 * Thu Dec  8 2005 Joe Orton <jorton@redhat.com> 5.1.1-5
 - require net-snmp for php-snmp (#174800)
 
