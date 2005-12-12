@@ -3,7 +3,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.1
-Release: 5.1
+Release: 6
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -537,6 +537,9 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Mon Dec 12 2005 Joe Orton <jorton@redhat.com> 5.1.1-6
+- enable short_open_tag in default php.ini again (#175381)
+
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
