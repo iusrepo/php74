@@ -3,7 +3,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.2
-Release: 2
+Release: 3
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -383,7 +383,7 @@ build --enable-force-cgi-redirect \
       --with-snmp=shared,%{_prefix} \
       --enable-soap=shared \
       --with-xsl=shared,%{_prefix} \
-      --enable-xmlreader=shared \
+      --enable-xmlreader=shared --enable-xmlwriter=shared \
       --enable-fastcgi \
       --enable-pdo=shared \
       --with-pdo-odbc=shared,unixODBC,%{_prefix} \
@@ -398,7 +398,7 @@ build --with-apxs2=%{_sbindir}/apxs \
       --without-mysql --without-gd \
       --without-odbc --disable-dom \
       --disable-dba --without-unixODBC \
-      --disable-pdo
+      --disable-pdo --disable-xmlreader --disable-xmlwriter
 popd
 
 %check
@@ -457,7 +457,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
-    mbstring ncurses gd dom xsl soap bcmath dba xmlreader \
+    mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
@@ -469,8 +469,8 @@ EOF
 EOF
 done
 
-# The dom, xsl and xmlreader modules are all packaged in php-xml
-cat files.dom files.xsl files.xmlreader > files.xml
+# The dom, xsl and xml* modules are all packaged in php-xml
+cat files.dom files.xsl files.xml{reader,writer} > files.xml
 
 # The mysql and mysqli modules are both packaged in php-mysql
 cat files.mysqli >> files.mysql
@@ -537,6 +537,9 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Mon Jan 16 2006 Joe Orton <jorton@redhat.com> 5.1.2-3
+- only build xmlreader and xmlwriter shared (#177810)
+
 * Fri Jan 13 2006 Joe Orton <jorton@redhat.com> 5.1.2-2
 - update to 5.1.2
 
