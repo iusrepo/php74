@@ -3,7 +3,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.2
-Release: 4.2
+Release: 4.3
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -537,7 +537,7 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
-* Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 5.1.2-4.2
+* Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 5.1.2-4.3
 - bump again for double-long bug on ppc(64)
 
 * Tue Feb 07 2006 Jesse Keating <jkeating@redhat.com> - 5.1.2-4.1
