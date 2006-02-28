@@ -1,9 +1,10 @@
 %define contentdir /var/www
+%define apiver 20041225
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.2
-Release: 4.3
+Release: 5
 License: The PHP License
 Group: Development/Languages
 URL: http://www.php.net/
@@ -42,6 +43,14 @@ Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 Requires: file >= 4.0, php-pear
+Provides: php-api = %{apiver}
+# Provides for all builtin modules:
+Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
+Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
+Provides: php-mime_magic, php-openssl, php-pcntl, php-pcre, php-pspell
+Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
+Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
+Provides: php-wddx, php-zlib
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -57,6 +66,7 @@ the embedded PHP language in Web pages.
 Group: Development/Libraries
 Summary: Files needed for building PHP extensions.
 Requires: php = %{version}-%{release}, autoconf, automake
+Obsoletes: php-pecl-pdo-devel
 
 %description devel
 The php-devel package contains the files needed for building PHP
@@ -98,6 +108,7 @@ need to install this package in addition to the php package.
 Summary: A database access abstraction module for PHP applications
 Group: Development/Languages
 Requires: php = %{version}-%{release}
+Obsoletes: php-pecl-pdo-sqlite, php-pecl-pdo
 
 %description pdo
 The php-pdo package contains a dynamic shared object that will add
@@ -280,6 +291,14 @@ rm -f ext/standard/tests/file/bug21131.phpt
 rm -f ext/standard/tests/file/bug22414.phpt \
       ext/iconv/tests/bug16069.phpt
 
+# Safety check for API version change.
+vapi=`sed -n '/#define PHP_API_VERSION/{s/.* //;p}' main/php.h`
+if test "x${vapi}" != "x%{apiver}"; then
+   : Error: Upstream API version is now ${vapi}, expecting %{apiver}.
+   : Update the apiver macro and rebuild.
+   exit 1
+fi
+
 %build
 # Force use of system libtool:
 libtoolize --force --copy
@@ -440,6 +459,9 @@ install -m 644 $RPM_SOURCE_DIR/php.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 install -m 755 -d $RPM_BUILD_ROOT%{contentdir}/icons
 install -m 644    *.gif $RPM_BUILD_ROOT%{contentdir}/icons/
 
+# For PEAR packaging:
+install -m 755 -d $RPM_BUILD_ROOT%{_libdir}/php/pear
+
 # Use correct libdir
 sed -i -e 's|%{_prefix}/lib|%{_libdir}|' $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 
@@ -506,6 +528,7 @@ rm files.*
 %{_mandir}/man?/*
 %dir %{_libdir}/php
 %dir %{_libdir}/php/modules
+%dir %{_libdir}/php/pear
 %dir %{_localstatedir}/lib/php
 %attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
 %{_libdir}/httpd/modules/libphp5.so
@@ -537,6 +560,12 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Tue Feb 28 2006 Joe Orton <jorton@redhat.com> 5.1.2-5
+- provide php-api (#183227)
+- add provides for all builtin modules (Tim Jackson, #173804)
+- own %%{_libdir}/php/pear for PEAR packages (per #176733)
+- add obsoletes to allow upgrade from FE4 PDO packages (#181863)
+
 * Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 5.1.2-4.3
 - bump again for double-long bug on ppc(64)
 
