@@ -4,7 +4,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.4
-Release: 3
+Release: 5
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -13,7 +13,8 @@ Source0: http://www.php.net/distributions/php-%{version}.tar.gz
 Source50: php.conf
 Source51: php.ini
 
-Patch4: php-4.2.2-cxx.patch
+Patch1: php-5.1.4-gnusrc.patch
+Patch2: php-5.1.4-warnings.patch
 Patch5: php-4.3.3-install.patch
 Patch6: php-5.0.4-norpath.patch
 Patch7: php-4.3.2-libtool15.patch
@@ -42,8 +43,10 @@ BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
-Requires: file >= 4.0, php-pear
+Requires: file >= 4.0
 Provides: php-api = %{apiver}
+Provides: mod_php = %{version}-%{release}
+Provides: php-cli = %{version}-%{release}
 # Provides for all builtin modules:
 Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
 Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
@@ -259,7 +262,8 @@ support for using the DBA database abstraction layer to PHP.
 
 %prep
 %setup -q
-#patch4 -p1 -b .cxx
+%patch1 -p1 -b .gnusrc
+%patch2 -p1 -b .warnings
 %patch5 -p1 -b .install
 %patch6 -p1 -b .norpath
 %patch7 -p1 -b .libtool15
@@ -308,7 +312,8 @@ cat `aclocal --print-ac-dir`/libtool.m4 > build/libtool.m4
 ./buildconf --force
 
 CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign"
-export CFLAGS
+CPPFLAGS="-DLDAP_DEPRECATED=1"
+export CFLAGS CPPFLAGS
 
 # Install extension modules in %{_libdir}/php/modules.
 EXTENSION_DIR=%{_libdir}/php/modules; export EXTENSION_DIR
@@ -560,6 +565,13 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Thu May 18 2006 Joe Orton <jorton@redhat.com> 5.1.4-5
+- provide mod_php (#187891)
+- provide php-cli (#192196)
+- use correct LDAP fix (#181518)
+- define _GNU_SOURCE in php_config.h and leave it defined
+- drop (circular) dependency on php-pear
+
 * Mon May  8 2006 Joe Orton <jorton@redhat.com> 5.1.4-3
 - update to 5.1.4
 

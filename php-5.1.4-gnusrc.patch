@@ -1,0 +1,127 @@
+--- php-5.1.4/configure.in.gnusrc
++++ php-5.1.4/configure.in
+@@ -39,6 +39,8 @@
+ 
+ AC_CONFIG_HEADER(main/php_config.h)
+ 
++AC_DEFINE([_GNU_SOURCE], 1, [Define to enable GNU C Library extensions])
++
+ MAJOR_VERSION=5
+ MINOR_VERSION=1
+ RELEASE_VERSION=4
+--- php-5.1.4/Zend/zend_alloc.h.gnusrc
++++ php-5.1.4/Zend/zend_alloc.h
+@@ -125,10 +125,7 @@
+ 
+ #else
+ 
+-#undef _GNU_SOURCE
+-#define _GNU_SOURCE
+ #include <string.h>
+-#undef _GNU_SOURCE
+ 
+ /* Standard wrapper macros */
+ #define emalloc(size)					malloc(size)
+--- php-5.1.4/ext/session/mod_files.c.gnusrc
++++ php-5.1.4/ext/session/mod_files.c
+@@ -18,6 +18,7 @@
+ 
+ /* $Id$ */
+ 
++#include "php_config.h"
+ #include "php.h"
+ 
+ #include <sys/stat.h>
+--- php-5.1.4/ext/posix/posix.c.gnusrc
++++ php-5.1.4/ext/posix/posix.c
+@@ -18,9 +18,7 @@
+ 
+ /* $Id$ */
+ 
+-#ifdef HAVE_CONFIG_H
+-#include "config.h"
+-#endif
++#include "php_config.h"
+ 
+ #include "php.h"
+ #include <unistd.h>
+--- php-5.1.4/ext/standard/file.c.gnusrc
++++ php-5.1.4/ext/standard/file.c
+@@ -118,7 +118,6 @@
+ 
+ #ifdef HAVE_FNMATCH
+ #ifndef _GNU_SOURCE
+-#define _GNU_SOURCE
+ #endif
+ #include <fnmatch.h>
+ #endif
+--- php-5.1.4/ext/interbase/interbase.c.gnusrc
++++ php-5.1.4/ext/interbase/interbase.c
+@@ -24,7 +24,6 @@
+ #include "config.h"
+ #endif
+ 
+-#define _GNU_SOURCE
+ 
+ #include "php.h"
+ 
+--- php-5.1.4/ext/zlib/zlib_fopen_wrapper.c.gnusrc
++++ php-5.1.4/ext/zlib/zlib_fopen_wrapper.c
+@@ -19,7 +19,6 @@
+ 
+ /* $Id$ */
+ 
+-#define _GNU_SOURCE
+ 
+ #include "php.h"
+ #include "php_zlib.h"
+--- php-5.1.4/ext/pdo_firebird/firebird_driver.c.gnusrc
++++ php-5.1.4/ext/pdo_firebird/firebird_driver.c
+@@ -22,7 +22,6 @@
+ #include "config.h"
+ #endif
+ 
+-#define _GNU_SOURCE
+ 
+ #include "php.h"
+ #include "php_ini.h"
+--- php-5.1.4/main/php.h.gnusrc
++++ php-5.1.4/main/php.h
+@@ -30,6 +30,7 @@
+ #define PHP_HAVE_STREAMS
+ #define YYDEBUG 0
+ 
++#include "php_config.h"
+ #include "php_version.h"
+ #include "zend.h"
+ #include "zend_qsort.h"
+--- php-5.1.4/main/streams/memory.c.gnusrc
++++ php-5.1.4/main/streams/memory.c
+@@ -18,7 +18,6 @@
+ 
+ /* $Id$ */
+ 
+-#define _GNU_SOURCE
+ #include "php.h"
+ 
+ /* Memory streams use a dynamic memory buffer to emulate a stream.
+--- php-5.1.4/main/streams/streams.c.gnusrc
++++ php-5.1.4/main/streams/streams.c
+@@ -21,7 +21,6 @@
+ 
+ /* $Id$ */
+ 
+-#define _GNU_SOURCE
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_network.h"
+--- php-5.1.4/main/streams/cast.c.gnusrc
++++ php-5.1.4/main/streams/cast.c
+@@ -18,7 +18,6 @@
+ 
+ /* $Id$ */
+ 
+-#define _GNU_SOURCE
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_network.h"
