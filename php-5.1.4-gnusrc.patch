@@ -22,29 +22,6 @@
  
  /* Standard wrapper macros */
  #define emalloc(size)					malloc(size)
---- php-5.1.4/ext/session/mod_files.c.gnusrc
-+++ php-5.1.4/ext/session/mod_files.c
-@@ -18,6 +18,7 @@
- 
- /* $Id$ */
- 
-+#include "php_config.h"
- #include "php.h"
- 
- #include <sys/stat.h>
---- php-5.1.4/ext/posix/posix.c.gnusrc
-+++ php-5.1.4/ext/posix/posix.c
-@@ -18,9 +18,7 @@
- 
- /* $Id$ */
- 
--#ifdef HAVE_CONFIG_H
--#include "config.h"
--#endif
-+#include "php_config.h"
- 
- #include "php.h"
- #include <unistd.h>
 --- php-5.1.4/ext/standard/file.c.gnusrc
 +++ php-5.1.4/ext/standard/file.c
 @@ -118,7 +118,6 @@
