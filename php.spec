@@ -1,5 +1,6 @@
 %define contentdir /var/www
 %define apiver 20041225
+%define pdover 20060409
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
@@ -133,6 +134,7 @@ Summary: A database access abstraction module for PHP applications
 Group: Development/Languages
 Requires: php = %{version}-%{release}
 Obsoletes: php-pecl-pdo-sqlite, php-pecl-pdo
+Provides: php-pdo-abi = %{pdoabi}
 
 %description pdo
 The php-pdo package contains a dynamic shared object that will add
@@ -174,7 +176,7 @@ php package.
 
 %package odbc
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php = %{version}-%{release}, php-pdo
 Summary: A module for PHP applications that use ODBC databases.
 Provides: php_database
 Obsoletes: stronghold-php-odbc
@@ -321,6 +323,14 @@ vapi=`sed -n '/#define PHP_API_VERSION/{s/.* //;p}' main/php.h`
 if test "x${vapi}" != "x%{apiver}"; then
    : Error: Upstream API version is now ${vapi}, expecting %{apiver}.
    : Update the apiver macro and rebuild.
+   exit 1
+fi
+
+# Safety check for PDO ABI version change
+vpdo=`sed -n '/#define PDO_DRIVER_API/{s/.*[ 	]//;p}' ext/pdo/php_pdo_driver.h`
+if test "x${vpdo}" != "x%{pdover}"; then
+   : Error: Upstream PDO ABI version is now ${vpdo}, expecting %{pdover}.
+   : Update the pdover macro and rebuild.
    exit 1
 fi
 
@@ -592,6 +602,7 @@ rm files.*
 %changelog
 * Fri Jun  2 2006 Joe Orton <jorton@redhat.com> 5.1.4-6
 - split out php-cli, php-common subpackages (#177821)
+- add php-pdo-abi version export (#193202)
 
 * Wed May 24 2006 Radek Vokal <rvokal@redhat.com> 5.1.4-5.1
 - rebuilt for new libnetsnmp
