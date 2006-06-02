@@ -4,7 +4,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.4
-Release: 5.1
+Release: 6
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -44,9 +44,36 @@ Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 Requires: file >= 4.0
-Provides: php-api = %{apiver}
 Provides: mod_php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
+# For backwards-compatibility, require php-cli for the time being:
+Requires: php-cli = %{version}-%{release}
+
+%description
+PHP is an HTML-embedded scripting language. PHP attempts to make it
+easy for developers to write dynamically generated webpages. PHP also
+offers built-in database integration for several commercial and
+non-commercial database management systems, so writing a
+database-enabled webpage with PHP is fairly simple. The most common
+use of PHP coding is probably as a replacement for CGI scripts. 
+
+The php package contains the module which adds support for the PHP
+language to Apache HTTP Server.
+
+%package cli
+Group: Development/Languages
+Summary: Command-line interface for PHP
 Provides: php-cli = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
+
+%description cli
+The php-cli package contains the command-line interface 
+executing PHP scripts, /usr/bin/php, and the CGI interface.
+
+%package common
+Group: Development/Languages
+Summary: Common files for PHP
+Provides: php-api = %{apiver}
 # Provides for all builtin modules:
 Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
 Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
@@ -55,15 +82,9 @@ Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
 Provides: php-wddx, php-zlib
 
-%description
-PHP is an HTML-embedded scripting language. PHP attempts to make it
-easy for developers to write dynamically generated webpages. PHP also
-offers built-in database integration for several commercial and
-non-commercial database management systems, so writing a
-database-enabled webpage with PHP is fairly simple. The most common
-use of PHP coding is probably as a replacement for CGI scripts. The
-mod_php module enables the Apache Web server to understand and process
-the embedded PHP language in Web pages.
+%description common
+The php-common package contains files used by both the php
+package and the php-cli package.
 
 %package devel
 Group: Development/Libraries
@@ -77,7 +98,7 @@ extensions. If you need to compile your own PHP extensions, you will
 need to install this package.
 
 %package imap
-Summary: An Apache module for PHP applications that use IMAP.
+Summary: A module for PHP applications that use IMAP.
 Group: Development/Languages
 Requires: php = %{version}-%{release}
 Obsoletes: mod_php3-imap, stronghold-php-imap
@@ -525,21 +546,25 @@ rm files.*
 
 %files
 %defattr(-,root,root)
+%{_libdir}/httpd/modules/libphp5.so
+%attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
+%config %{_sysconfdir}/httpd/conf.d/php.conf
+%{contentdir}/icons/php.gif
+
+%files common
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
 %doc Zend/ZEND_* gd_README TSRM_LICENSE regex_COPYRIGHT
 %config %{_sysconfdir}/php.ini
+%dir %{_sysconfdir}/php.d
+%dir %{_libdir}/php
+%dir %{_libdir}/php/modules
+%dir %{_localstatedir}/lib/php
+%dir %{_libdir}/php/pear
+
+%files cli
 %{_bindir}/php
 %{_bindir}/php-cgi
 %{_mandir}/man?/*
-%dir %{_libdir}/php
-%dir %{_libdir}/php/modules
-%dir %{_libdir}/php/pear
-%dir %{_localstatedir}/lib/php
-%attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
-%{_libdir}/httpd/modules/libphp5.so
-%config %{_sysconfdir}/httpd/conf.d/php.conf
-%dir %{_sysconfdir}/php.d
-%{contentdir}/icons/php.gif
 
 %files devel
 %defattr(-,root,root)
@@ -565,6 +590,9 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Fri Jun  2 2006 Joe Orton <jorton@redhat.com> 5.1.4-6
+- split out php-cli, php-common subpackages (#177821)
+
 * Wed May 24 2006 Radek Vokal <rvokal@redhat.com> 5.1.4-5.1
 - rebuilt for new libnetsnmp
 
