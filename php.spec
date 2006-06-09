@@ -5,7 +5,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.4
-Release: 6
+Release: 7
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -41,7 +41,7 @@ BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
 BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon
 BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3, gcc-c++
-Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php, php-openssl
+Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 Requires: file >= 4.0
@@ -64,8 +64,8 @@ language to Apache HTTP Server.
 %package cli
 Group: Development/Languages
 Summary: Command-line interface for PHP
-Provides: php-cli = %{version}-%{release}
 Requires: php-common = %{version}-%{release}
+Provides: php-cgi = %{version}-%{release}
 
 %description cli
 The php-cli package contains the command-line interface 
@@ -82,6 +82,7 @@ Provides: php-mime_magic, php-openssl, php-pcntl, php-pcre, php-pspell
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
 Provides: php-wddx, php-zlib
+Obsoletes: php-openssl
 
 %description common
 The php-common package contains files used by both the php
@@ -600,6 +601,10 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Fri Jun  9 2006 Joe Orton <jorton@redhat.com> 5.1.4-7
+- move Obsoletes for php-openssl to -common (#194501)
+- Provide: php-cgi from -cli subpackage
+
 * Fri Jun  2 2006 Joe Orton <jorton@redhat.com> 5.1.4-6
 - split out php-cli, php-common subpackages (#177821)
 - add php-pdo-abi version export (#193202)
