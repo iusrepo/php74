@@ -5,7 +5,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.4
-Release: 7
+Release: 8
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -66,6 +66,7 @@ Group: Development/Languages
 Summary: Command-line interface for PHP
 Requires: php-common = %{version}-%{release}
 Provides: php-cgi = %{version}-%{release}
+Provides: php-pcntl
 
 %description cli
 The php-cli package contains the command-line interface 
@@ -78,7 +79,7 @@ Provides: php-api = %{apiver}
 # Provides for all builtin modules:
 Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
 Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
-Provides: php-mime_magic, php-openssl, php-pcntl, php-pcre, php-pspell
+Provides: php-mime_magic, php-openssl, php-pcre, php-posix, php-pspell
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
 Provides: php-wddx, php-zlib
@@ -563,6 +564,7 @@ rm files.*
 %{contentdir}/icons/php.gif
 
 %files common
+%defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
 %doc Zend/ZEND_* gd_README TSRM_LICENSE regex_COPYRIGHT
 %config %{_sysconfdir}/php.ini
@@ -573,6 +575,7 @@ rm files.*
 %dir %{_libdir}/php/pear
 
 %files cli
+%defattr(-,root,root)
 %{_bindir}/php
 %{_bindir}/php-cgi
 %{_mandir}/man?/*
@@ -601,6 +604,11 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Fri Jun  9 2006 Joe Orton <jorton@redhat.com> 5.1.4-8
+- Provide php-posix (#194583)
+- only provide php-pcntl from -cli subpackage
+- add missing defattr's (thanks to Matthias Saou)
+
 * Fri Jun  9 2006 Joe Orton <jorton@redhat.com> 5.1.4-7
 - move Obsoletes for php-openssl to -common (#194501)
 - Provide: php-cgi from -cli subpackage
