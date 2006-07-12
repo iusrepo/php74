@@ -5,7 +5,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.4
-Release: 8
+Release: 8.1
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -604,6 +604,9 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - cat: /usr/include/httpd/.mmn: No such file or directory
+- rebuild
+
 * Fri Jun  9 2006 Joe Orton <jorton@redhat.com> 5.1.4-8
 - Provide php-posix (#194583)
 - only provide php-pcntl from -cli subpackage
