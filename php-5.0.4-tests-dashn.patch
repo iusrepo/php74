@@ -50,14 +50,3 @@ and hence the installed (old) shared extensions are not loaded.
  print_r($out);
  ?>
  --EXPECT--
---- php-5.1.1/run-tests.php.tests-dashn
-+++ php-5.1.1/run-tests.php
-@@ -184,7 +184,7 @@
- 	settings2params($info_params);
- 	$php_info = `$php $pass_options $info_params $info_file`;
- 	@unlink($info_file);
--	define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
-+	define('TESTED_PHP_VERSION', `$php $pass_options -r 'echo PHP_VERSION;'`);
- 
- 	// check for extensions that need special handling and regenerate
- 	$php_extensions = '<?php echo join(",",get_loaded_extensions()); ?>'; 
