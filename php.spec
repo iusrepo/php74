@@ -5,7 +5,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.6
-Release: 1
+Release: 2
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -604,7 +604,7 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
-* Tue Aug 29 2006 Joe Orton <jorton@redhat.com> 5.1.6-9
+* Tue Aug 29 2006 Joe Orton <jorton@redhat.com> 5.1.6-2
 - update to 5.1.6 (security fixes)
 - bump default memory_limit to 16M (#196802)
 
