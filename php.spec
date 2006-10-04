@@ -5,7 +5,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.1.6
-Release: 2
+Release: 3
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -20,6 +20,7 @@ Patch5: php-4.3.3-install.patch
 Patch6: php-5.0.4-norpath.patch
 Patch7: php-4.3.2-libtool15.patch
 Patch13: php-5.0.2-phpize64.patch
+Patch14: php-5.1.6-ecalloc.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -293,6 +294,7 @@ support for using the DBA database abstraction layer to PHP.
 %patch6 -p1 -b .norpath
 %patch7 -p1 -b .libtool15
 %patch13 -p1 -b .phpize64
+%patch14 -p1 -b .ecalloc
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
@@ -604,6 +606,9 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Wed Oct  4 2006 Joe Orton <jorton@redhat.com> 5.1.6-3
+- from upstream: add safety checks against integer overflow in _ecalloc
+
 * Tue Aug 29 2006 Joe Orton <jorton@redhat.com> 5.1.6-2
 - update to 5.1.6 (security fixes)
 - bump default memory_limit to 16M (#196802)
