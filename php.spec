@@ -21,6 +21,7 @@ Patch6: php-5.0.4-norpath.patch
 Patch7: php-4.3.2-libtool15.patch
 Patch13: php-5.0.2-phpize64.patch
 Patch14: php-5.1.6-ecalloc.patch
+Patch15: php-5.1.6-curl716.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -42,7 +43,7 @@ BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
 BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon
 BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3, gcc-c++
-Obsoletes: php-dbg, mod_php, php3, phpfi, stronghold-php
+Obsoletes: php-dbg, php3, phpfi, stronghold-php
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 Requires: file >= 4.0
@@ -295,6 +296,7 @@ support for using the DBA database abstraction layer to PHP.
 %patch7 -p1 -b .libtool15
 %patch13 -p1 -b .phpize64
 %patch14 -p1 -b .ecalloc
+%patch15 -p1 -b .curl716
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
@@ -580,7 +582,7 @@ rm files.*
 %defattr(-,root,root)
 %{_bindir}/php
 %{_bindir}/php-cgi
-%{_mandir}/man?/*
+%{_mandir}/man1/php.1*
 
 %files devel
 %defattr(-,root,root)
@@ -588,6 +590,8 @@ rm files.*
 %{_bindir}/phpize
 %{_includedir}/php
 %{_libdir}/php/build
+%{_mandir}/man1/php-config.1*
+%{_mandir}/man1/phpize.1*
 
 %files pgsql -f files.pgsql
 %files mysql -f files.mysql
@@ -608,6 +612,7 @@ rm files.*
 %changelog
 * Tue Oct 31 2006 Joseph Orton <jorton@redhat.com> 5.1.6-4
 - rebuild for curl soname bump
+- add build fix for curl 7.16 API
 
 * Wed Oct  4 2006 Joe Orton <jorton@redhat.com> 5.1.6-3
 - from upstream: add safety checks against integer overflow in _ecalloc
