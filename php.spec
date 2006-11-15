@@ -625,6 +625,7 @@ rm files.* macros.php
 * Wed Nov 15 2006 Joe Orton <jorton@redhat.com> 5.2.0-4
 - provide php-zend-abi (#212804)
 - add /etc/rpm/macros.php exporting interface versions
+- synch with upstream recommended php.ini
 
 * Wed Nov 15 2006 Joe Orton <jorton@redhat.com> 5.2.0-3
 - update to 5.2.0 (#213837)
