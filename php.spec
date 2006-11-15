@@ -12,8 +12,9 @@ Group: Development/Languages
 URL: http://www.php.net/
 
 Source0: http://www.php.net/distributions/php-%{version}.tar.gz
-Source50: php.conf
-Source51: php.ini
+Source1: php.conf
+Source2: php.ini
+Source3: macros.php
 
 Patch1: php-5.1.4-gnusrc.patch
 Patch2: php-4.3.3-install.patch
