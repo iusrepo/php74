@@ -16,11 +16,11 @@ Source50: php.conf
 Source51: php.ini
 
 Patch1: php-5.1.4-gnusrc.patch
-Patch5: php-4.3.3-install.patch
-Patch6: php-5.0.4-norpath.patch
-Patch7: php-4.3.2-libtool15.patch
-Patch13: php-5.0.2-phpize64.patch
-Patch15: php-5.1.6-curl716.patch
+Patch2: php-4.3.3-install.patch
+Patch3: php-5.0.4-norpath.patch
+Patch4: php-4.3.2-libtool15.patch
+Patch5: php-5.0.2-phpize64.patch
+Patch6: php-5.1.6-curl716.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -289,11 +289,11 @@ support for using the DBA database abstraction layer to PHP.
 %prep
 %setup -q
 %patch1 -p1 -b .gnusrc
-%patch5 -p1 -b .install
-%patch6 -p1 -b .norpath
-%patch7 -p1 -b .libtool15
-%patch13 -p1 -b .phpize64
-%patch15 -p1 -b .curl716
+%patch2 -p1 -b .install
+%patch3 -p1 -b .norpath
+%patch4 -p1 -b .libtool15
+%patch5 -p1 -b .phpize64
+%patch6 -p1 -b .curl716
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
