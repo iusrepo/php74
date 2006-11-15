@@ -1,11 +1,12 @@
 %define contentdir /var/www
 %define apiver 20041225
+%define zendver 220060519
 %define pdover 20060511
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.2.0
-Release: 3
+Release: 4
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -75,7 +76,7 @@ executing PHP scripts, /usr/bin/php, and the CGI interface.
 %package common
 Group: Development/Languages
 Summary: Common files for PHP
-Provides: php-api = %{apiver}
+Provides: php-api = %{apiver}, php-zend-abi = %{zendver}
 # Provides for all builtin modules:
 Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
 Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
@@ -328,6 +329,13 @@ if test "x${vapi}" != "x%{apiver}"; then
    exit 1
 fi
 
+vzend=`sed -n '/#define ZEND_EXTENSION_API_NO/{s/^[^0-9]*//;p;}' Zend/zend_extensions.h`
+if test "x${vzend}" != "x%{zendver}"; then
+   : Error: Upstream Zend ABI version is now ${vzend}, expecting %{zendver}.
+   : Update the zendver macro and rebuild.
+   exit 1
+fi
+
 # Safety check for PDO ABI version change
 vpdo=`sed -n '/#define PDO_DRIVER_API/{s/.*[ 	]//;p}' ext/pdo/php_pdo_driver.h`
 if test "x${vpdo}" != "x%{pdover}"; then
@@ -543,6 +551,13 @@ cat files.pdo_odbc >> files.odbc
 # isn't useful at this time since rpm itself requires sqlite.
 cat files.pdo_sqlite >> files.pdo
 
+# Install the macros file:
+install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
+sed -e "s/@PHP_APIVER@/%{apiver}/;s/@PHP_ZENDVER@/%{zendver}/;s/@PHP_PDOVER@/%{pdover}/" \
+    < $RPM_SOURCE_DIR/macros.php > macros.php
+install -m 644 -c macros.php \
+           $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.php
+
 # Remove unpackaged files
 rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
        $RPM_BUILD_ROOT%{_bindir}/{phptar} \
@@ -553,7 +568,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-rm files.*
+rm files.* macros.php
 
 %files
 %defattr(-,root,root)
@@ -587,6 +602,7 @@ rm files.*
 %{_libdir}/php/build
 %{_mandir}/man1/php-config.1*
 %{_mandir}/man1/phpize.1*
+%config %{_sysconfdir}/rpm/macros.php
 
 %files pgsql -f files.pgsql
 %files mysql -f files.mysql
@@ -605,6 +621,10 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Wed Nov 15 2006 Joe Orton <jorton@redhat.com> 5.2.0-4
+- provide php-zend-abi (#212804)
+- add /etc/rpm/macros.php exporting interface versions
+
 * Wed Nov 15 2006 Joe Orton <jorton@redhat.com> 5.2.0-3
 - update to 5.2.0 (#213837)
 - php-xml provides php-domxml (#215656)
