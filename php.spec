@@ -1,11 +1,11 @@
 %define contentdir /var/www
 %define apiver 20041225
-%define pdover 20060409
+%define pdover 20060511
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
-Version: 5.1.6
-Release: 4
+Version: 5.2.0
+Release: 3
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -15,12 +15,10 @@ Source50: php.conf
 Source51: php.ini
 
 Patch1: php-5.1.4-gnusrc.patch
-Patch2: php-5.1.4-warnings.patch
 Patch5: php-4.3.3-install.patch
 Patch6: php-5.0.4-norpath.patch
 Patch7: php-4.3.2-libtool15.patch
 Patch13: php-5.0.2-phpize64.patch
-Patch14: php-5.1.6-ecalloc.patch
 Patch15: php-5.1.6-curl716.patch
 
 # Fixes for extension modules
@@ -138,7 +136,7 @@ Summary: A database access abstraction module for PHP applications
 Group: Development/Languages
 Requires: php = %{version}-%{release}
 Obsoletes: php-pecl-pdo-sqlite, php-pecl-pdo
-Provides: php-pdo-abi = %{pdoabi}
+Provides: php-pdo-abi = %{pdover}
 
 %description pdo
 The php-pdo package contains a dynamic shared object that will add
@@ -222,7 +220,7 @@ Summary: A module for PHP applications which use XML
 Group: Development/Languages
 Requires: php = %{version}-%{release}
 Obsoletes: php-domxml, php-dom
-Provides: php-dom, php-xsl
+Provides: php-dom, php-xsl, php-domxml
 BuildRequires: libxslt-devel >= 1.0.18-1, libxml2-devel >= 2.4.14-1
 
 %description xml
@@ -290,12 +288,10 @@ support for using the DBA database abstraction layer to PHP.
 %prep
 %setup -q
 %patch1 -p1 -b .gnusrc
-%patch2 -p1 -b .warnings
 %patch5 -p1 -b .install
 %patch6 -p1 -b .norpath
 %patch7 -p1 -b .libtool15
 %patch13 -p1 -b .phpize64
-%patch14 -p1 -b .ecalloc
 %patch15 -p1 -b .curl716
 
 %patch21 -p1 -b .odbc
@@ -349,8 +345,7 @@ cat `aclocal --print-ac-dir`/libtool.m4 > build/libtool.m4
 ./buildconf --force
 
 CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign"
-CPPFLAGS="-DLDAP_DEPRECATED=1"
-export CFLAGS CPPFLAGS
+export CFLAGS
 
 # Install extension modules in %{_libdir}/php/modules.
 EXTENSION_DIR=%{_libdir}/php/modules; export EXTENSION_DIR
@@ -610,6 +605,11 @@ rm files.*
 %files pdo -f files.pdo
 
 %changelog
+* Wed Nov 15 2006 Joe Orton <jorton@redhat.com> 5.2.0-3
+- update to 5.2.0 (#213837)
+- php-xml provides php-domxml (#215656)
+- fix php-pdo-abi provide (#214281)
+
 * Tue Oct 31 2006 Joseph Orton <jorton@redhat.com> 5.1.6-4
 - rebuild for curl soname bump
 - add build fix for curl 7.16 API

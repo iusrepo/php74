@@ -9,19 +9,6 @@
  MAJOR_VERSION=5
  MINOR_VERSION=1
  RELEASE_VERSION=4
---- php-5.1.4/Zend/zend_alloc.h.gnusrc
-+++ php-5.1.4/Zend/zend_alloc.h
-@@ -125,10 +125,7 @@
- 
- #else
- 
--#undef _GNU_SOURCE
--#define _GNU_SOURCE
- #include <string.h>
--#undef _GNU_SOURCE
- 
- /* Standard wrapper macros */
- #define emalloc(size)					malloc(size)
 --- php-5.1.4/ext/standard/file.c.gnusrc
 +++ php-5.1.4/ext/standard/file.c
 @@ -118,7 +118,6 @@

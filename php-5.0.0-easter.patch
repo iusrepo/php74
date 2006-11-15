@@ -1,85 +1,14 @@
 
 Remove 7K of April's Fool.
 
---- php-5.1.3/ext/standard/basic_functions.c.easter
-+++ php-5.1.3/ext/standard/basic_functions.c
-@@ -202,7 +202,6 @@
- 	PHP_FE(phpcredits,														NULL)
- 	PHP_FE(php_logo_guid,													NULL)
- 	PHP_FE(php_real_logo_guid,												NULL)
--	PHP_FE(php_egg_logo_guid,												NULL)
- 	PHP_FE(zend_logo_guid,													NULL)
- 	PHP_FE(php_sapi_name,													NULL)
- 	PHP_FE(php_uname,														NULL)
---- php-5.1.3/ext/standard/info.h.easter
-+++ php-5.1.3/ext/standard/info.h
-@@ -51,7 +51,6 @@
- #endif /* HAVE_CREDITS_DEFS */
- 
- #define PHP_LOGO_GUID		  "PHPE9568F34-D428-11d2-A769-00AA001ACF42"
--#define PHP_EGG_LOGO_GUID	"PHPE9568F36-D428-11d2-A769-00AA001ACF42"
- #define ZEND_LOGO_GUID		"PHPE9568F35-D428-11d2-A769-00AA001ACF42"
- #define PHP_CREDITS_GUID  "PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000"
- 
-@@ -62,7 +61,6 @@
- PHP_FUNCTION(php_logo_guid);
- PHP_FUNCTION(php_real_logo_guid);
- PHP_FUNCTION(zend_logo_guid);
--PHP_FUNCTION(php_egg_logo_guid);
- PHP_FUNCTION(php_sapi_name);
- PHP_FUNCTION(php_uname);
- PHP_FUNCTION(php_ini_scanned_files);
---- php-5.1.3/ext/standard/info.c.easter
-+++ php-5.1.3/ext/standard/info.c
-@@ -1046,21 +1046,7 @@
-  */
- PHPAPI char *php_logo_guid()
- {
--	char *logo_guid;
--
--	time_t the_time;
--	struct tm *ta, tmbuf;
--
--	the_time = time(NULL);
--	ta = php_localtime_r(&the_time, &tmbuf);
--
--	if ((ta->tm_mon==3) && (ta->tm_mday==1)) {
--		logo_guid = PHP_EGG_LOGO_GUID;
--	} else {
--		logo_guid = PHP_LOGO_GUID;
--	}
--
--	return estrdup(logo_guid);
-+	return estrdup(PHP_LOGO_GUID);
- 
- }
- /* }}} */
-@@ -1091,18 +1077,6 @@
- }
- /* }}} */
- 
--/* {{{ proto string php_egg_logo_guid(void)
--   Return the special ID used to request the PHP logo in phpinfo screens*/
--PHP_FUNCTION(php_egg_logo_guid)
--{
--	if (ZEND_NUM_ARGS() != 0) {
--		WRONG_PARAM_COUNT;
--	}
--
--	RETURN_STRINGL(PHP_EGG_LOGO_GUID, sizeof(PHP_EGG_LOGO_GUID)-1, 1);
--}
--/* }}} */
--
- /* {{{ proto string zend_logo_guid(void)
-    Return the special ID used to request the Zend logo in phpinfo screens*/
- PHP_FUNCTION(zend_logo_guid)
---- php-5.1.3/main/logos.h.easter
-+++ php-5.1.3/main/logos.h
-@@ -492,385 +492,3 @@
+--- php-5.2.0/main/logos.h.easter
++++ php-5.2.0/main/logos.h
+@@ -491,386 +491,3 @@
+ 	102,  63, 251, 220, 139,  16,  65,  26,  16, 112, 
  	 21, 116, 187, 251, 221, 240, 142, 119, 188,   3, 
  	  1,   0,  59,   0 };
- 
--unsigned char php_egg_logo[] = {
+-
+-static const unsigned char php_egg_logo[] = {
 -	 71,  73,  70,  56,  57,  97, 120,   0,  67,   0, 
 -	247,   0,   0,   0, 255,   0, 107, 114, 178,   0, 
 -	  0,   0,  31,  31,  31, 255, 255, 255, 106, 113, 
@@ -461,8 +390,8 @@ Remove 7K of April's Fool.
 -	  7,   4, 129,   5,  84, 208,  62, 158, 185, 154, 
 -	  8, 177,   5,  80, 208, 153, 172,  25, 155, 178, 
 -	 57, 155, 180,  41, 148,   1,   1,   0,  59,   0 };
---- php-5.1.3/main/php_logos.c.easter
-+++ php-5.1.3/main/php_logos.c
+--- php-5.2.0/main/php_logos.c.easter
++++ php-5.2.0/main/php_logos.c
 @@ -56,7 +56,6 @@
  		return FAILURE;
  
@@ -471,3 +400,86 @@ Remove 7K of April's Fool.
  	php_register_info_logo(ZEND_LOGO_GUID   , "image/gif", zend_logo   , sizeof(zend_logo));
  
  	return SUCCESS;
+--- php-5.2.0/ext/standard/basic_functions.c.easter
++++ php-5.2.0/ext/standard/basic_functions.c
+@@ -1742,10 +1742,6 @@
+ ZEND_END_ARG_INFO()
+ 
+ static
+-ZEND_BEGIN_ARG_INFO(arginfo_php_egg_logo_guid, 0)
+-ZEND_END_ARG_INFO()
+-
+-static
+ ZEND_BEGIN_ARG_INFO(arginfo_zend_logo_guid, 0)
+ ZEND_END_ARG_INFO()
+ 
+@@ -3116,7 +3112,6 @@
+ 	PHP_FE(phpcredits,														arginfo_phpcredits)
+ 	PHP_FE(php_logo_guid,													arginfo_php_logo_guid)
+ 	PHP_FE(php_real_logo_guid,												arginfo_php_real_logo_guid)
+-	PHP_FE(php_egg_logo_guid,												arginfo_php_egg_logo_guid)
+ 	PHP_FE(zend_logo_guid,													arginfo_zend_logo_guid)
+ 	PHP_FE(php_sapi_name,													arginfo_php_sapi_name)
+ 	PHP_FE(php_uname,														arginfo_php_uname)
+--- php-5.2.0/ext/standard/info.c.easter
++++ php-5.2.0/ext/standard/info.c
+@@ -1046,21 +1046,7 @@
+  */
+ PHPAPI char *php_logo_guid()
+ {
+-	char *logo_guid;
+-
+-	time_t the_time;
+-	struct tm *ta, tmbuf;
+-
+-	the_time = time(NULL);
+-	ta = php_localtime_r(&the_time, &tmbuf);
+-
+-	if ((ta->tm_mon==3) && (ta->tm_mday==1)) {
+-		logo_guid = PHP_EGG_LOGO_GUID;
+-	} else {
+-		logo_guid = PHP_LOGO_GUID;
+-	}
+-
+-	return estrdup(logo_guid);
++	return estrdup(PHP_LOGO_GUID);
+ 
+ }
+ /* }}} */
+@@ -1091,18 +1077,6 @@
+ }
+ /* }}} */
+ 
+-/* {{{ proto string php_egg_logo_guid(void)
+-   Return the special ID used to request the PHP logo in phpinfo screens*/
+-PHP_FUNCTION(php_egg_logo_guid)
+-{
+-	if (ZEND_NUM_ARGS() != 0) {
+-		WRONG_PARAM_COUNT;
+-	}
+-
+-	RETURN_STRINGL(PHP_EGG_LOGO_GUID, sizeof(PHP_EGG_LOGO_GUID)-1, 1);
+-}
+-/* }}} */
+-
+ /* {{{ proto string zend_logo_guid(void)
+    Return the special ID used to request the Zend logo in phpinfo screens*/
+ PHP_FUNCTION(zend_logo_guid)
+--- php-5.2.0/ext/standard/info.h.easter
++++ php-5.2.0/ext/standard/info.h
+@@ -51,7 +51,6 @@
+ #endif /* HAVE_CREDITS_DEFS */
+ 
+ #define PHP_LOGO_GUID		  "PHPE9568F34-D428-11d2-A769-00AA001ACF42"
+-#define PHP_EGG_LOGO_GUID	"PHPE9568F36-D428-11d2-A769-00AA001ACF42"
+ #define ZEND_LOGO_GUID		"PHPE9568F35-D428-11d2-A769-00AA001ACF42"
+ #define PHP_CREDITS_GUID  "PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000"
+ 
+@@ -62,7 +61,6 @@
+ PHP_FUNCTION(php_logo_guid);
+ PHP_FUNCTION(php_real_logo_guid);
+ PHP_FUNCTION(zend_logo_guid);
+-PHP_FUNCTION(php_egg_logo_guid);
+ PHP_FUNCTION(php_sapi_name);
+ PHP_FUNCTION(php_uname);
+ PHP_FUNCTION(php_ini_scanned_files);

@@ -6,30 +6,19 @@ and hence the installed (old) shared extensions are not loaded.
 - passed to run-tests.php to ensure it's passed when running each test case
 - in cases where the PHP executable is run by a test case
 
---- php-5.1.1/ext/xml/tests/bug32001.phpt.tests-dashn
-+++ php-5.1.1/ext/xml/tests/bug32001.phpt
-@@ -159,7 +159,7 @@
- 
- if (XML_SAX_IMPL == 'libxml') {
-   $php = getenv('TEST_PHP_EXECUTABLE');
--  preg_match("/^libxml2 Version.*\$/im", `$php -i`, $match);
-+  preg_match("/^libxml2 Version.*\$/im", `$php -i -n`, $match);
-   echo $match[0], "\n";
- } else {
-   echo "libxml2 Version => NONE\n";  
---- php-5.1.1/ext/standard/tests/file/proc_open01.phpt.tests-dashn
-+++ php-5.1.1/ext/standard/tests/file/proc_open01.phpt
-@@ -9,7 +9,7 @@
- 	die("no php executable defined");
- } 
- $proc = proc_open(
--	$php,
-+	$php . " -n",
- 	array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')),
- 	$pipes
- );
---- php-5.1.1/ext/standard/tests/file/bug26938.phpt.tests-dashn
-+++ php-5.1.1/ext/standard/tests/file/bug26938.phpt
+--- php-5.2.0/Makefile.global.tests-dashn
++++ php-5.2.0/Makefile.global
+@@ -79,7 +79,7 @@
+ 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
+ 		TEST_PHP_SRCDIR=$(top_srcdir) \
+ 		CC="$(CC)" \
+-			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php $(TESTS); \
++			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php -n $(TESTS); \
+ 	else \
+ 		echo "ERROR: Cannot run tests without CLI sapi."; \
+ 	fi
+--- php-5.2.0/ext/standard/tests/file/bug26938.phpt.tests-dashn
++++ php-5.2.0/ext/standard/tests/file/bug26938.phpt
 @@ -5,7 +5,7 @@
  $out = array();
  $status = -1;
@@ -39,8 +28,19 @@ and hence the installed (old) shared extensions are not loaded.
       . '$lengths = array(10,20000,10000,5,10000,3);'
       . 'foreach($lengths as $length) {'
       . '  for($i=0;$i<$length;$i++) print chr(65+$i % 27);'
---- php-5.1.1/ext/standard/tests/file/bug26615.phpt.tests-dashn
-+++ php-5.1.1/ext/standard/tests/file/bug26615.phpt
+--- php-5.2.0/ext/standard/tests/file/proc_open01.phpt.tests-dashn
++++ php-5.2.0/ext/standard/tests/file/proc_open01.phpt
+@@ -9,7 +9,7 @@
+ 	die("no php executable defined");
+ } 
+ $proc = proc_open(
+-	$php,
++	$php . " -n",
+ 	array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')),
+ 	$pipes
+ );
+--- php-5.2.0/ext/standard/tests/file/bug26615.phpt.tests-dashn
++++ php-5.2.0/ext/standard/tests/file/bug26615.phpt
 @@ -6,7 +6,7 @@
  <?php
  $out = array();
