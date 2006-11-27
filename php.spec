@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.2.0
-Release: 4
+Release: 5
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -41,7 +41,7 @@ BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
 BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
-BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon
+BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon, readline-devel
 BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, php3, phpfi, stronghold-php
 # Enforce Apache module ABI compatibility
@@ -68,7 +68,7 @@ Group: Development/Languages
 Summary: Command-line interface for PHP
 Requires: php-common = %{version}-%{release}
 Provides: php-cgi = %{version}-%{release}
-Provides: php-pcntl
+Provides: php-pcntl, php-readline
 
 %description cli
 The php-cli package contains the command-line interface 
@@ -84,8 +84,8 @@ Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
 Provides: php-mime_magic, php-openssl, php-pcre, php-posix, php-pspell
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
-Provides: php-wddx, php-zlib
-Obsoletes: php-openssl
+Provides: php-wddx, php-zlib, php-json, php-zip
+Obsoletes: php-openssl, php-pecl-zip, php-json
 
 %description common
 The php-common package contains files used by both the php
@@ -105,7 +105,7 @@ need to install this package.
 %package imap
 Summary: A module for PHP applications that use IMAP.
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 Obsoletes: mod_php3-imap, stronghold-php-imap
 BuildRequires: krb5-devel, openssl-devel, libc-client-devel
 
@@ -121,7 +121,7 @@ and the php package.
 %package ldap
 Summary: A module for PHP applications that use LDAP.
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 Obsoletes: mod_php3-ldap, stronghold-php-ldap
 BuildRequires: cyrus-sasl-devel, openldap-devel, openssl-devel
 
@@ -136,7 +136,7 @@ need to install this package in addition to the php package.
 %package pdo
 Summary: A database access abstraction module for PHP applications
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 Obsoletes: php-pecl-pdo-sqlite, php-pecl-pdo
 Provides: php-pdo-abi = %{pdover}
 
@@ -149,7 +149,7 @@ databases.
 %package mysql
 Summary: A module for PHP applications that use MySQL databases.
 Group: Development/Languages
-Requires: php = %{version}-%{release}, php-pdo
+Requires: php-common = %{version}-%{release}, php-pdo
 Provides: php_database, php-mysqli
 Obsoletes: mod_php3-mysql, stronghold-php-mysql
 BuildRequires: mysql-devel >= 4.1.0
@@ -164,7 +164,7 @@ this package and the php package.
 %package pgsql
 Summary: A PostgreSQL database module for PHP.
 Group: Development/Languages
-Requires: php = %{version}-%{release}, php-pdo
+Requires: php-common = %{version}-%{release}, php-pdo
 Provides: php_database
 Obsoletes: mod_php3-pgsql, stronghold-php-pgsql
 BuildRequires: krb5-devel, openssl-devel, postgresql-devel
@@ -180,7 +180,7 @@ php package.
 
 %package odbc
 Group: Development/Languages
-Requires: php = %{version}-%{release}, php-pdo
+Requires: php-common = %{version}-%{release}, php-pdo
 Summary: A module for PHP applications that use ODBC databases.
 Provides: php_database
 Obsoletes: stronghold-php-odbc
@@ -197,7 +197,7 @@ package.
 
 %package soap
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 Summary: A module for PHP applications that use the SOAP protocol
 BuildRequires: libxml2-devel
 
@@ -208,7 +208,7 @@ support to PHP for using the SOAP web services protocol.
 %package snmp
 Summary: A module for PHP applications that query SNMP-managed devices.
 Group: Development/Languages
-Requires: php = %{version}-%{release}, net-snmp
+Requires: php-common = %{version}-%{release}, net-snmp
 BuildRequires: net-snmp-devel
 
 %description snmp
@@ -220,7 +220,7 @@ will need to install this package and the php package.
 %package xml
 Summary: A module for PHP applications which use XML
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 Obsoletes: php-domxml, php-dom
 Provides: php-dom, php-xsl, php-domxml
 BuildRequires: libxslt-devel >= 1.0.18-1, libxml2-devel >= 2.4.14-1
@@ -233,7 +233,7 @@ and performing XSL transformations on XML documents.
 %package xmlrpc
 Summary: A module for PHP applications which use the XML-RPC protocol
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 BuildRequires: expat-devel
 
 %description xmlrpc
@@ -243,7 +243,7 @@ support for the XML-RPC protocol to PHP.
 %package mbstring
 Summary: A module for PHP applications which need multi-byte string handling
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 
 %description mbstring
 The php-mbstring package contains a dynamic shared object that will add
@@ -252,7 +252,7 @@ support for multi-byte string handling to PHP.
 %package ncurses
 Summary: A module for PHP applications for using ncurses interfaces
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 BuildRequires: ncurses-devel
 
 %description ncurses
@@ -262,7 +262,7 @@ support for using the ncurses terminal output interfaces.
 %package gd
 Summary: A module for PHP applications for using the gd graphics library
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 BuildRequires: gd-devel, freetype-devel
 
 %description gd
@@ -272,7 +272,7 @@ support for using the gd graphics library to PHP.
 %package bcmath
 Summary: A module for PHP applications for using the bcmath library
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 
 %description bcmath
 The php-bcmath package contains a dynamic shared object that will add
@@ -281,7 +281,7 @@ support for using the bcmath library to PHP.
 %package dba
 Summary: A database abstraction layer module for PHP applications
 Group: Development/Languages
-Requires: php = %{version}-%{release}
+Requires: php-common = %{version}-%{release}
 
 %description dba
 The php-dba package contains a dynamic shared object that will add
@@ -454,7 +454,10 @@ build --enable-force-cgi-redirect \
       --with-pdo-odbc=shared,unixODBC,%{_prefix} \
       --with-pdo-mysql=shared,%{_prefix} \
       --with-pdo-pgsql=shared,%{_prefix} \
-      --with-pdo-sqlite=shared,%{_prefix}
+      --with-pdo-sqlite=shared,%{_prefix} \
+      --enable-json=shared \
+      --enable-zip=shared \
+      --with-readline
 popd
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
@@ -463,7 +466,8 @@ build --with-apxs2=%{_sbindir}/apxs \
       --without-mysql --without-gd \
       --without-odbc --disable-dom \
       --disable-dba --without-unixODBC \
-      --disable-pdo --disable-xmlreader --disable-xmlwriter
+      --disable-pdo --disable-xmlreader --disable-xmlwriter \
+      --disable-json
 popd
 
 %check
@@ -526,7 +530,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
-    pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite; do
+    pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -551,6 +555,9 @@ cat files.pdo_odbc >> files.odbc
 # Package pdo_sqlite with pdo; isolating the sqlite dependency
 # isn't useful at this time since rpm itself requires sqlite.
 cat files.pdo_sqlite >> files.pdo
+
+# Package json and zip in -common.
+cat files.json files.zip > files.common
 
 # Install the macros file:
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
@@ -578,7 +585,7 @@ rm files.* macros.php
 %config %{_sysconfdir}/httpd/conf.d/php.conf
 %{contentdir}/icons/php.gif
 
-%files common
+%files common -f files.common
 %defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
 %doc Zend/ZEND_* gd_README TSRM_LICENSE regex_COPYRIGHT
@@ -622,6 +629,12 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Mon Nov 27 2006 Joe Orton <jorton@redhat.com> 5.2.0-5
+- build json and zip shared, in -common (Remi Collet, #215966)
+- obsolete php-json and php-pecl-zip
+- build readline extension into /usr/bin/php* (#210585)
+- change module subpackages to require php-common not php (#177821)
+
 * Wed Nov 15 2006 Joe Orton <jorton@redhat.com> 5.2.0-4
 - provide php-zend-abi (#212804)
 - add /etc/rpm/macros.php exporting interface versions
