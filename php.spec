@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.2.0
-Release: 5
+Release: 6
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -629,6 +629,9 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Tue Nov 28 2006 Joe Orton <jorton@redhat.com> 5.2.0-6
+- rebuild for net-snmp soname bump
+
 * Mon Nov 27 2006 Joe Orton <jorton@redhat.com> 5.2.0-5
 - build json and zip shared, in -common (Remi Collet, #215966)
 - obsolete php-json and php-pecl-zip
