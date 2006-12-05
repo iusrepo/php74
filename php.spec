@@ -1,12 +1,12 @@
 %define contentdir /var/www
 %define apiver 20041225
-%define zendver 220060519
+%define zendver 20060613
 %define pdover 20060511
 
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.2.0
-Release: 7
+Release: 8
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -22,6 +22,7 @@ Patch3: php-5.0.4-norpath.patch
 Patch4: php-4.3.2-libtool15.patch
 Patch5: php-5.0.2-phpize64.patch
 Patch6: php-5.1.6-curl716.patch
+Patch7: php-5.2.0-filterm4.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -295,6 +296,7 @@ support for using the DBA database abstraction layer to PHP.
 %patch4 -p1 -b .libtool15
 %patch5 -p1 -b .phpize64
 %patch6 -p1 -b .curl716
+%patch7 -p1 -b .filterm4
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
@@ -330,7 +332,7 @@ if test "x${vapi}" != "x%{apiver}"; then
    exit 1
 fi
 
-vzend=`sed -n '/#define ZEND_EXTENSION_API_NO/{s/^[^0-9]*//;p;}' Zend/zend_extensions.h`
+vzend=`sed -n '/#define ZEND_MODULE_API_NO/{s/^[^0-9]*//;p;}' Zend/zend_modules.h`
 if test "x${vzend}" != "x%{zendver}"; then
    : Error: Upstream Zend ABI version is now ${vzend}, expecting %{zendver}.
    : Update the zendver macro and rebuild.
@@ -629,6 +631,10 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Tue Dec  5 2006 Joe Orton <jorton@redhat.com> 5.2.0-8
+- fix filter.h installation path
+- fix php-zend-abi version (Remi Collet, #212804)
+
 * Tue Nov 28 2006 Joe Orton <jorton@redhat.com> 5.2.0-7
 - rebuild again
 
