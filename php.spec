@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
 Name: php
 Version: 5.2.0
-Release: 8
+Release: 9
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -23,6 +23,7 @@ Patch4: php-4.3.2-libtool15.patch
 Patch5: php-5.0.2-phpize64.patch
 Patch6: php-5.1.6-curl716.patch
 Patch7: php-5.2.0-filterm4.patch
+Patch8: php-5.2.0-includedir.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -79,6 +80,7 @@ executing PHP scripts, /usr/bin/php, and the CGI interface.
 Group: Development/Languages
 Summary: Common files for PHP
 Provides: php-api = %{apiver}, php-zend-abi = %{zendver}
+Provides: php(api) = %{apiver}, php(zend-abi) = %{zendver}
 # Provides for all builtin modules:
 Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
 Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
@@ -297,6 +299,7 @@ support for using the DBA database abstraction layer to PHP.
 %patch5 -p1 -b .phpize64
 %patch6 -p1 -b .curl716
 %patch7 -p1 -b .filterm4
+%patch8 -p1 -b .includedir
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
@@ -511,8 +514,9 @@ install -m 644 $RPM_SOURCE_DIR/php.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 install -m 755 -d $RPM_BUILD_ROOT%{contentdir}/icons
 install -m 644    *.gif $RPM_BUILD_ROOT%{contentdir}/icons/
 
-# For PEAR packaging:
-install -m 755 -d $RPM_BUILD_ROOT%{_libdir}/php/pear
+# For third-party packaging:
+install -m 755 -d $RPM_BUILD_ROOT%{_libdir}/php/pear \
+                  $RPM_BUILD_ROOT%{_datadir}/php
 
 # Use correct libdir
 sed -i -e 's|%{_prefix}/lib|%{_libdir}|' $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
@@ -597,6 +601,7 @@ rm files.* macros.php
 %dir %{_libdir}/php/modules
 %dir %{_localstatedir}/lib/php
 %dir %{_libdir}/php/pear
+%dir %{_datadir}/php
 
 %files cli
 %defattr(-,root,root)
@@ -631,6 +636,10 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Tue Jan 30 2007 Joe Orton <jorton@redhat.com> 5.2.0-9
+- add php(api), php(zend-abi) provides (#221302)
+- package /usr/share/php and append to default include_path (#225434)
+
 * Tue Dec  5 2006 Joe Orton <jorton@redhat.com> 5.2.0-8
 - fix filter.h installation path
 - fix php-zend-abi version (Remi Collet, #212804)
