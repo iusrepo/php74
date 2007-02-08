@@ -3,10 +3,10 @@
 %define zendver 20060613
 %define pdover 20060511
 
-Summary: The PHP HTML-embedded scripting language. (PHP: Hypertext Preprocessor)
+Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.0
-Release: 9
+Release: 10
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -19,7 +19,6 @@ Source3: macros.php
 Patch1: php-5.1.4-gnusrc.patch
 Patch2: php-4.3.3-install.patch
 Patch3: php-5.0.4-norpath.patch
-Patch4: php-4.3.2-libtool15.patch
 Patch5: php-5.0.2-phpize64.patch
 Patch6: php-5.1.6-curl716.patch
 Patch7: php-5.2.0-filterm4.patch
@@ -37,7 +36,7 @@ Patch31: php-5.0.0-easter.patch
 Patch50: php-5.0.4-tests-dashn.patch
 Patch51: php-5.0.4-tests-wddx.patch
 
-BuildRoot: %{_tmppath}/%{name}-root
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
 BuildRequires: gmp-devel, aspell-devel >= 0.50.0
@@ -96,7 +95,7 @@ package and the php-cli package.
 
 %package devel
 Group: Development/Libraries
-Summary: Files needed for building PHP extensions.
+Summary: Files needed for building PHP extensions
 Requires: php = %{version}-%{release}, autoconf, automake
 Obsoletes: php-pecl-pdo-devel
 
@@ -106,7 +105,7 @@ extensions. If you need to compile your own PHP extensions, you will
 need to install this package.
 
 %package imap
-Summary: A module for PHP applications that use IMAP.
+Summary: A module for PHP applications that use IMAP
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}
 Obsoletes: mod_php3-imap, stronghold-php-imap
@@ -122,7 +121,7 @@ support for PHP applications, you will need to install this package
 and the php package.
 
 %package ldap
-Summary: A module for PHP applications that use LDAP.
+Summary: A module for PHP applications that use LDAP
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}
 Obsoletes: mod_php3-ldap, stronghold-php-ldap
@@ -150,7 +149,7 @@ a common interface for accessing MySQL, PostgreSQL or other
 databases.
 
 %package mysql
-Summary: A module for PHP applications that use MySQL databases.
+Summary: A module for PHP applications that use MySQL databases
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}, php-pdo
 Provides: php_database, php-mysqli
@@ -165,7 +164,7 @@ you need MySQL support for PHP applications, you will need to install
 this package and the php package.
 
 %package pgsql
-Summary: A PostgreSQL database module for PHP.
+Summary: A PostgreSQL database module for PHP
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}, php-pdo
 Provides: php_database
@@ -184,7 +183,7 @@ php package.
 %package odbc
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}, php-pdo
-Summary: A module for PHP applications that use ODBC databases.
+Summary: A module for PHP applications that use ODBC databases
 Provides: php_database
 Obsoletes: stronghold-php-odbc
 BuildRequires: unixODBC-devel
@@ -209,7 +208,7 @@ The php-soap package contains a dynamic shared object that will add
 support to PHP for using the SOAP web services protocol.
 
 %package snmp
-Summary: A module for PHP applications that query SNMP-managed devices.
+Summary: A module for PHP applications that query SNMP-managed devices
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}, net-snmp
 BuildRequires: net-snmp-devel
@@ -295,7 +294,6 @@ support for using the DBA database abstraction layer to PHP.
 %patch1 -p1 -b .gnusrc
 %patch2 -p1 -b .install
 %patch3 -p1 -b .norpath
-%patch4 -p1 -b .libtool15
 %patch5 -p1 -b .phpize64
 %patch6 -p1 -b .curl716
 %patch7 -p1 -b .filterm4
@@ -588,14 +586,14 @@ rm files.* macros.php
 %defattr(-,root,root)
 %{_libdir}/httpd/modules/libphp5.so
 %attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
-%config %{_sysconfdir}/httpd/conf.d/php.conf
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/php.conf
 %{contentdir}/icons/php.gif
 
 %files common -f files.common
 %defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
 %doc Zend/ZEND_* gd_README TSRM_LICENSE regex_COPYRIGHT
-%config %{_sysconfdir}/php.ini
+%config(noreplace) %{_sysconfdir}/php.ini
 %dir %{_sysconfdir}/php.d
 %dir %{_libdir}/php
 %dir %{_libdir}/php/modules
@@ -636,6 +634,13 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Thu Feb  8 2007 Joe Orton <jorton@redhat.com> 5.2.0-10
+- bump default memory_limit to 32M (#220821)
+- mark config files noreplace again (#174251)
+- drop trailing dots from Summary fields
+- use standard BuildRoot
+- drop libtool15 patch (#226294)
+
 * Tue Jan 30 2007 Joe Orton <jorton@redhat.com> 5.2.0-9
 - add php(api), php(zend-abi) provides (#221302)
 - package /usr/share/php and append to default include_path (#225434)
