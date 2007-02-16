@@ -5,8 +5,8 @@
 
 Summary: The PHP HTML-embedded scripting language
 Name: php
-Version: 5.2.0
-Release: 10
+Version: 5.2.1
+Release: 2
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -20,9 +20,8 @@ Patch1: php-5.1.4-gnusrc.patch
 Patch2: php-4.3.3-install.patch
 Patch3: php-5.0.4-norpath.patch
 Patch5: php-5.0.2-phpize64.patch
-Patch6: php-5.1.6-curl716.patch
-Patch7: php-5.2.0-filterm4.patch
 Patch8: php-5.2.0-includedir.patch
+Patch9: php-5.2.1-strreplace.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -52,6 +51,8 @@ Provides: mod_php = %{version}-%{release}
 Requires: php-common = %{version}-%{release}
 # For backwards-compatibility, require php-cli for the time being:
 Requires: php-cli = %{version}-%{release}
+# To ensure correct /var/lib/php/session ownership:
+Requires(pre): httpd
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -295,8 +296,6 @@ support for using the DBA database abstraction layer to PHP.
 %patch2 -p1 -b .install
 %patch3 -p1 -b .norpath
 %patch5 -p1 -b .phpize64
-%patch6 -p1 -b .curl716
-%patch7 -p1 -b .filterm4
 %patch8 -p1 -b .includedir
 
 %patch21 -p1 -b .odbc
@@ -634,6 +633,12 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Thu Feb 15 2007 Joe Orton <jorton@redhat.com> 5.2.1-2
+- update to 5.2.1
+- fix regression in str_{i,}replace (from upstream)
+- add Requires(pre) for httpd
+- trim %%changelog to versions >= 5.0.0
+
 * Thu Feb  8 2007 Joe Orton <jorton@redhat.com> 5.2.0-10
 - bump default memory_limit to 32M (#220821)
 - mark config files noreplace again (#174251)
@@ -906,177 +911,3 @@ rm files.* macros.php
 - add patch to prevent clobbering struct re_registers from regex.h
 - remove domxml references, replaced with dom now built-in
 - fix php.ini to refer to php5 not php4
-
-* Wed Aug 04 2004 Florian La Roche <Florian.LaRoche@redhat.de>
-- rebuild
-
-* Wed Jul 14 2004 Joe Orton <jorton@redhat.com> 4.3.8-3
-- update to 4.3.8
-- catch some fd > FD_SETSIZE vs select() issues (#125258)
-
-* Mon Jun 21 2004 Joe Orton <jorton@redhat.com> 4.3.7-4
-- pick up test failures again
-- have -devel require php of same release
-
-* Thu Jun 17 2004 Joe Orton <jorton@redhat.com> 4.3.7-3
-- add gmp_powm fix (Oskari Saarenmaa, #124318)
-- split mbstring, ncurses, gd, openssl extns into subpackages
-- fix memory leak in apache2handler; use ap_r{write,flush}
-  rather than brigade interfaces
-
-* Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
-- rebuilt
-
-* Thu Jun  3 2004 Joe Orton <jorton@redhat.com> 4.3.7-1
-- update to 4.3.7
-- have -pear subpackage require php of same VR
-
-* Wed May 26 2004 Joe Orton <jorton@redhat.com> 4.3.6-6
-- buildrequire smtpdaemon (#124430)
-- try switching to system libgd again (prevent symbol conflicts
-  when e.g. mod_perl loads the system libgd library.)
-
-* Wed May 19 2004 Joe Orton <jorton@redhat.com> 4.3.6-5
-- don't obsolete php-imap (#123580)
-- unconditionally build -imap subpackage
-
-* Thu May 13 2004 Joe Orton <jorton@redhat.com> 4.3.6-4
-- remove trigger
-
-* Thu Apr 22 2004 Joe Orton <jorton@redhat.com> 4.3.6-3
-- fix umask reset "feature" (#121454)
-- don't use DL_GLOBAL when dlopen'ing extension modules
-
-* Sun Apr 18 2004 Joe Orton <jorton@redhat.com> 4.3.6-2
-- fix segfault on httpd SIGHUP (upstream #27810)
-
-* Fri Apr 16 2004 Joe Orton <jorton@redhat.com> 4.3.6-1
-- update to 4.3.6 (Robert Scheck, #121011)
-
-* Wed Apr  7 2004 Joe Orton <jorton@redhat.com> 4.3.4-11
-- add back imap subpackage, using libc-client (#115535)
-
-* Tue Mar 02 2004 Elliot Lee <sopwith@redhat.com>
-- rebuilt
-
-* Wed Feb 18 2004 Joe Orton <jorton@redhat.com> 4.3.4-10
-- eliminate /usr/local/lib RPATH in odbc.so
-- really use system pcre library
-
-* Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com> 4.3.4-9
-- rebuilt
-
-* Mon Feb  2 2004 Bill Nottingham <notting@redhat.com> 4.3.4-8
-- obsolete php-imap if we're not building it
-
-* Wed Jan 28 2004 Joe Orton <jorton@redhat.com> 4.3.4-7
-- gd fix for build with recent Freetype2 (from upstream)
-- remove easter egg (Oden Eriksson, Mandrake)
-
-* Wed Jan 21 2004 Joe Orton <jorton@redhat.com> 4.3.4-6
-- php-pear requires php
-- also remove extension=imap from php.ini in upgrade trigger
-- merge from Taroon: allow upgrade from Stronghold 4.0
-
-* Wed Jan 21 2004 Joe Orton <jorton@redhat.com> 4.3.4-5
-- add defattr for php-pear subpackage
-- restore defaults: output_buffering=Off, register_argc_argv=On
-- add trigger to handle php.ini upgrades smoothly (#112470)
-
-* Tue Jan 13 2004 Joe Orton <jorton@redhat.com> 4.3.4-4
-- conditionalize support for imap extension for the time being
-- switch /etc/php.ini to use php.ini-recommended (but leave
-  variables_order as EGPCS) (#97765)
-- set session.path to /var/lib/php/session by default (#89975)
-- own /var/lib/php{,/session} and have apache own the latter
-- split off php-pear subpackage (#83771)
-
-* Sat Dec 13 2003 Jeff Johnson <jbj@jbj.org> 4.3.4-3
-- rebuild against db-4.2.52.
-
-* Mon Dec  1 2003 Joe Orton <jorton@redhat.com> 4.3.4-2
-- rebuild for new libxslt (#110658) 
-- use --with-{mssql,oci8} for enabling extensions (#110482)
-- fix rebuild issues (Jan Visser, #110274)
-- remove hard-coded LIBS
-- conditional support for mhash (Aleksander Adamowski, #111251)
-
-* Mon Nov 10 2003 Joe Orton <jorton@redhat.com> 4.3.4-1.1
-- rebuild for FC1 updates
-
-* Mon Nov 10 2003 Joe Orton <jorton@redhat.com> 4.3.4-1
-- update to 4.3.4
-- include all licence files
-- libxmlrpc fixes
-
-* Mon Oct 20 2003 Joe Orton <jorton@redhat.com> 4.3.3-6
-- use bundled libgd (#107407)
-- remove manual: up-to-date manual sources are no longer DFSG-free;
-  it's too big; it's on the web anyway; #91292, #105804, #107384
-
-* Wed Oct 15 2003 Joe Orton <jorton@redhat.com> 4.3.3-5
-- add php-xmlrpc subpackage (#107138)
-
-* Mon Oct 13 2003 Joe Orton <jorton@redhat.com> 4.3.3-4
-- drop recode support, symbols collide with MySQL
-
-* Sun Oct 12 2003 Joe Orton <jorton@redhat.com> 4.3.3-3
-- split domxml extension into php-domxml subpackage
-- enable xslt and xml support in domxml extension (#106042)
-- fix httpd-devel build requirement (#104341)
-- enable recode extension (#106755)
-- add workaround for #103982
-
-* Thu Sep 25 2003 Jeff Johnson <jbj@jbj.org> 4.3.3-3
-- rebuild against db-4.2.42.
-
-* Sun Sep  7 2003 Joe Orton <jorton@redhat.com> 4.3.3-2
-- don't use --enable-versioning, it depends on libtool being
- broken (#103690)
-
-* Sun Sep  7 2003 Joe Orton <jorton@redhat.com> 4.3.3-1
-- update to 4.3.3
-- add libtool build prereq (#103388)
-- switch to apache2handler
-
-* Mon Jul 28 2003 Joe Orton <jorton@redhat.com> 4.3.2-8
-- rebuild
-
-* Tue Jul 22 2003 Nalin Dahyabhai <nalin@redhat.com> 4.3.2-7
-- rebuild
-
-* Tue Jul  8 2003 Joe Orton <jorton@redhat.com> 4.3.2-6
-- use system pcre library
-
-* Mon Jun  9 2003 Joe Orton <jorton@redhat.com> 4.3.2-5
-- enable mbstring and mbregex (#81336)
-- fix use of libtool 1.5
-
-* Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
-- rebuilt
-
-* Tue Jun  3 2003 Joe Orton <jorton@redhat.com> 4.3.2-3
-- add lib64 and domxml fixes
-
-* Tue Jun  3 2003 Frank Dauer <f@paf.net>
-- added conditional support for mssql module (#92149)
-
-* Fri May 30 2003 Joe Orton <jorton@redhat.com> 4.3.2-2
-- update the -tests and -lib64 patches
-- fixes for db4 detection
-- require aspell-devel >= 0.50.0 for pspell compatibility
-
-* Thu May 29 2003 Joe Orton <jorton@redhat.com> 4.3.2-1
-- update to 4.3.2
-
-* Fri May 16 2003 Joe Orton <jorton@redhat.com> 4.3.1-3
-- link odbc module correctly
-- patch so that php -n doesn't scan inidir
-- run tests using php -n, avoid loading system modules
-
-* Wed May 14 2003 Joe Orton <jorton@redhat.com> 4.3.1-2
-- workaround broken parser produced by bison-1.875
-
-* Tue May  6 2003 Joe Orton <jorton@redhat.com> 4.3.1-1
-- update to 4.3.1; run test suite
-- open extension modules with RTLD_NOW rather than _LAZY
