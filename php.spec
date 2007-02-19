@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.1
-Release: 2
+Release: 3
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -297,6 +297,7 @@ support for using the DBA database abstraction layer to PHP.
 %patch3 -p1 -b .norpath
 %patch5 -p1 -b .phpize64
 %patch8 -p1 -b .includedir
+%patch9 -p1 -b .strreplace
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
@@ -633,9 +634,11 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Mon Feb 19 2007 Joe Orton <jorton@redhat.com> 5.2.1-3
+- fix regression in str_{i,}replace (from upstream)
+
 * Thu Feb 15 2007 Joe Orton <jorton@redhat.com> 5.2.1-2
 - update to 5.2.1
-- fix regression in str_{i,}replace (from upstream)
 - add Requires(pre) for httpd
 - trim %%changelog to versions >= 5.0.0
 
