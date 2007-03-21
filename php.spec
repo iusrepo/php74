@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.1
-Release: 3
+Release: 4
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -42,11 +42,10 @@ BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
 BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon, readline-devel
-BuildRequires: bzip2, fileutils, file >= 4.0, perl, libtool >= 1.4.3, gcc-c++
+BuildRequires: bzip2, fileutils, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, php3, phpfi, stronghold-php
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
-Requires: file >= 4.0
 Provides: mod_php = %{version}-%{release}
 Requires: php-common = %{version}-%{release}
 # For backwards-compatibility, require php-cli for the time being:
@@ -84,7 +83,7 @@ Provides: php(api) = %{apiver}, php(zend-abi) = %{zendver}
 # Provides for all builtin modules:
 Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
 Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
-Provides: php-mime_magic, php-openssl, php-pcre, php-posix, php-pspell
+Provides: php-openssl, php-pcre, php-posix, php-pspell
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
 Provides: php-wddx, php-zlib, php-json, php-zip
@@ -416,7 +415,7 @@ ln -sf ../configure
 	--enable-calendar \
 	--enable-dbx \
 	--enable-dio \
-        --with-mime-magic=%{_sysconfdir}/httpd/conf/magic \
+        --without-mime-magic \
         --without-sqlite \
         --with-libxml-dir=%{_prefix} \
 	--with-xml \
@@ -634,6 +633,9 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Wed Mar 21 2007 Joe Orton <jorton@redhat.com> 5.2.1-4
+- drop mime_magic extension (deprecated by php-pecl-Fileinfo)
+
 * Mon Feb 19 2007 Joe Orton <jorton@redhat.com> 5.2.1-3
 - fix regression in str_{i,}replace (from upstream)
 
