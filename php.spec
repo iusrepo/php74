@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.1
-Release: 4
+Release: 5
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -42,7 +42,7 @@ BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
 BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon, readline-devel
-BuildRequires: bzip2, fileutils, perl, libtool >= 1.4.3, gcc-c++
+BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, php3, phpfi, stronghold-php
 # Enforce Apache module ABI compatibility
 Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
@@ -441,7 +441,7 @@ build --enable-force-cgi-redirect \
       --enable-bcmath=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
       --with-xmlrpc=shared \
-      --with-ldap=shared \
+      --with-ldap=shared --with-ldap-sasl \
       --with-mysql=shared,%{_prefix} \
       --with-mysqli=shared,%{_bindir}/mysql_config \
       --enable-dom=shared \
@@ -633,6 +633,9 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Thu Mar 29 2007 Joe Orton <jorton@redhat.com> 5.2.1-5
+- enable SASL support in LDAP extension (#205772)
+
 * Wed Mar 21 2007 Joe Orton <jorton@redhat.com> 5.2.1-4
 - drop mime_magic extension (deprecated by php-pecl-Fileinfo)
 
