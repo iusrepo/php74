@@ -5,8 +5,8 @@
 
 Summary: The PHP HTML-embedded scripting language
 Name: php
-Version: 5.2.1
-Release: 5
+Version: 5.2.2
+Release: 2
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -21,7 +21,6 @@ Patch2: php-4.3.3-install.patch
 Patch3: php-5.0.4-norpath.patch
 Patch5: php-5.0.2-phpize64.patch
 Patch8: php-5.2.0-includedir.patch
-Patch9: php-5.2.1-strreplace.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -296,7 +295,6 @@ support for using the DBA database abstraction layer to PHP.
 %patch3 -p1 -b .norpath
 %patch5 -p1 -b .phpize64
 %patch8 -p1 -b .includedir
-%patch9 -p1 -b .strreplace
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
@@ -633,6 +631,10 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Fri May  4 2007 Joe Orton <jorton@redhat.com> 5.2.2-2
+- update to 5.2.2
+- synch changes from upstream recommended php.ini
+
 * Thu Mar 29 2007 Joe Orton <jorton@redhat.com> 5.2.1-5
 - enable SASL support in LDAP extension (#205772)
 
