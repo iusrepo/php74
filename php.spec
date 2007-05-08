@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.2
-Release: 2
+Release: 3
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -108,7 +108,7 @@ Summary: A module for PHP applications that use IMAP
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}
 Obsoletes: mod_php3-imap, stronghold-php-imap
-BuildRequires: krb5-devel, openssl-devel, libc-client-devel
+BuildRequires: krb5-devel, openssl-devel, uw-imap-devel
 
 %description imap
 The php-imap package contains a dynamic shared object (DSO) for the
@@ -631,6 +631,9 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Tue May  8 2007 Joe Orton <jorton@redhat.com> 5.2.2-3
+- rebuild against uw-imap-devel
+
 * Fri May  4 2007 Joe Orton <jorton@redhat.com> 5.2.2-2
 - update to 5.2.2
 - synch changes from upstream recommended php.ini
