@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.2
-Release: 3
+Release: 4
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -25,6 +25,7 @@ Patch8: php-5.2.0-includedir.patch
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
+Patch23: php-5.2.2-pdosym.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -108,7 +109,7 @@ Summary: A module for PHP applications that use IMAP
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}
 Obsoletes: mod_php3-imap, stronghold-php-imap
-BuildRequires: krb5-devel, openssl-devel, uw-imap-devel
+BuildRequires: krb5-devel, openssl-devel, libc-client-devel
 
 %description imap
 The php-imap package contains a dynamic shared object (DSO) for the
@@ -298,6 +299,7 @@ support for using the DBA database abstraction layer to PHP.
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
+%patch23 -p1 -b .pdosym
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -631,6 +633,9 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Wed May  9 2007 Joe Orton <jorton@redhat.com> 5.2.2-4
+- fix php-pdo *_arg_force_ref global symbol abuse (#216125)
+
 * Tue May  8 2007 Joe Orton <jorton@redhat.com> 5.2.2-3
 - rebuild against uw-imap-devel
 
