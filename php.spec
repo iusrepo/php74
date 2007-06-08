@@ -5,8 +5,8 @@
 
 Summary: The PHP HTML-embedded scripting language
 Name: php
-Version: 5.2.2
-Release: 4
+Version: 5.2.3
+Release: 2
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -493,17 +493,10 @@ unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 # Install everything from the CGI SAPI build
-pushd build-cgi
-make install INSTALL_ROOT=$RPM_BUILD_ROOT 
-mv $RPM_BUILD_ROOT%{_bindir}/php $RPM_BUILD_ROOT%{_bindir}/php-cgi
-# Install the CLI SAPI as /usr/bin/php
-make install-cli INSTALL_ROOT=$RPM_BUILD_ROOT
-popd
+make -C build-cgi install INSTALL_ROOT=$RPM_BUILD_ROOT 
 
 # Install the Apache module
-pushd build-apache
-make install-sapi INSTALL_ROOT=$RPM_BUILD_ROOT
-popd
+make -C build-apache install-sapi INSTALL_ROOT=$RPM_BUILD_ROOT
 
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
@@ -633,6 +626,9 @@ rm files.* macros.php
 %files pdo -f files.pdo
 
 %changelog
+* Fri Jun  8 2007 Joe Orton <jorton@redhat.com> 5.2.3-2
+- update to 5.2.3 (thanks to Jeff Sheltren)
+
 * Wed May  9 2007 Joe Orton <jorton@redhat.com> 5.2.2-4
 - fix php-pdo *_arg_force_ref global symbol abuse (#216125)
 
