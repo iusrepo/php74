@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.3
-Release: 2
+Release: 3
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -86,7 +86,7 @@ Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
 Provides: php-openssl, php-pcre, php-posix, php-pspell
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
-Provides: php-wddx, php-zlib, php-json, php-zip
+Provides: php-wddx, php-zlib, php-json, php-zip, php-dbase
 Obsoletes: php-openssl, php-pecl-zip, php-json
 
 %description common
@@ -289,6 +289,48 @@ Requires: php-common = %{version}-%{release}
 The php-dba package contains a dynamic shared object that will add
 support for using the DBA database abstraction layer to PHP.
 
+%package mcrypt
+Summary: Standard PHP module provides mcrypt library support
+Group: Development/Languages
+Requires: php-common = %{version}-%{release}
+BuildRequires: libmcrypt-devel
+
+%description mcrypt
+The php-mcrypt package contains a dynamic shared object that will add
+support for using the mcrypt library to PHP.
+
+%package mhash
+Summary: Standard PHP module provides mhash support
+Group: Development/Languages
+Requires: php-common = %{version}-%{release}
+BuildRequires: mhash-devel
+
+%description mhash
+The php-mhash package contains a dynamic shared object that will add
+support for using the mhash library to PHP.
+
+%package tidy
+Summary: Standard PHP module provides tidy library support
+Group: Development/Languages
+Requires: php-common = %{version}-%{release}
+BuildRequires: libtidy-devel
+
+%description tidy
+The php-tidy package contains a dynamic shared object that will add
+support for using the tidy library to PHP.
+
+%package mssql
+Summary: MSSQL database module for PHP
+Group: Development/Languages
+Requires: php-common = %{version}-%{release}
+BuildRequires: freetds-devel
+
+%description mssql
+The php-mssql package contains a dynamic shared object that will
+add MSSQL database support to PHP.  It uses the TDS (Tabular
+DataStream) protocol through the freetds library, hence any
+database server which supports TDS can be accessed.
+
 %prep
 %setup -q
 %patch1 -p1 -b .gnusrc
@@ -459,7 +501,12 @@ build --enable-force-cgi-redirect \
       --with-pdo-sqlite=shared,%{_prefix} \
       --enable-json=shared \
       --enable-zip=shared \
-      --with-readline
+      --with-readline \
+      --enable-dbase=shared \
+      --with-mcrypt=shared,%{_prefix} \
+      --with-mhash=shared,%{_prefix} \
+      --with-tidy=shared,%{_prefix} \
+      --with-mssql=shared,%{_prefix}
 popd
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
@@ -526,7 +573,8 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
-    pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip; do
+    pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip \
+    dbase mcrypt mhash tidy mssql; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -552,8 +600,8 @@ cat files.pdo_odbc >> files.odbc
 # isn't useful at this time since rpm itself requires sqlite.
 cat files.pdo_sqlite >> files.pdo
 
-# Package json and zip in -common.
-cat files.json files.zip > files.common
+# Package json, dbase and zip in -common.
+cat files.json files.dbase files.zip > files.common
 
 # Install the macros file:
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
@@ -624,8 +672,16 @@ rm files.* macros.php
 %files bcmath -f files.bcmath
 %files dba -f files.dba
 %files pdo -f files.pdo
+%files mcrypt -f files.mcrypt
+%files mhash -f files.mhash
+%files tidy -f files.tidy
+%files mssql -f files.mssql
 
 %changelog
+* Tue Jun 19 2007 Joe Orton <jorton@redhat.com> 5.2.3-3
+- add mcrypt, mhash, tidy, mssql subpackages (Dmitry Butskoy)
+- enable dbase extension and package in -common
+
 * Fri Jun  8 2007 Joe Orton <jorton@redhat.com> 5.2.3-2
 - update to 5.2.3 (thanks to Jeff Sheltren)
 
