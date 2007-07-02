@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.3
-Release: 3
+Release: 4
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -87,7 +87,7 @@ Provides: php-openssl, php-pcre, php-posix, php-pspell
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
 Provides: php-wddx, php-zlib, php-json, php-zip, php-dbase
-Obsoletes: php-openssl, php-pecl-zip, php-json
+Obsoletes: php-openssl, php-pecl-zip, php-json, php-dbase
 
 %description common
 The php-common package contains files used by both the php
@@ -678,6 +678,9 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Mon Jul  2 2007 Joe Orton <jorton@redhat.com> 5.2.3-4
+- obsolete php-dbase
+
 * Tue Jun 19 2007 Joe Orton <jorton@redhat.com> 5.2.3-3
 - add mcrypt, mhash, tidy, mssql subpackages (Dmitry Butskoy)
 - enable dbase extension and package in -common
