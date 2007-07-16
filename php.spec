@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.3
-Release: 4
+Release: 5
 License: The PHP License v3.01
 Group: Development/Languages
 URL: http://www.php.net/
@@ -678,6 +678,9 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Mon Jul 16 2007 Joe Orton <jorton@redhat.com> 5.2.3-5
+- define php_extdir in macros.php
+
 * Mon Jul  2 2007 Joe Orton <jorton@redhat.com> 5.2.3-4
 - obsolete php-dbase
 
