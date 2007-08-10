@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.3
-Release: 6
+Release: 7
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -21,6 +21,7 @@ Patch2: php-4.3.3-install.patch
 Patch3: php-5.0.4-norpath.patch
 Patch5: php-5.0.2-phpize64.patch
 Patch8: php-5.2.0-includedir.patch
+Patch9: php-5.2.3-embed.patch
 
 # Fixes for extension modules
 Patch21: php-4.3.1-odbc.patch
@@ -332,6 +333,17 @@ add MSSQL database support to PHP.  It uses the TDS (Tabular
 DataStream) protocol through the freetds library, hence any
 database server which supports TDS can be accessed.
 
+%package embedded
+Summary: PHP library for embedding in applications
+Group: System Environment/Libraries
+Requires: php-common = %{version}-%{release}
+# doing a real -devel package for just the .so symlink is a bit overkill
+Provides: php-embedded-devel = %{version}-%{release}
+
+%description embedded
+The php-embedded package contains a library which can be embedded
+into applications to provide PHP scripting language support.
+
 %prep
 %setup -q
 %patch1 -p1 -b .gnusrc
@@ -339,6 +351,7 @@ database server which supports TDS can be accessed.
 %patch3 -p1 -b .norpath
 %patch5 -p1 -b .phpize64
 %patch8 -p1 -b .includedir
+%patch9 -p1 -b .embed
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
@@ -357,8 +370,9 @@ cp TSRM/LICENSE TSRM_LICENSE
 cp regex/COPYRIGHT regex_COPYRIGHT
 cp ext/gd/libgd/README gd_README
 
-# Source is built twice: once for /usr/bin/php, once for the Apache DSO.
-mkdir build-cgi build-apache
+# Source is built trice: once for /usr/bin/php, once for the Apache DSO
+# and once for inclusion as embedded script language into other programs
+mkdir build-cgi build-apache build-embedded
 
 # Remove bogus test; position of read position after fopen(, "a+")
 # is not defined by C standard, so don't presume anything.
@@ -521,6 +535,17 @@ build --with-apxs2=%{_sbindir}/apxs \
       --disable-json
 popd
 
+# Build for inclusion as embedded script language into applications,
+# /usr/lib[64]/libphp5.so
+pushd build-embedded
+build --enable-embed \
+      --without-mysql --without-gd \
+      --without-odbc --disable-dom \
+      --disable-dba --without-unixODBC \
+      --disable-pdo --disable-xmlreader --disable-xmlwriter \
+      --disable-json
+popd
+
 %check
 cd build-apache
 # Run tests, using the CLI SAPI
@@ -546,6 +571,9 @@ make -C build-cgi install INSTALL_ROOT=$RPM_BUILD_ROOT
 
 # Install the Apache module
 make -C build-apache install-sapi INSTALL_ROOT=$RPM_BUILD_ROOT
+
+# Install the version for embedded script language in applications
+make -C build-embedded install-sapi INSTALL_ROOT=$RPM_BUILD_ROOT
 
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
@@ -659,6 +687,11 @@ rm files.* macros.php
 %{_mandir}/man1/phpize.1*
 %config %{_sysconfdir}/rpm/macros.php
 
+%files embedded
+%defattr(-,root,root,-)
+%{_libdir}/libphp5.so
+%{_libdir}/libphp5-%{version}.so
+
 %files pgsql -f files.pgsql
 %files mysql -f files.mysql
 %files odbc -f files.odbc
@@ -680,6 +713,9 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Fri Aug 10 2007 Hans de Goede <j.w.r.degoede@hhs.nl> 5.2.3-7
+- add php-embedded sub-package
+
 * Fri Aug 10 2007 Joe Orton <jorton@redhat.com> 5.2.3-6
 - fix build with new glibc
 - fix License
