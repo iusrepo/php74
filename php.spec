@@ -6,8 +6,8 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.3
-Release: 5
-License: The PHP License v3.01
+Release: 6
+License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
 
@@ -26,6 +26,7 @@ Patch8: php-5.2.0-includedir.patch
 Patch21: php-4.3.1-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
 Patch23: php-5.2.2-pdosym.patch
+Patch24: php-5.2.3-macropen.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -342,6 +343,7 @@ database server which supports TDS can be accessed.
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
 %patch23 -p1 -b .pdosym
+%patch24 -p1 -b .macropen
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -678,6 +680,10 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Fri Aug 10 2007 Joe Orton <jorton@redhat.com> 5.2.3-6
+- fix build with new glibc
+- fix License
+
 * Mon Jul 16 2007 Joe Orton <jorton@redhat.com> 5.2.3-5
 - define php_extdir in macros.php
 
