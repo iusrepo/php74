@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.3
-Release: 7
+Release: 8
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -652,6 +652,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 rm files.* macros.php
 
+%post embedded -p /sbin/ldconfig
+%postun embedded -p /sbin/ldconfig
+
 %files
 %defattr(-,root,root)
 %{_libdir}/httpd/modules/libphp5.so
@@ -713,6 +716,9 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Tue Aug 28 2007 Joe Orton <jorton@redhat.com> 5.2.3-8
+- add ldconfig post/postun for -embedded (Hans de Goede)
+
 * Fri Aug 10 2007 Hans de Goede <j.w.r.degoede@hhs.nl> 5.2.3-7
 - add php-embedded sub-package
 
