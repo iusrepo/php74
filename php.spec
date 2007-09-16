@@ -5,8 +5,8 @@
 
 Summary: The PHP HTML-embedded scripting language
 Name: php
-Version: 5.2.3
-Release: 9
+Version: 5.2.4
+Release: 2
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -16,25 +16,25 @@ Source1: php.conf
 Source2: php.ini
 Source3: macros.php
 
-Patch1: php-5.1.4-gnusrc.patch
+Patch1: php-5.2.4-gnusrc.patch
 Patch2: php-4.3.3-install.patch
-Patch3: php-5.0.4-norpath.patch
+Patch3: php-5.2.4-norpath.patch
 Patch5: php-5.0.2-phpize64.patch
 Patch8: php-5.2.0-includedir.patch
-Patch9: php-5.2.3-embed.patch
+Patch9: php-5.2.4-embed.patch
 
 # Fixes for extension modules
-Patch21: php-4.3.1-odbc.patch
+Patch21: php-5.2.4-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
 Patch23: php-5.2.2-pdosym.patch
 Patch24: php-5.2.3-macropen.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
-Patch31: php-5.0.0-easter.patch
+Patch31: php-5.2.4-easter.patch
 
 # Fixes for tests
-Patch50: php-5.0.4-tests-dashn.patch
+Patch50: php-5.2.4-tests-dashn.patch
 Patch51: php-5.0.4-tests-wddx.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -716,6 +716,9 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Sun Sep 16 2007 Joe Orton <jorton@redhat.com> 5.2.4-2
+- update to 5.2.4
+
 * Sun Sep  2 2007 Joe Orton <jorton@redhat.com> 5.2.3-9
 - rebuild for fixed APR
 
