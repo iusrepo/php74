@@ -1,39 +1,12 @@
 --- php-5.2.4/sapi/embed/config.m4.embed
 +++ php-5.2.4/sapi/embed/config.m4
-@@ -12,7 +12,7 @@ if test "$PHP_EMBED" != "no"; then
+@@ -12,7 +12,8 @@ if test "$PHP_EMBED" != "no"; then
    case "$PHP_EMBED" in
      yes|shared)
        PHP_EMBED_TYPE=shared
 -      INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(prefix)/lib; \$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)\$(prefix)/lib"
-+      INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(libdir); \$(INSTALL) -m 0755 libs/libphp$(PHP_MAJOR_VERSION).$PHP_VERSION.$SHLIB_DL_SUFFIX_NAME \$(INSTALL_ROOT)\$(libdir); \$(LN_S) libphp$(PHP_MAJOR_VERSION).$PHP_VERSION.$SHLIB_DL_SUFFIX_NAME \$(INSTALL_ROOT)\$(libdir)/libphp$(PHP_MAJOR_VERSION).$SHLIB_DL_SUFFIX_NAME"
++      EXTRA_LDFLAGS="$EXTRA_LDFLAGS -release \$(PHP_MAJOR_VERSION)"
++      INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(libdir); \$(LIBTOOL) --mode=install \$(INSTALL) -m 0755 \$(OVERALL_TARGET) \$(INSTALL_ROOT)\$(libdir)"
        ;;
      static)
        PHP_EMBED_TYPE=static
---- php-5.2.4/Makefile.global.embed
-+++ php-5.2.4/Makefile.global
-@@ -14,7 +14,7 @@ all: $(all_targets) 
- build-modules: $(PHP_MODULES)
- 
- libphp$(PHP_MAJOR_VERSION).la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
--	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
-+        $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) -release $(PHP_VERSION) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
- 	-@$(LIBTOOL) --silent --mode=install cp $@ $(phptempdir)/$@ >/dev/null 2>&1
- 
- libs/libphp$(PHP_MAJOR_VERSION).bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
-@@ -25,13 +25,9 @@ install: $(all_targets) $(install_target
- install-sapi: $(OVERALL_TARGET)
- 	@echo "Installing PHP SAPI module:       $(PHP_SAPI)"
- 	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
--	-@if test ! -r $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME); then \
--		for i in 0.0.0 0.0 0; do \
--			if test -r $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME).$$i; then \
--				$(LN_S) $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME).$$i $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME); \
--				break; \
--			fi; \
--		done; \
-+	-@if test ! -r $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME) -a \
-+		-r $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(PHP_VERSION).$(SHLIB_DL_SUFFIX_NAME); then \
-+		$(LN_S) $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(PHP_VERSION).$(SHLIB_DL_SUFFIX_NAME) $(phptempdir)/libphp$(PHP_MAJOR_VERSION).$(SHLIB_DL_SUFFIX_NAME); \
- 	fi
- 	@$(INSTALL_IT)
- 

@@ -643,7 +643,8 @@ install -m 644 -c macros.php \
 # Remove unpackaged files
 rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
        $RPM_BUILD_ROOT%{_bindir}/{phptar} \
-       $RPM_BUILD_ROOT%{_datadir}/pear
+       $RPM_BUILD_ROOT%{_datadir}/pear \
+       $RPM_BUILD_ROOT%{_libdir}/libphp5.la
 
 # Remove irrelevant docs
 rm -f README.{Zeus,QNX,CVS-RULES}
