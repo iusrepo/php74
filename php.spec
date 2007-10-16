@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.4
-Release: 2
+Release: 3
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -28,6 +28,7 @@ Patch21: php-5.2.4-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
 Patch23: php-5.2.2-pdosym.patch
 Patch24: php-5.2.3-macropen.patch
+Patch25: php-4.3.9-metaphone.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -43,7 +44,7 @@ BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
 BuildRequires: gmp-devel, aspell-devel >= 0.50.0
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
-BuildRequires: zlib-devel, pcre-devel >= 4.5, smtpdaemon, readline-devel
+BuildRequires: zlib-devel, pcre-devel >= 6.6, smtpdaemon, readline-devel
 BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, php3, phpfi, stronghold-php
 # Enforce Apache module ABI compatibility
@@ -357,6 +358,7 @@ into applications to provide PHP scripting language support.
 %patch22 -p1 -b .shutdown
 %patch23 -p1 -b .pdosym
 %patch24 -p1 -b .macropen
+%patch25 -p1 -b .metaphone
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -680,6 +682,7 @@ rm files.* macros.php
 %{_bindir}/php
 %{_bindir}/php-cgi
 %{_mandir}/man1/php.1*
+%doc sapi/cgi/README* sapi/cli/README
 
 %files devel
 %defattr(-,root,root)
@@ -717,6 +720,11 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Mon Oct 15 2007 Joe Orton <jorton@redhat.com> 5.2.4-3
+- correct pcre BR version (#333021)
+- restore metaphone fix (#205714)
+- add READMEs to php-cli
+
 * Sun Sep 16 2007 Joe Orton <jorton@redhat.com> 5.2.4-2
 - update to 5.2.4
 
