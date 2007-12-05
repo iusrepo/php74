@@ -5,8 +5,8 @@
 
 Summary: The PHP HTML-embedded scripting language
 Name: php
-Version: 5.2.4
-Release: 3
+Version: 5.2.5
+Release: 2
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -26,7 +26,6 @@ Patch9: php-5.2.4-embed.patch
 # Fixes for extension modules
 Patch21: php-5.2.4-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
-Patch23: php-5.2.2-pdosym.patch
 Patch24: php-5.2.3-macropen.patch
 Patch25: php-4.3.9-metaphone.patch
 
@@ -356,7 +355,6 @@ into applications to provide PHP scripting language support.
 
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
-%patch23 -p1 -b .pdosym
 %patch24 -p1 -b .macropen
 %patch25 -p1 -b .metaphone
 
@@ -720,6 +718,9 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Wed Dec  5 2007 Joe Orton <jorton@redhat.com> 5.2.5-2
+- update to 5.2.5
+
 * Mon Oct 15 2007 Joe Orton <jorton@redhat.com> 5.2.4-3
 - correct pcre BR version (#333021)
 - restore metaphone fix (#205714)
