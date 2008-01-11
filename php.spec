@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.5
-Release: 4
+Release: 5
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -32,6 +32,7 @@ Patch25: php-4.3.9-metaphone.patch
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
 Patch31: php-5.2.4-easter.patch
+Patch32: php-5.2.5-systzdata.patch
 
 # Fixes for tests
 Patch50: php-5.2.4-tests-dashn.patch
@@ -360,6 +361,7 @@ into applications to provide PHP scripting language support.
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
+%patch32 -p1 -b .systzdata
 
 %patch50 -p1 -b .tests-dashn
 %patch51 -p1 -b .tests-wddx
@@ -477,6 +479,7 @@ ln -sf ../configure
         --without-sqlite \
         --with-libxml-dir=%{_prefix} \
 	--with-xml \
+        --with-system-tzdata \
 	$* 
 if test $? != 0; then 
   tail -500 config.log
@@ -718,6 +721,9 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Fri Jan 11 2008 Joe Orton <jorton@redhat.com> 5.2.5-5
+- ext/date: use system timezone database
+
 * Fri Dec 28 2007 Joe Orton <jorton@redhat.com> 5.2.5-4
 - rebuild for libc-client bump
 
