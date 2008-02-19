@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.5
-Release: 5
+Release: 6
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -721,6 +721,9 @@ rm files.* macros.php
 %files mssql -f files.mssql
 
 %changelog
+* Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 5.2.5-6
+- Autorebuild for GCC 4.3
+
 * Fri Jan 11 2008 Joe Orton <jorton@redhat.com> 5.2.5-5
 - ext/date: use system timezone database
 
