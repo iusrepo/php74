@@ -6,7 +6,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.5
-Release: 6
+Release: 7
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -41,7 +41,7 @@ Patch51: php-5.0.4-tests-wddx.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
-BuildRequires: gmp-devel, aspell-devel >= 0.50.0
+BuildRequires: gmp-devel
 BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
 BuildRequires: zlib-devel, pcre-devel >= 6.6, smtpdaemon, readline-devel
@@ -86,7 +86,7 @@ Provides: php(api) = %{apiver}, php(zend-abi) = %{zendver}
 # Provides for all builtin modules:
 Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
 Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
-Provides: php-openssl, php-pcre, php-posix, php-pspell
+Provides: php-openssl, php-pcre, php-posix
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
 Provides: php-wddx, php-zlib, php-json, php-zip, php-dbase
@@ -345,6 +345,16 @@ Provides: php-embedded-devel = %{version}-%{release}
 The php-embedded package contains a library which can be embedded
 into applications to provide PHP scripting language support.
 
+%package pspell
+Summary: A module for PHP applications for using pspell interfaces
+Group: System Environment/Libraries
+Requires: php-common = %{version}-%{release}
+BuildRequires: aspell-devel >= 0.50.0
+
+%description pspell
+The php-pspell package contains a dynamic shared object that will add
+support for using the pspell library to PHP.
+
 %prep
 %setup -q
 %patch1 -p1 -b .gnusrc
@@ -453,7 +463,6 @@ ln -sf ../configure
 	--with-jpeg-dir=%{_prefix} \
 	--with-openssl \
 	--with-png \
-	--with-pspell \
 	--with-expat-dir=%{_prefix} \
         --with-pcre-regex=%{_prefix} \
 	--with-zlib \
@@ -522,31 +531,28 @@ build --enable-force-cgi-redirect \
       --enable-zip=shared \
       --with-readline \
       --enable-dbase=shared \
+      --with-pspell=shared \
       --with-mcrypt=shared,%{_prefix} \
       --with-mhash=shared,%{_prefix} \
       --with-tidy=shared,%{_prefix} \
       --with-mssql=shared,%{_prefix}
 popd
 
-# Build Apache module, and the CLI SAPI, /usr/bin/php
-pushd build-apache
-build --with-apxs2=%{_sbindir}/apxs \
-      --without-mysql --without-gd \
+without_shared="--without-mysql --without-gd \
       --without-odbc --disable-dom \
       --disable-dba --without-unixODBC \
       --disable-pdo --disable-xmlreader --disable-xmlwriter \
-      --disable-json
+      --disable-json --without-pspell"
+
+# Build Apache module, and the CLI SAPI, /usr/bin/php
+pushd build-apache
+build --with-apxs2=%{_sbindir}/apxs ${without_shared}
 popd
 
 # Build for inclusion as embedded script language into applications,
 # /usr/lib[64]/libphp5.so
 pushd build-embedded
-build --enable-embed \
-      --without-mysql --without-gd \
-      --without-odbc --disable-dom \
-      --disable-dba --without-unixODBC \
-      --disable-pdo --disable-xmlreader --disable-xmlwriter \
-      --disable-json
+build --enable-embed ${without_shared}
 popd
 
 %check
@@ -607,7 +613,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip \
-    dbase mcrypt mhash tidy mssql; do
+    dbase mcrypt mhash tidy mssql pspell; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -719,8 +725,12 @@ rm files.* macros.php
 %files mhash -f files.mhash
 %files tidy -f files.tidy
 %files mssql -f files.mssql
+%files pspell -f files.pspell
 
 %changelog
+* Thu Apr 24 2008 Joe Orton <jorton@redhat.com> 5.2.5-7
+- split pspell extension out into php-spell (#443857)
+
 * Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 5.2.5-6
 - Autorebuild for GCC 4.3
 
