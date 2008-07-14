@@ -1,0 +1,102 @@
+--- php-5.2.6/configure.in.gnusrc
++++ php-5.2.6/configure.in
+@@ -58,6 +58,8 @@ AC_DEFUN([PHP_EXT_DIR],[ext/$1])dnl
+ AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir/ext/$1])dnl
+ AC_DEFUN([PHP_ALWAYS_SHARED],[])dnl
+ 
++AC_DEFINE([_GNU_SOURCE], 1, [Define to enable GNU C Library extensions])
++
+ dnl Setting up the PHP version based on the information above.
+ dnl -------------------------------------------------------------------------
+ 
+--- php-5.2.6/ext/interbase/interbase.c.gnusrc
++++ php-5.2.6/ext/interbase/interbase.c
+@@ -24,7 +24,6 @@
+ #include "config.h"
+ #endif
+ 
+-#define _GNU_SOURCE
+ 
+ #include "php.h"
+ 
+--- php-5.2.6/ext/pdo_firebird/firebird_driver.c.gnusrc
++++ php-5.2.6/ext/pdo_firebird/firebird_driver.c
+@@ -22,7 +22,6 @@
+ #include "config.h"
+ #endif
+ 
+-#define _GNU_SOURCE
+ 
+ #include "php.h"
+ #include "php_ini.h"
+--- php-5.2.6/ext/standard/file.c.gnusrc
++++ php-5.2.6/ext/standard/file.c
+@@ -118,7 +118,6 @@ php_file_globals file_globals;
+ 
+ #ifdef HAVE_FNMATCH
+ #ifndef _GNU_SOURCE
+-#define _GNU_SOURCE
+ #endif
+ #include <fnmatch.h>
+ #endif
+--- php-5.2.6/ext/zlib/zlib_fopen_wrapper.c.gnusrc
++++ php-5.2.6/ext/zlib/zlib_fopen_wrapper.c
+@@ -19,7 +19,6 @@
+ 
+ /* $Id$ */
+ 
+-#define _GNU_SOURCE
+ 
+ #include "php.h"
+ #include "php_zlib.h"
+--- php-5.2.6/main/php.h.gnusrc
++++ php-5.2.6/main/php.h
+@@ -30,6 +30,7 @@
+ #define PHP_HAVE_STREAMS
+ #define YYDEBUG 0
+ 
++#include "php_config.h"
+ #include "php_version.h"
+ #include "zend.h"
+ #include "zend_qsort.h"
+--- php-5.2.6/main/streams/cast.c.gnusrc
++++ php-5.2.6/main/streams/cast.c
+@@ -18,7 +18,6 @@
+ 
+ /* $Id$ */
+ 
+-#define _GNU_SOURCE
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_network.h"
+--- php-5.2.6/main/streams/memory.c.gnusrc
++++ php-5.2.6/main/streams/memory.c
+@@ -18,7 +18,6 @@
+ 
+ /* $Id$ */
+ 
+-#define _GNU_SOURCE
+ #include "php.h"
+ 
+ PHPAPI int php_url_decode(char *str, int len);
+--- php-5.2.6/main/streams/streams.c.gnusrc
++++ php-5.2.6/main/streams/streams.c
+@@ -21,7 +21,6 @@
+ 
+ /* $Id$ */
+ 
+-#define _GNU_SOURCE
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_network.h"
+--- php-5.2.6/Zend/zend_language_parser.c.gnusrc
++++ php-5.2.6/Zend/zend_language_parser.c
+@@ -356,6 +356,8 @@
+ #include "zend_API.h"
+ #include "zend_constants.h"
+ 
++#include <string.h>
++
+ 
+ #define YYERROR_VERBOSE
+ #define YYSTYPE znode

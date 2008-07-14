@@ -3,6 +3,8 @@
 %define zendver 20060613
 %define pdover 20060511
 
+%define _default_patch_fuzz 2
+
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.6
@@ -16,7 +18,7 @@ Source1: php.conf
 Source2: php.ini
 Source3: macros.php
 
-Patch1: php-5.2.4-gnusrc.patch
+Patch1: php-5.2.6-gnusrc.patch
 Patch2: php-4.3.3-install.patch
 Patch3: php-5.2.4-norpath.patch
 Patch5: php-5.0.2-phpize64.patch
