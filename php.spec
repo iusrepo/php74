@@ -5,8 +5,8 @@
 
 Summary: The PHP HTML-embedded scripting language
 Name: php
-Version: 5.2.5
-Release: 7
+Version: 5.2.6
+Release: 3
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -27,7 +27,6 @@ Patch9: php-5.2.4-embed.patch
 Patch21: php-5.2.4-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
 Patch24: php-5.2.3-macropen.patch
-Patch25: php-4.3.9-metaphone.patch
 
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
@@ -367,7 +366,6 @@ support for using the pspell library to PHP.
 %patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
 %patch24 -p1 -b .macropen
-%patch25 -p1 -b .metaphone
 
 %patch30 -p1 -b .dlopen
 %patch31 -p1 -b .easter
@@ -594,9 +592,6 @@ install -m 644    *.gif $RPM_BUILD_ROOT%{contentdir}/icons/
 install -m 755 -d $RPM_BUILD_ROOT%{_libdir}/php/pear \
                   $RPM_BUILD_ROOT%{_datadir}/php
 
-# Use correct libdir
-sed -i -e 's|%{_prefix}/lib|%{_libdir}|' $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
-
 # install the DSO
 install -m 755 -d $RPM_BUILD_ROOT%{_libdir}/httpd/modules
 install -m 755 build-apache/libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/httpd/modules
@@ -728,6 +723,13 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Mon Jul 14 2008 Joe Orton <jorton@redhat.com> 5.2.6-3
+- update to 5.2.6
+- sync default php.ini with upstream
+- drop extension_dir from default php.ini, rely on hard-coded
+  default, to make php-common multilib-safe (#455091)
+- update to r3 of systzdata patch
+
 * Thu Apr 24 2008 Joe Orton <jorton@redhat.com> 5.2.5-7
 - split pspell extension out into php-spell (#443857)
 

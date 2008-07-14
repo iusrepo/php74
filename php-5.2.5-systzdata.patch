@@ -1,3 +1,12 @@
+
+Add support for use of the system timezone database, rather
+than embedding a copy.  Discussed upstream but was not desired.
+
+History:
+r3: fix a crash if /usr/share/zoneinfo doesn't exist (Raphael Geissert)
+r2: add filesystem trawl to set up name alias index
+r1: initial revision
+
 --- php-5.2.5/ext/date/lib/timelib.m4.systzdata
 +++ php-5.2.5/ext/date/lib/timelib.m4
 @@ -78,3 +78,17 @@ stdlib.h
@@ -82,7 +91,7 @@
 +	timelib_tzdb_index_entry *db_index;
 +	char **dirstack;
 +
-+	/* LIFO stack to hold directory entres to scan; each slot is a
++	/* LIFO stack to hold directory entries to scan; each slot is a
 +	 * directory name relative to the zoneinfo prefix. */
 +	dirstack_size = 32;
 +	dirstack = malloc(dirstack_size * sizeof *dirstack);
@@ -144,7 +153,7 @@
 +			free(ents[--count]);
 +		}
 +		
-+		free(ents);
++		if (count != -1) free(ents);
 +		free(top);
 +	} while (dirstack_top);
 +
