@@ -8,7 +8,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.6
-Release: 3
+Release: 4
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -269,7 +269,7 @@ support for using the ncurses terminal output interfaces.
 Summary: A module for PHP applications for using the gd graphics library
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}
-BuildRequires: gd-devel, freetype-devel
+BuildRequires: gd-devel, freetype-devel, t1lib-devel
 
 %description gd
 The php-gd package contains a dynamic shared object that will add
@@ -456,6 +456,7 @@ ln -sf ../configure
 	--with-freetype-dir=%{_prefix} \
 	--with-png-dir=%{_prefix} \
 	--enable-gd-native-ttf \
+	--with-t1lib=%{_prefix} \
 	--without-gdbm \
 	--with-gettext \
 	--with-gmp \
@@ -725,6 +726,9 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Sun Jul 20 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.6-4
+- enable T1lib support in php-gd
+
 * Mon Jul 14 2008 Joe Orton <jorton@redhat.com> 5.2.6-3
 - update to 5.2.6
 - sync default php.ini with upstream
