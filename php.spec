@@ -8,7 +8,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.6
-Release: 4
+Release: 5
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -43,7 +43,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
 BuildRequires: gmp-devel
-BuildRequires: httpd-devel >= 2.0.46-1, libjpeg-devel, libpng-devel, pam-devel
+BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
 BuildRequires: zlib-devel, pcre-devel >= 6.6, smtpdaemon, readline-devel
 BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
@@ -269,7 +269,8 @@ support for using the ncurses terminal output interfaces.
 Summary: A module for PHP applications for using the gd graphics library
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}
-BuildRequires: gd-devel, freetype-devel, t1lib-devel
+# Required to build the bundled GD library
+BuildRequires: libXpm-devel, libjpeg-devel, libpng-devel, freetype-devel, t1lib-devel
 
 %description gd
 The php-gd package contains a dynamic shared object that will add
@@ -455,6 +456,7 @@ ln -sf ../configure
 	--with-exec-dir=%{_bindir} \
 	--with-freetype-dir=%{_prefix} \
 	--with-png-dir=%{_prefix} \
+	--with-xpm-dir=%{_prefix} \
 	--enable-gd-native-ttf \
 	--with-t1lib=%{_prefix} \
 	--without-gdbm \
@@ -726,6 +728,10 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Sat Sep 13 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.6-5
+- enable XPM support in php-gd
+- Fix BR for php-gd
+
 * Sun Jul 20 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.6-4
 - enable T1lib support in php-gd
 
