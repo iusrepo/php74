@@ -258,6 +258,19 @@ r1: initial revision
  
  static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib_sll *transition_time)
  {
+--- php-5.2.6/ext/date/lib/timelib.h.systzdata
++++ php-5.2.6/ext/date/lib/timelib.h
+@@ -31,6 +31,10 @@
+ 
+ #define TIMELIB_SPECIAL_WEEKDAY  0x01
+ 
++#ifdef HAVE_SYSTEM_TZDATA
++#define TIMELIB_SYSTEM_TZID "System/Localtime"
++#endif
++
+ #ifndef LONG_MAX
+ #define LONG_MAX 2147483647L
+ #endif
 --- php-5.2.6/ext/date/lib/timelib.m4.systzdata
 +++ php-5.2.6/ext/date/lib/timelib.m4
 @@ -78,3 +78,17 @@ stdlib.h
