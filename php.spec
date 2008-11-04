@@ -8,7 +8,7 @@
 Summary: The PHP HTML-embedded scripting language
 Name: php
 Version: 5.2.6
-Release: 5
+Release: 6
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -33,7 +33,7 @@ Patch24: php-5.2.3-macropen.patch
 # Functional changes
 Patch30: php-5.0.4-dlopen.patch
 Patch31: php-5.2.4-easter.patch
-Patch32: php-5.2.5-systzdata.patch
+Patch32: php-5.2.6-systzdata.patch
 
 # Fixes for tests
 Patch50: php-5.2.4-tests-dashn.patch
@@ -675,7 +675,7 @@ rm files.* macros.php
 %files common -f files.common
 %defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
-%doc Zend/ZEND_* gd_README TSRM_LICENSE regex_COPYRIGHT
+%doc Zend/ZEND_* TSRM_LICENSE regex_COPYRIGHT
 %config(noreplace) %{_sysconfdir}/php.ini
 %dir %{_sysconfdir}/php.d
 %dir %{_libdir}/php
@@ -717,6 +717,7 @@ rm files.* macros.php
 %files mbstring -f files.mbstring
 %files ncurses -f files.ncurses
 %files gd -f files.gd
+%doc gd_README
 %files soap -f files.soap
 %files bcmath -f files.bcmath
 %files dba -f files.dba
@@ -728,6 +729,11 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Tue Nov  4 2008 Joe Orton <jorton@redhat.com> 5.2.6-6
+- move gd_README to php-gd
+- update to r4 of systzdata patch; introduces a default timezone
+  name of "System/Localtime", which uses /etc/localtime (#469532)
+
 * Sat Sep 13 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.6-5
 - enable XPM support in php-gd
 - Fix BR for php-gd
