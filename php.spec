@@ -5,10 +5,10 @@
 
 %define _default_patch_fuzz 2
 
-Summary: The PHP HTML-embedded scripting language
+Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.6
-Release: 6
+Release: 7
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -729,6 +729,9 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Mon Nov 24 2008 Joe Orton <jorton@redhat.com> 5.2.6-7
+- tweak Summary, thanks to Richard Hughes
+
 * Tue Nov  4 2008 Joe Orton <jorton@redhat.com> 5.2.6-6
 - move gd_README to php-gd
 - update to r4 of systzdata patch; introduces a default timezone
