@@ -7,13 +7,13 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.2.6
-Release: 7
+Version: 5.2.7
+Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
 
-Source0: http://www.php.net/distributions/php-%{version}.tar.gz
+Source0: http://www.php.net/distributions/php-%{version}.tar.bz2
 Source1: php.conf
 Source2: php.ini
 Source3: macros.php
@@ -36,7 +36,7 @@ Patch31: php-5.2.4-easter.patch
 Patch32: php-5.2.6-systzdata.patch
 
 # Fixes for tests
-Patch50: php-5.2.4-tests-dashn.patch
+Patch50: php-5.2.7-tests-dashn.patch
 Patch51: php-5.0.4-tests-wddx.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -327,7 +327,7 @@ support for using the tidy library to PHP.
 %package mssql
 Summary: MSSQL database module for PHP
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common = %{version}-%{release}, php-pdo
 BuildRequires: freetds-devel
 
 %description mssql
@@ -530,6 +530,7 @@ build --enable-force-cgi-redirect \
       --with-pdo-mysql=shared,%{_prefix} \
       --with-pdo-pgsql=shared,%{_prefix} \
       --with-pdo-sqlite=shared,%{_prefix} \
+      --with-pdo-dblib=shared,%{_prefix} \
       --enable-json=shared \
       --enable-zip=shared \
       --with-readline \
@@ -613,7 +614,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip \
-    dbase mcrypt mhash tidy mssql pspell; do
+    dbase mcrypt mhash tidy pdo_dblib mssql pspell; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -631,6 +632,7 @@ cat files.dom files.xsl files.xml{reader,writer} > files.xml
 cat files.mysqli >> files.mysql
 
 # Split out the PDO modules
+cat files.pdo_dblib >> files.mssql
 cat files.pdo_mysql >> files.mysql
 cat files.pdo_pgsql >> files.pgsql
 cat files.pdo_odbc >> files.odbc
@@ -729,6 +731,10 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Fri Dec 05 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.7-1
+- update to 5.2.7
+- enable pdo_dblib driver in php-mssql
+
 * Mon Nov 24 2008 Joe Orton <jorton@redhat.com> 5.2.6-7
 - tweak Summary, thanks to Richard Hughes
 
