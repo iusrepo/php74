@@ -8,7 +8,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.7
-Release: 1%{?dist}
+Release: 1%{?dist}.1
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -419,6 +419,9 @@ if test "x${vpdo}" != "x%{pdover}"; then
 fi
 
 %build
+# aclocal workaround - to be improved
+cat `aclocal --print-ac-dir`/{libtool,ltoptions,ltsugar,ltversion,lt~obsolete}.m4 >>aclocal.m4
+
 # Force use of system libtool:
 libtoolize --force --copy
 cat `aclocal --print-ac-dir`/libtool.m4 > build/libtool.m4
@@ -731,6 +734,9 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Sat Dec 06 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.7-1.1
+- aclocal workaround
+
 * Fri Dec 05 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.7-1
 - update to 5.2.7
 - enable pdo_dblib driver in php-mssql
