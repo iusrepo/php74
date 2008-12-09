@@ -7,8 +7,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.2.7
-Release: 1%{?dist}.1
+Version: 5.2.8
+Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -734,6 +734,9 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Tue Dec 09 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.8-1
+- update to 5.2.8
+
 * Sat Dec 06 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.7-1.1
 - aclocal workaround
 
