@@ -8,7 +8,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -424,7 +424,7 @@ cat `aclocal --print-ac-dir`/{libtool,ltoptions,ltsugar,ltversion,lt~obsolete}.m
 
 # Force use of system libtool:
 libtoolize --force --copy
-cat `aclocal --print-ac-dir`/libtool.m4 > build/libtool.m4
+cat `aclocal --print-ac-dir`/{libtool,ltoptions,ltsugar,ltversion,lt~obsolete}.m4 >build/libtool.m4
 
 # Regenerate configure scripts (patches change config.m4's)
 ./buildconf --force
@@ -582,14 +582,14 @@ unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
+# Install the version for embedded script language in applications + php_embed.h
+make -C build-embedded install-sapi install-headers INSTALL_ROOT=$RPM_BUILD_ROOT
+
 # Install everything from the CGI SAPI build
 make -C build-cgi install INSTALL_ROOT=$RPM_BUILD_ROOT 
 
 # Install the Apache module
 make -C build-apache install-sapi INSTALL_ROOT=$RPM_BUILD_ROOT
-
-# Install the version for embedded script language in applications
-make -C build-embedded install-sapi INSTALL_ROOT=$RPM_BUILD_ROOT
 
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
@@ -734,11 +734,15 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Sat Dec 13 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.8-2
+- libtool 2 workaround for phpize (#476004)
+- add missing php_embed.h (#457777)
+
 * Tue Dec 09 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.8-1
 - update to 5.2.8
 
 * Sat Dec 06 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.7-1.1
-- aclocal workaround
+- libtool 2 workaround
 
 * Fri Dec 05 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.7-1
 - update to 5.2.7
