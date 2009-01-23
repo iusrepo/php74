@@ -8,7 +8,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.8
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -469,7 +469,6 @@ ln -sf ../configure
 	--with-jpeg-dir=%{_prefix} \
 	--with-openssl \
 	--with-png \
-	--with-expat-dir=%{_prefix} \
         --with-pcre-regex=%{_prefix} \
 	--with-zlib \
 	--with-layout=GNU \
@@ -734,6 +733,9 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Fri Jan 23 2009 Joe Orton <jorton@redhat.com> 5.2.8-3
+- rebuild for new MySQL
+
 * Sat Dec 13 2008 Remi Collet <Fedora@FamilleCollet.com> 5.2.8-2
 - libtool 2 workaround for phpize (#476004)
 - add missing php_embed.h (#457777)
