@@ -8,7 +8,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.8
-Release: 3%{?dist}
+Release: 5%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -41,7 +41,7 @@ Patch51: php-5.0.4-tests-wddx.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, expat-devel
+BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel
 BuildRequires: gmp-devel
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
@@ -90,7 +90,7 @@ Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
 Provides: php-openssl, php-pcre, php-posix
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
-Provides: php-wddx, php-zlib, php-json, php-zip, php-dbase
+Provides: php-zlib, php-json, php-zip, php-dbase
 Obsoletes: php-openssl, php-pecl-zip, php-json, php-dbase
 
 %description common
@@ -228,7 +228,7 @@ Summary: A module for PHP applications which use XML
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}
 Obsoletes: php-domxml, php-dom
-Provides: php-dom, php-xsl, php-domxml
+Provides: php-dom, php-xsl, php-domxml, php-wddx
 BuildRequires: libxslt-devel >= 1.0.18-1, libxml2-devel >= 2.4.14-1
 
 %description xml
@@ -240,7 +240,6 @@ and performing XSL transformations on XML documents.
 Summary: A module for PHP applications which use the XML-RPC protocol
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}
-BuildRequires: expat-devel
 
 %description xmlrpc
 The php-xmlrpc package contains a dynamic shared object that will add
@@ -455,7 +454,6 @@ ln -sf ../configure
 	--disable-rpath \
 	--without-pear \
 	--with-bz2 \
-	--with-curl \
 	--with-exec-dir=%{_bindir} \
 	--with-freetype-dir=%{_prefix} \
 	--with-png-dir=%{_prefix} \
@@ -480,7 +478,6 @@ ln -sf ../configure
 	--enable-track-vars \
 	--enable-trans-sid \
 	--enable-yp \
-	--enable-wddx \
 	--with-kerberos \
 	--enable-ucd-snmp-hack \
 	--with-unixODBC=shared,%{_prefix} \
@@ -522,10 +519,12 @@ build --enable-force-cgi-redirect \
       --enable-dom=shared \
       --with-dom-xslt=%{_prefix} --with-dom-exslt=%{_prefix} \
       --with-pgsql=shared \
+      --enable-wddx=shared \
       --with-snmp=shared,%{_prefix} \
       --enable-soap=shared \
       --with-xsl=shared,%{_prefix} \
       --enable-xmlreader=shared --enable-xmlwriter=shared \
+      --with-curl=shared,%{_prefix} \
       --enable-fastcgi \
       --enable-pdo=shared \
       --with-pdo-odbc=shared,unixODBC,%{_prefix} \
@@ -548,7 +547,8 @@ without_shared="--without-mysql --without-gd \
       --without-odbc --disable-dom \
       --disable-dba --without-unixODBC \
       --disable-pdo --disable-xmlreader --disable-xmlwriter \
-      --disable-json --without-pspell"
+      --disable-json --without-pspell --disable-wddx \
+      --without-curl"
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
 pushd build-apache
@@ -616,7 +616,7 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip \
-    dbase mcrypt mhash tidy pdo_dblib mssql pspell; do
+    dbase mcrypt mhash tidy pdo_dblib mssql pspell curl wddx; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -628,7 +628,7 @@ EOF
 done
 
 # The dom, xsl and xml* modules are all packaged in php-xml
-cat files.dom files.xsl files.xml{reader,writer} > files.xml
+cat files.dom files.xsl files.xml{reader,writer} files.wddx > files.xml
 
 # The mysql and mysqli modules are both packaged in php-mysql
 cat files.mysqli >> files.mysql
@@ -644,7 +644,7 @@ cat files.pdo_odbc >> files.odbc
 cat files.pdo_sqlite >> files.pdo
 
 # Package json, dbase and zip in -common.
-cat files.json files.dbase files.zip > files.common
+cat files.json files.dbase files.zip files.curl > files.common
 
 # Install the macros file:
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
@@ -733,6 +733,10 @@ rm files.* macros.php
 %files pspell -f files.pspell
 
 %changelog
+* Sun Jan 25 2009 Joe Orton <jorton@redhat.com> 5.2.8-4
+- move wddx to php-xml, build curl shared in -common
+- remove BR for expat-devel, bogus configure option
+
 * Fri Jan 23 2009 Joe Orton <jorton@redhat.com> 5.2.8-3
 - rebuild for new MySQL
 
