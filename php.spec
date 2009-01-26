@@ -8,7 +8,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.8
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -87,9 +87,8 @@ Provides: php(api) = %{apiver}, php(zend-abi) = %{zendver}
 # Provides for all builtin modules:
 Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
 Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
-Provides: php-openssl, php-pcre, php-posix
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
-Provides: php-spl, php-sysvsem, php-sysvshm, php-sysvmsg, php-tokenizer
+Provides: php-spl, php-tokenizer, php-openssl, php-pcre
 Provides: php-zlib, php-json, php-zip, php-dbase
 Obsoletes: php-openssl, php-pecl-zip, php-json, php-dbase
 
@@ -183,6 +182,17 @@ system that supports almost all SQL constructs. PHP is an
 HTML-embedded scripting language. If you need back-end support for
 PostgreSQL, you should install this package in addition to the main
 php package.
+
+%package process
+Summary: Modules for PHP script using system process interfaces
+Group: Development/Languages
+Requires: php-common = %{version}-%{release}
+Provides: php-posix, php-sysvsem, php-sysvshm, php-sysvmsg
+
+%description process
+The php-process package contains dynamic shared objects which add
+support to PHP using system interfaces for inter-process
+communication.
 
 %package odbc
 Group: Development/Languages
@@ -540,7 +550,9 @@ build --enable-force-cgi-redirect \
       --with-mcrypt=shared,%{_prefix} \
       --with-mhash=shared,%{_prefix} \
       --with-tidy=shared,%{_prefix} \
-      --with-mssql=shared,%{_prefix}
+      --with-mssql=shared,%{_prefix} \
+      --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
+      --enable-posix=shared
 popd
 
 without_shared="--without-mysql --without-gd \
@@ -548,7 +560,8 @@ without_shared="--without-mysql --without-gd \
       --disable-dba --without-unixODBC \
       --disable-pdo --disable-xmlreader --disable-xmlwriter \
       --disable-json --without-pspell --disable-wddx \
-      --without-curl"
+      --without-curl --disable-posix \
+      --disable-sysvmsg --disable-sysvshm --disable-sysvsem"
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
 pushd build-apache
@@ -616,7 +629,8 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip \
-    dbase mcrypt mhash tidy pdo_dblib mssql pspell curl wddx; do
+    dbase mcrypt mhash tidy pdo_dblib mssql pspell curl wddx \
+    posix sysvshm sysvsem sysvmsg; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -638,6 +652,9 @@ cat files.pdo_dblib >> files.mssql
 cat files.pdo_mysql >> files.mysql
 cat files.pdo_pgsql >> files.pgsql
 cat files.pdo_odbc >> files.odbc
+
+# sysv* and posix in packaged in php-process
+cat files.syv* files.posix > files.process
 
 # Package pdo_sqlite with pdo; isolating the sqlite dependency
 # isn't useful at this time since rpm itself requires sqlite.
@@ -731,8 +748,12 @@ rm files.* macros.php
 %files tidy -f files.tidy
 %files mssql -f files.mssql
 %files pspell -f files.pspell
+%files process -f files.process
 
 %changelog
+* Mon Jan 26 2009 Joe Orton <jorton@redhat.com> 5.2.8-5
+- split out sysvshm, sysvsem, sysvmsg, posix into php-process
+
 * Sun Jan 25 2009 Joe Orton <jorton@redhat.com> 5.2.8-4
 - move wddx to php-xml, build curl shared in -common
 - remove BR for expat-devel, bogus configure option
