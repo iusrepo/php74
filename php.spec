@@ -6,7 +6,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.8
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -16,25 +16,25 @@ Source1: php.conf
 Source2: php.ini
 Source3: macros.php
 
-Patch1: php-5.2.6-gnusrc.patch
-Patch2: php-4.3.3-install.patch
+Patch1: php-5.2.8-gnusrc.patch
+Patch2: php-5.2.8-install.patch
 Patch3: php-5.2.4-norpath.patch
-Patch5: php-5.0.2-phpize64.patch
-Patch8: php-5.2.0-includedir.patch
-Patch9: php-5.2.4-embed.patch
+Patch4: php-5.2.8-phpize64.patch
+Patch5: php-5.2.0-includedir.patch
+Patch6: php-5.2.4-embed.patch
 
 # Fixes for extension modules
-Patch22: php-4.3.11-shutdown.patch
-Patch24: php-5.2.3-macropen.patch
+Patch20: php-4.3.11-shutdown.patch
+Patch21: php-5.2.3-macropen.patch
 
 # Functional changes
-Patch30: php-5.0.4-dlopen.patch
-Patch31: php-5.2.4-easter.patch
-Patch32: php-5.2.6-systzdata.patch
+Patch40: php-5.0.4-dlopen.patch
+Patch41: php-5.2.4-easter.patch
+Patch42: php-5.2.6-systzdata.patch
 
 # Fixes for tests
-Patch50: php-5.2.7-tests-dashn.patch
-Patch51: php-5.0.4-tests-wddx.patch
+Patch60: php-5.2.7-tests-dashn.patch
+Patch61: php-5.0.4-tests-wddx.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -367,19 +367,19 @@ support for using the pspell library to PHP.
 %patch1 -p1 -b .gnusrc
 %patch2 -p1 -b .install
 %patch3 -p1 -b .norpath
-%patch5 -p1 -b .phpize64
-%patch8 -p1 -b .includedir
-%patch9 -p1 -b .embed
+%patch4 -p1 -b .phpize64
+%patch5 -p1 -b .includedir
+%patch6 -p1 -b .embed
 
-%patch22 -p1 -b .shutdown
-%patch24 -p1 -b .macropen
+%patch20 -p1 -b .shutdown
+%patch21 -p1 -b .macropen
 
-%patch30 -p1 -b .dlopen
-%patch31 -p1 -b .easter
-%patch32 -p1 -b .systzdata
+%patch40 -p1 -b .dlopen
+%patch41 -p1 -b .easter
+%patch42 -p1 -b .systzdata
 
-%patch50 -p1 -b .tests-dashn
-%patch51 -p1 -b .tests-wddx
+%patch60 -p1 -b .tests-dashn
+%patch61 -p1 -b .tests-wddx
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -738,6 +738,9 @@ rm files.* macros.php
 %files process -f files.process
 
 %changelog
+* Wed Feb  4 2009 Joe Orton <jorton@redhat.com> 5.2.8-8
+- fix patch fuzz, renumber patches
+
 * Wed Feb  4 2009 Joe Orton <jorton@redhat.com> 5.2.8-7
 - drop obsolete configure args
 - drop -odbc patch (#483690)

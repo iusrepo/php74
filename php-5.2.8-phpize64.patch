@@ -1,8 +1,5 @@
-
-Install phpize into libdir.
-
---- php-5.0.5/scripts/Makefile.frag.phpize64
-+++ php-5.0.5/scripts/Makefile.frag
+--- php-5.2.8/scripts/Makefile.frag.phpize64
++++ php-5.2.8/scripts/Makefile.frag
 @@ -4,7 +4,7 @@
  #
  
@@ -12,8 +9,8 @@ Install phpize into libdir.
  
  BUILD_FILES = \
  	scripts/phpize.m4 \
---- php-5.0.5/scripts/phpize.in.phpize64
-+++ php-5.0.5/scripts/phpize.in
+--- php-5.2.8/scripts/phpize.in.phpize64
++++ php-5.2.8/scripts/phpize.in
 @@ -3,7 +3,7 @@
  # Variable declaration
  prefix='@prefix@'
@@ -22,4 +19,4 @@ Install phpize into libdir.
 +phpdir="@libdir@/php/build"
  includedir="`eval echo @includedir@`/php"
  builddir="`pwd`"
- 
+ SED="@SED@"
