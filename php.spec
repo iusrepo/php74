@@ -6,7 +6,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.8
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -738,7 +738,7 @@ rm files.* macros.php
 %files process -f files.process
 
 %changelog
-* Wed Feb  4 2009 Joe Orton <jorton@redhat.com> 5.2.8-6
+* Wed Feb  4 2009 Joe Orton <jorton@redhat.com> 5.2.8-7
 - drop obsolete configure args
 - drop -odbc patch (#483690)
 
