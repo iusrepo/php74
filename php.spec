@@ -3,8 +3,6 @@
 %define zendver 20060613
 %define pdover 20060511
 
-%define _default_patch_fuzz 2
-
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.8
@@ -26,7 +24,6 @@ Patch8: php-5.2.0-includedir.patch
 Patch9: php-5.2.4-embed.patch
 
 # Fixes for extension modules
-Patch21: php-5.2.4-odbc.patch
 Patch22: php-4.3.11-shutdown.patch
 Patch24: php-5.2.3-macropen.patch
 
@@ -41,8 +38,7 @@ Patch51: php-5.0.4-tests-wddx.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel
-BuildRequires: gmp-devel
+BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, gmp-devel
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
 BuildRequires: zlib-devel, pcre-devel >= 6.6, smtpdaemon, readline-devel
@@ -375,7 +371,6 @@ support for using the pspell library to PHP.
 %patch8 -p1 -b .includedir
 %patch9 -p1 -b .embed
 
-%patch21 -p1 -b .odbc
 %patch22 -p1 -b .shutdown
 %patch24 -p1 -b .macropen
 
@@ -476,7 +471,6 @@ ln -sf ../configure
 	--with-iconv \
 	--with-jpeg-dir=%{_prefix} \
 	--with-openssl \
-	--with-png \
         --with-pcre-regex=%{_prefix} \
 	--with-zlib \
 	--with-layout=GNU \
@@ -485,21 +479,14 @@ ln -sf ../configure
 	--enable-magic-quotes \
 	--enable-sockets \
 	--enable-sysvsem --enable-sysvshm --enable-sysvmsg \
-	--enable-track-vars \
-	--enable-trans-sid \
-	--enable-yp \
 	--with-kerberos \
 	--enable-ucd-snmp-hack \
-	--with-unixODBC=shared,%{_prefix} \
-	--enable-memory-limit \
 	--enable-shmop \
 	--enable-calendar \
-	--enable-dbx \
-	--enable-dio \
         --without-mime-magic \
         --without-sqlite \
         --with-libxml-dir=%{_prefix} \
-	--with-xml \
+	--enable-xml \
         --with-system-tzdata \
 	$* 
 if test $? != 0; then 
@@ -516,7 +503,7 @@ pushd build-cgi
 build --enable-force-cgi-redirect \
       --enable-pcntl \
       --with-imap=shared --with-imap-ssl \
-      --enable-mbstring=shared --enable-mbstr-enc-trans \
+      --enable-mbstring=shared \
       --enable-mbregex \
       --with-ncurses=shared \
       --with-gd=shared \
@@ -527,7 +514,6 @@ build --enable-force-cgi-redirect \
       --with-mysql=shared,%{_prefix} \
       --with-mysqli=shared,%{_bindir}/mysql_config \
       --enable-dom=shared \
-      --with-dom-xslt=%{_prefix} --with-dom-exslt=%{_prefix} \
       --with-pgsql=shared \
       --enable-wddx=shared \
       --with-snmp=shared,%{_prefix} \
@@ -552,11 +538,12 @@ build --enable-force-cgi-redirect \
       --with-tidy=shared,%{_prefix} \
       --with-mssql=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
-      --enable-posix=shared
+      --enable-posix=shared \
+      --with-unixODBC=shared,%{_prefix}
 popd
 
 without_shared="--without-mysql --without-gd \
-      --without-odbc --disable-dom \
+      --without-unixODBC --disable-dom \
       --disable-dba --without-unixODBC \
       --disable-pdo --disable-xmlreader --disable-xmlwriter \
       --disable-json --without-pspell --disable-wddx \
@@ -654,7 +641,7 @@ cat files.pdo_pgsql >> files.pgsql
 cat files.pdo_odbc >> files.odbc
 
 # sysv* and posix in packaged in php-process
-cat files.syv* files.posix > files.process
+cat files.sysv* files.posix > files.process
 
 # Package pdo_sqlite with pdo; isolating the sqlite dependency
 # isn't useful at this time since rpm itself requires sqlite.
@@ -751,6 +738,10 @@ rm files.* macros.php
 %files process -f files.process
 
 %changelog
+* Wed Feb  4 2009 Joe Orton <jorton@redhat.com> 5.2.8-6
+- drop obsolete configure args
+- drop -odbc patch (#483690)
+
 * Mon Jan 26 2009 Joe Orton <jorton@redhat.com> 5.2.8-5
 - split out sysvshm, sysvsem, sysvmsg, posix into php-process
 
