@@ -2,11 +2,12 @@
 %define apiver 20041225
 %define zendver 20060613
 %define pdover 20060511
+%define httpd_mmn %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.8
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -16,12 +17,14 @@ Source1: php.conf
 Source2: php.ini
 Source3: macros.php
 
+# Build fixes
 Patch1: php-5.2.8-gnusrc.patch
 Patch2: php-5.2.8-install.patch
 Patch3: php-5.2.4-norpath.patch
 Patch4: php-5.2.8-phpize64.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
+Patch7: php-5.2.8-recode.patch
 
 # Fixes for extension modules
 Patch20: php-4.3.11-shutdown.patch
@@ -44,8 +47,7 @@ BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
 BuildRequires: zlib-devel, pcre-devel >= 6.6, smtpdaemon, readline-devel
 BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, php3, phpfi, stronghold-php
-# Enforce Apache module ABI compatibility
-Requires: httpd-mmn = %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
+Requires: httpd-mmn = %{httpd_mmn}
 Provides: mod_php = %{version}-%{release}
 Requires: php-common = %{version}-%{release}
 # For backwards-compatibility, require php-cli for the time being:
@@ -74,6 +76,16 @@ Provides: php-pcntl, php-readline
 %description cli
 The php-cli package contains the command-line interface 
 executing PHP scripts, /usr/bin/php, and the CGI interface.
+
+%package zts
+Group: Development/Languages
+Summary: Thread-safe PHP interpreter for use with the Apache HTTP Server
+Requires: php-common = %{version}-%{release}
+Requires: httpd-mmn = %{httpd_mmn}
+
+%description zts
+The php-zts package contains a module for use with the Apache HTTP
+Server which can operate under a threaded server processing model.
 
 %package common
 Group: Development/Languages
@@ -362,6 +374,16 @@ BuildRequires: aspell-devel >= 0.50.0
 The php-pspell package contains a dynamic shared object that will add
 support for using the pspell library to PHP.
 
+%package recode
+Summary: A module for PHP applications for using the recode library
+Group: System Environment/Libraries
+Requires: php-common = %{version}-%{release}
+BuildRequires: recode-devel
+
+%description recode
+The php-recode package contains a dynamic shared object that will add
+support for using the recode library to PHP.
+
 %prep
 %setup -q
 %patch1 -p1 -b .gnusrc
@@ -370,6 +392,7 @@ support for using the pspell library to PHP.
 %patch4 -p1 -b .phpize64
 %patch5 -p1 -b .includedir
 %patch6 -p1 -b .embed
+%patch7 -p1 -b .recode
 
 %patch20 -p1 -b .shutdown
 %patch21 -p1 -b .macropen
@@ -387,9 +410,8 @@ cp TSRM/LICENSE TSRM_LICENSE
 cp regex/COPYRIGHT regex_COPYRIGHT
 cp ext/gd/libgd/README gd_README
 
-# Source is built trice: once for /usr/bin/php, once for the Apache DSO
-# and once for inclusion as embedded script language into other programs
-mkdir build-cgi build-apache build-embedded
+# Multiple builds for multiple SAPIs
+mkdir build-cgi build-apache build-embedded build-zts
 
 # Remove bogus test; position of read position after fopen(, "a+")
 # is not defined by C standard, so don't presume anything.
@@ -539,7 +561,8 @@ build --enable-force-cgi-redirect \
       --with-mssql=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
       --enable-posix=shared \
-      --with-unixODBC=shared,%{_prefix}
+      --with-unixODBC=shared,%{_prefix} \
+      --with-recode=shared,%{_prefix}
 popd
 
 without_shared="--without-mysql --without-gd \
@@ -560,6 +583,17 @@ popd
 pushd build-embedded
 build --enable-embed ${without_shared}
 popd
+
+# Build a special thread-safe Apache SAPI
+pushd build-zts
+EXTENSION_DIR=%{_libdir}/php/modules-zts
+build --with-apxs2=%{_sbindir}/apxs ${without_shared} \
+      --enable-maintainer-zts \
+      --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d
+popd
+
+### NOTE!!! EXTENSION_DIR was changed for the -zts build, so it must remain
+### the last SAPI to be built.
 
 %check
 cd build-apache
@@ -587,9 +621,6 @@ make -C build-embedded install-sapi install-headers INSTALL_ROOT=$RPM_BUILD_ROOT
 # Install everything from the CGI SAPI build
 make -C build-cgi install INSTALL_ROOT=$RPM_BUILD_ROOT 
 
-# Install the Apache module
-make -C build-apache install-sapi INSTALL_ROOT=$RPM_BUILD_ROOT
-
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
 install -m 644 $RPM_SOURCE_DIR/php.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
@@ -604,6 +635,9 @@ install -m 755 -d $RPM_BUILD_ROOT%{_libdir}/php/pear \
 install -m 755 -d $RPM_BUILD_ROOT%{_libdir}/httpd/modules
 install -m 755 build-apache/libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/httpd/modules
 
+# install the ZTS DSO
+install -m 755 build-zts/libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/httpd/modules/libphp5-zts.so
+
 # Apache config fragment
 install -m 755 -d $RPM_BUILD_ROOT/etc/httpd/conf.d
 install -m 644 $RPM_SOURCE_DIR/php.conf $RPM_BUILD_ROOT/etc/httpd/conf.d
@@ -617,7 +651,7 @@ for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip \
     dbase mcrypt mhash tidy pdo_dblib mssql pspell curl wddx \
-    posix sysvshm sysvsem sysvmsg; do
+    posix sysvshm sysvsem sysvmsg recode; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -699,6 +733,10 @@ rm files.* macros.php
 %{_mandir}/man1/php.1*
 %doc sapi/cgi/README* sapi/cli/README
 
+%files zts
+%defattr(-,root,root)
+%{_libdir}/httpd/modules/libphp5-zts.so
+
 %files devel
 %defattr(-,root,root)
 %{_bindir}/php-config
@@ -736,8 +774,14 @@ rm files.* macros.php
 %files mssql -f files.mssql
 %files pspell -f files.pspell
 %files process -f files.process
+%files recode -f files.recode
 
 %changelog
+* Thu Feb  5 2009 Joe Orton <jorton@redhat.com> 5.2.8-9
+- add recode support, -recode subpackage (#106755)
+- add -zts subpackage with ZTS-enabled build of httpd SAPI
+- adjust php.conf to use -zts SAPI build for worker MPM
+
 * Wed Feb  4 2009 Joe Orton <jorton@redhat.com> 5.2.8-8
 - fix patch fuzz, renumber patches
 
