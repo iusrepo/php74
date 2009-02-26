@@ -7,7 +7,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.2.8
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -777,6 +777,9 @@ rm files.* macros.php
 %files recode -f files.recode
 
 %changelog
+* Thu Feb 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.2.8-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+
 * Thu Feb  5 2009 Joe Orton <jorton@redhat.com> 5.2.8-9
 - add recode support, -recode subpackage (#106755)
 - add -zts subpackage with ZTS-enabled build of httpd SAPI
