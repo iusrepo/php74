@@ -6,8 +6,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.2.8
-Release: 10%{?dist}
+Version: 5.2.9
+Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -18,7 +18,7 @@ Source2: php.ini
 Source3: macros.php
 
 # Build fixes
-Patch1: php-5.2.8-gnusrc.patch
+Patch1: php-5.2.9-gnusrc.patch
 Patch2: php-5.2.8-install.patch
 Patch3: php-5.2.4-norpath.patch
 Patch4: php-5.2.8-phpize64.patch
@@ -777,6 +777,9 @@ rm files.* macros.php
 %files recode -f files.recode
 
 %changelog
+* Sat Feb 28 2009 Remi Collet <Fedora@FamilleCollet.com> - 5.2.9-1
+- update to 5.2.9
+
 * Thu Feb 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.2.8-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
