@@ -6,7 +6,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.2.9
+Version: 5.2.10
 Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
@@ -18,7 +18,7 @@ Source2: php.ini
 Source3: macros.php
 
 # Build fixes
-Patch1: php-5.2.9-gnusrc.patch
+Patch1: php-5.2.10-gnusrc.patch
 Patch2: php-5.2.8-install.patch
 Patch3: php-5.2.4-norpath.patch
 Patch4: php-5.2.8-phpize64.patch
@@ -98,7 +98,7 @@ Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-tokenizer, php-openssl, php-pcre
 Provides: php-zlib, php-json, php-zip, php-dbase
-Obsoletes: php-openssl, php-pecl-zip, php-json, php-dbase
+Obsoletes: php-openssl, php-pecl-zip, php-pecl-json, php-json, php-dbase
 
 %description common
 The php-common package contains files used by both the php
@@ -228,6 +228,26 @@ BuildRequires: libxml2-devel
 %description soap
 The php-soap package contains a dynamic shared object that will add
 support to PHP for using the SOAP web services protocol.
+
+%package interbase
+Summary: 	A module for PHP applications that use Interbase/Firebird databases
+Group: 		Development/Languages
+BuildRequires:  firebird-devel
+Requires: 	php-common = %{version}-%{release}, php-pdo
+Provides: 	php_database, php-firebird, php-pdo_firebird
+
+%description interbase
+The php-interbase package contains a dynamic shared object that will add
+database support through Interbase/Firebird to PHP.
+
+InterBase is the name of the closed-source variant of this RDBMS that was
+developed by Borland/Inprise. 
+
+Firebird is a commercially independent project of C and C++ programmers, 
+technical advisors and supporters developing and enhancing a multi-platform 
+relational database management system based on the source code released by 
+Inprise Corp (now known as Borland Software Corp) under the InterBase Public
+License.
 
 %package snmp
 Summary: A module for PHP applications that query SNMP-managed devices
@@ -535,6 +555,8 @@ build --enable-force-cgi-redirect \
       --with-ldap=shared --with-ldap-sasl \
       --with-mysql=shared,%{_prefix} \
       --with-mysqli=shared,%{_bindir}/mysql_config \
+      --with-interbase=shared,%{_libdir}/firebird \
+      --with-pdo-firebird=shared,%{_libdir}/firebird \
       --enable-dom=shared \
       --with-pgsql=shared \
       --enable-wddx=shared \
@@ -623,7 +645,7 @@ make -C build-cgi install INSTALL_ROOT=$RPM_BUILD_ROOT
 
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
-install -m 644 $RPM_SOURCE_DIR/php.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
+install -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 install -m 755 -d $RPM_BUILD_ROOT%{contentdir}/icons
 install -m 644    *.gif $RPM_BUILD_ROOT%{contentdir}/icons/
 
@@ -651,7 +673,7 @@ for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip \
     dbase mcrypt mhash tidy pdo_dblib mssql pspell curl wddx \
-    posix sysvshm sysvsem sysvmsg recode; do
+    posix sysvshm sysvsem sysvmsg recode interbase pdo_firebird; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -673,6 +695,7 @@ cat files.pdo_dblib >> files.mssql
 cat files.pdo_mysql >> files.mysql
 cat files.pdo_pgsql >> files.pgsql
 cat files.pdo_odbc >> files.odbc
+cat files.pdo_firebird >> files.interbase
 
 # sysv* and posix in packaged in php-process
 cat files.sysv* files.posix > files.process
@@ -775,8 +798,13 @@ rm files.* macros.php
 %files pspell -f files.pspell
 %files process -f files.process
 %files recode -f files.recode
+%files interbase -f files.interbase
 
 %changelog
+* Sat Jun 21 2009 Remi Collet <Fedora@famillecollet.com> 5.2.10-1
+- update to 5.2.10
+- add interbase sub-package
+
 * Sat Feb 28 2009 Remi Collet <Fedora@FamilleCollet.com> - 5.2.9-1
 - update to 5.2.9
 
