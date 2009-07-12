@@ -1,5 +1,6 @@
---- php-5.2.8/sapi/apache2handler/config.m4.install
-+++ php-5.2.8/sapi/apache2handler/config.m4
+diff -up php5.3-200812131330/sapi/apache2handler/config.m4.install php5.3-200812131330/sapi/apache2handler/config.m4
+--- php5.3-200812131330/sapi/apache2handler/config.m4.install	2008-03-12 00:31:53.000000000 +0100
++++ php5.3-200812131330/sapi/apache2handler/config.m4	2008-12-13 16:20:06.000000000 +0100
 @@ -68,7 +68,7 @@ if test "$PHP_APXS2" != "no"; then
    fi
  

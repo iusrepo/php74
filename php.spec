@@ -1,12 +1,18 @@
-%define contentdir /var/www
-%define apiver 20041225
-%define zendver 20060613
-%define pdover 20060511
+%global contentdir  /var/www
+# API/ABI check
+%global apiver      20090626
+%global zendver     20090626
+%global pdover      20080721
+# Extension version
+%global fileinfover 1.0.5-dev
+%global pharver     2.0.0-dev
+%global zipver      1.9.1
+
 %define httpd_mmn %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.2.10
+Version: 5.3.0
 Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
@@ -18,13 +24,13 @@ Source2: php.ini
 Source3: macros.php
 
 # Build fixes
-Patch1: php-5.2.10-gnusrc.patch
-Patch2: php-5.2.8-install.patch
+Patch1: php-5.3.0-gnusrc.patch
+Patch2: php-5.3.0-install.patch
 Patch3: php-5.2.4-norpath.patch
-Patch4: php-5.2.8-phpize64.patch
+Patch4: php-5.3.0-phpize64.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
-Patch7: php-5.2.8-recode.patch
+Patch7: php-5.3.0-recode.patch
 
 # Fixes for extension modules
 Patch20: php-4.3.11-shutdown.patch
@@ -32,18 +38,17 @@ Patch21: php-5.2.3-macropen.patch
 
 # Functional changes
 Patch40: php-5.0.4-dlopen.patch
-Patch41: php-5.2.4-easter.patch
-Patch42: php-5.2.6-systzdata.patch
+Patch41: php-5.3.0-easter.patch
+Patch42: php-5.2.5-systzdata.patch
 
 # Fixes for tests
-Patch60: php-5.2.7-tests-dashn.patch
 Patch61: php-5.0.4-tests-wddx.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, gmp-devel
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
-BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.0.0
+BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.6.0
 BuildRequires: zlib-devel, pcre-devel >= 6.6, smtpdaemon, readline-devel
 BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, php3, phpfi, stronghold-php
@@ -97,8 +102,12 @@ Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
 Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
 Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
 Provides: php-spl, php-tokenizer, php-openssl, php-pcre
-Provides: php-zlib, php-json, php-zip, php-dbase
-Obsoletes: php-openssl, php-pecl-zip, php-pecl-json, php-json, php-dbase
+Provides: php-zlib, php-json, php-zip, php-fileinfo
+Obsoletes: php-openssl, php-pecl-zip, php-pecl-json, php-json, php-pecl-phar, php-pecl-Fileinfo
+# For obsoleted pecl extension
+Provides: php-pecl-zip = %{zipver}, php-pecl(zip) = %{zipver}
+Provides: php-pecl-phar = %{pharver}, php-pecl(phar) = %{pharver}
+Provides: php-pecl-Fileinfo = %{fileinfover}, php-pecl(Fileinfo) = %{fileinfover}
 
 %description common
 The php-common package contains files used by both the php
@@ -152,6 +161,7 @@ Group: Development/Languages
 Requires: php-common = %{version}-%{release}
 Obsoletes: php-pecl-pdo-sqlite, php-pecl-pdo
 Provides: php-pdo-abi = %{pdover}
+Provides: php-sqlite3, php-pdo_sqlite
 
 %description pdo
 The php-pdo package contains a dynamic shared object that will add
@@ -163,7 +173,7 @@ databases.
 Summary: A module for PHP applications that use MySQL databases
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}, php-pdo
-Provides: php_database, php-mysqli
+Provides: php_database, php-mysqli, php-pdo_mysql
 Obsoletes: mod_php3-mysql, stronghold-php-mysql
 BuildRequires: mysql-devel >= 4.1.0
 
@@ -178,7 +188,7 @@ this package and the php package.
 Summary: A PostgreSQL database module for PHP
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}, php-pdo
-Provides: php_database
+Provides: php_database, php-pdo_pgsql
 Obsoletes: mod_php3-pgsql, stronghold-php-pgsql
 BuildRequires: krb5-devel, openssl-devel, postgresql-devel
 
@@ -206,7 +216,7 @@ communication.
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}, php-pdo
 Summary: A module for PHP applications that use ODBC databases
-Provides: php_database
+Provides: php_database, php-pdo_odbc
 Obsoletes: stronghold-php-odbc
 BuildRequires: unixODBC-devel
 
@@ -292,16 +302,6 @@ Requires: php-common = %{version}-%{release}
 The php-mbstring package contains a dynamic shared object that will add
 support for multi-byte string handling to PHP.
 
-%package ncurses
-Summary: A module for PHP applications for using ncurses interfaces
-Group: Development/Languages
-Requires: php-common = %{version}-%{release}
-BuildRequires: ncurses-devel
-
-%description ncurses
-The php-ncurses package contains a dynamic shared object that will add
-support for using the ncurses terminal output interfaces.
-
 %package gd
 Summary: A module for PHP applications for using the gd graphics library
 Group: Development/Languages
@@ -341,16 +341,6 @@ BuildRequires: libmcrypt-devel
 The php-mcrypt package contains a dynamic shared object that will add
 support for using the mcrypt library to PHP.
 
-%package mhash
-Summary: Standard PHP module provides mhash support
-Group: Development/Languages
-Requires: php-common = %{version}-%{release}
-BuildRequires: mhash-devel
-
-%description mhash
-The php-mhash package contains a dynamic shared object that will add
-support for using the mhash library to PHP.
-
 %package tidy
 Summary: Standard PHP module provides tidy library support
 Group: Development/Languages
@@ -366,6 +356,7 @@ Summary: MSSQL database module for PHP
 Group: Development/Languages
 Requires: php-common = %{version}-%{release}, php-pdo
 BuildRequires: freetds-devel
+Provides: php-pdo_dblib
 
 %description mssql
 The php-mssql package contains a dynamic shared object that will
@@ -404,6 +395,27 @@ BuildRequires: recode-devel
 The php-recode package contains a dynamic shared object that will add
 support for using the recode library to PHP.
 
+%package intl
+Summary: Internationalization extension for PHP applications
+Group: System Environment/Libraries
+Requires: php-common = %{version}-%{release}
+BuildRequires: libicu-devel >= 3.6
+
+%description intl
+The php-intl package contains a dynamic shared object that will add
+support for using the ICU library to PHP.
+
+%package enchant
+Summary: Human Language and Character Encoding Support
+Group: System Environment/Libraries
+Requires: php-common = %{version}-%{release}
+BuildRequires: enchant-devel >= 1.2.4
+
+%description enchant
+The php-intl package contains a dynamic shared object that will add
+support for using the enchant library to PHP.
+
+
 %prep
 %setup -q
 %patch1 -p1 -b .gnusrc
@@ -421,13 +433,12 @@ support for using the recode library to PHP.
 %patch41 -p1 -b .easter
 %patch42 -p1 -b .systzdata
 
-%patch60 -p1 -b .tests-dashn
 %patch61 -p1 -b .tests-wddx
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
 cp TSRM/LICENSE TSRM_LICENSE
-cp regex/COPYRIGHT regex_COPYRIGHT
+cp ext/ereg/regex/COPYRIGHT regex_COPYRIGHT
 cp ext/gd/libgd/README gd_README
 
 # Multiple builds for multiple SAPIs
@@ -463,6 +474,27 @@ if test "x${vpdo}" != "x%{pdover}"; then
    : Update the pdover macro and rebuild.
    exit 1
 fi
+
+# Check for some extension version
+ver=$(sed -n '/#define PHP_FILEINFO_VERSION /{s/.* "//;s/".*$//;p}' ext/fileinfo/php_fileinfo.h)
+if test "$ver" != "%{fileinfover}"; then
+   : Error: Upstream FILEINFO version is now ${ver}, expecting %{fileinfover}.
+   : Update the fileinfover macro and rebuild.
+   exit 1
+fi
+ver=$(sed -n '/#define PHP_PHAR_VERSION /{s/.* "//;s/".*$//;p}' ext/phar/php_phar.h)
+if test "$ver" != "%{pharver}"; then
+   : Error: Upstream PHAR version is now ${ver}, expecting %{pharver}.
+   : Update the pharver macro and rebuild.
+   exit 1
+fi
+ver=$(sed -n '/#define PHP_ZIP_VERSION_STRING /{s/.* "//;s/".*$//;p}' ext/zip/php_zip.h)
+if test "$ver" != "%{zipver}"; then
+   : Error: Upstream ZIP version is now ${ver}, expecting %{zipver}.
+   : Update the zipver macro and rebuild.
+   exit 1
+fi
+
 
 %build
 # aclocal workaround - to be improved
@@ -547,7 +579,6 @@ build --enable-force-cgi-redirect \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
       --enable-mbregex \
-      --with-ncurses=shared \
       --with-gd=shared \
       --enable-bcmath=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
@@ -572,25 +603,29 @@ build --enable-force-cgi-redirect \
       --with-pdo-pgsql=shared,%{_prefix} \
       --with-pdo-sqlite=shared,%{_prefix} \
       --with-pdo-dblib=shared,%{_prefix} \
+      --with-sqlite3=shared,%{_prefix} \
       --enable-json=shared \
       --enable-zip=shared \
       --with-readline \
-      --enable-dbase=shared \
       --with-pspell=shared \
+      --enable-phar=shared \
       --with-mcrypt=shared,%{_prefix} \
-      --with-mhash=shared,%{_prefix} \
       --with-tidy=shared,%{_prefix} \
       --with-mssql=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
       --enable-posix=shared \
       --with-unixODBC=shared,%{_prefix} \
+      --enable-fileinfo=shared \
+      --enable-intl=shared \
+      --with-icu-dir=%{_prefix} \
+      --with-enchant=shared,%{_prefix} \
       --with-recode=shared,%{_prefix}
 popd
 
 without_shared="--without-mysql --without-gd \
-      --without-unixODBC --disable-dom \
-      --disable-dba --without-unixODBC \
+      --disable-dom --disable-dba --without-unixODBC \
       --disable-pdo --disable-xmlreader --disable-xmlwriter \
+      --without-sqlite3 --disable-phar --disable-fileinfo \
       --disable-json --without-pspell --disable-wddx \
       --without-curl --disable-posix \
       --disable-sysvmsg --disable-sysvshm --disable-sysvsem"
@@ -668,11 +703,15 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php
 install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
+# Fix the link
+(cd $RPM_BUILD_ROOT%{_bindir}; ln -sfn phar.phar phar)
+
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
-    mbstring ncurses gd dom xsl soap bcmath dba xmlreader xmlwriter \
+    mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip \
-    dbase mcrypt mhash tidy pdo_dblib mssql pspell curl wddx \
+    sqlite3 enchant phar fileinfo intl \
+    mcrypt tidy pdo_dblib mssql pspell curl wddx \
     posix sysvshm sysvsem sysvmsg recode interbase pdo_firebird; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
@@ -700,12 +739,13 @@ cat files.pdo_firebird >> files.interbase
 # sysv* and posix in packaged in php-process
 cat files.sysv* files.posix > files.process
 
-# Package pdo_sqlite with pdo; isolating the sqlite dependency
+# Package sqlite3 and pdo_sqlite with pdo; isolating the sqlite dependency
 # isn't useful at this time since rpm itself requires sqlite.
 cat files.pdo_sqlite >> files.pdo
+cat files.sqlite3 >> files.pdo
 
-# Package json, dbase and zip in -common.
-cat files.json files.dbase files.zip files.curl > files.common
+# Package json, zip, curl, phar and fileinfo in -common.
+cat files.json files.zip files.curl files.phar files.fileinfo > files.common
 
 # Install the macros file:
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
@@ -753,6 +793,8 @@ rm files.* macros.php
 %defattr(-,root,root)
 %{_bindir}/php
 %{_bindir}/php-cgi
+%{_bindir}/phar.phar
+%{_bindir}/phar
 %{_mandir}/man1/php.1*
 %doc sapi/cgi/README* sapi/cli/README
 
@@ -784,7 +826,6 @@ rm files.* macros.php
 %files xml -f files.xml
 %files xmlrpc -f files.xmlrpc
 %files mbstring -f files.mbstring
-%files ncurses -f files.ncurses
 %files gd -f files.gd
 %doc gd_README
 %files soap -f files.soap
@@ -792,15 +833,23 @@ rm files.* macros.php
 %files dba -f files.dba
 %files pdo -f files.pdo
 %files mcrypt -f files.mcrypt
-%files mhash -f files.mhash
 %files tidy -f files.tidy
 %files mssql -f files.mssql
 %files pspell -f files.pspell
+%files intl -f files.intl
 %files process -f files.process
 %files recode -f files.recode
 %files interbase -f files.interbase
+%files enchant -f files.enchant
 
 %changelog
+* Sun Jul 12 2009 Remi Collet <Fedora@famillecollet.com> 5.3.0-1
+- update to 5.3.0
+- remove ncurses, dbase, mhash extensions
+- add enchant, sqlite3, intl, phar, fileinfo extensions
+- raise sqlite version to 3.6.0 (for sqlite3, build with --enable-load-extension)
+- sync with upstream "production" php.ini
+
 * Sat Jun 21 2009 Remi Collet <Fedora@famillecollet.com> 5.2.10-1
 - update to 5.2.10
 - add interbase sub-package
