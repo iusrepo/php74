@@ -13,7 +13,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -39,7 +39,7 @@ Patch21: php-5.2.3-macropen.patch
 # Functional changes
 Patch40: php-5.0.4-dlopen.patch
 Patch41: php-5.3.0-easter.patch
-Patch42: php-5.3.0-systzdata-v5.patch
+Patch42: php-5.3.0-systzdata-v6.patch
 
 # Fixes for tests
 Patch61: php-5.0.4-tests-wddx.patch
@@ -843,6 +843,9 @@ rm files.* macros.php
 %files enchant -f files.enchant
 
 %changelog
+* Thu Jul 16 2009 Joe Orton <jorton@redhat.com> 5.3.0-3
+- update to v6 of systzdata patch; various fixes
+
 * Tue Jul 14 2009 Joe Orton <jorton@redhat.com> 5.3.0-2
 - update to v5 of systzdata patch; parses zone.tab and extracts
   timezone->{country-code,long/lat,comment} mapping table

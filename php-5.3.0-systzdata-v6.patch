@@ -3,6 +3,9 @@ Add support for use of the system timezone database, rather
 than embedding a copy.  Discussed upstream but was not desired.
 
 History:
+r6: fix fd leak in r5, fix country code/BC flag use in 
+    timezone_identifiers_list() using system db,
+    fix use of PECL timezonedb to override system db,
 r5: reverts addition of "System/Localtime" fake tzname.
     updated for 5.3.0, parses zone.tab to pick up mapping between
     timezone name, country code and long/lat coords
@@ -11,8 +14,32 @@ r3: fix a crash if /usr/share/zoneinfo doesn't exist (Raphael Geissert)
 r2: add filesystem trawl to set up name alias index
 r1: initial revision
 
---- php-5.3.0/ext/date/lib/parse_tz.c.systzdata
-+++ php-5.3.0/ext/date/lib/parse_tz.c
+Index: ext/date/lib/timelib.m4
+===================================================================
+--- ext/date/lib/timelib.m4	(revision 284069)
++++ ext/date/lib/timelib.m4	(working copy)
+@@ -78,3 +78,17 @@
+ 
+ dnl Check for strtoll, atoll
+ AC_CHECK_FUNCS(strtoll atoll strftime)
++
++PHP_ARG_WITH(system-tzdata, for use of system timezone data,
++[  --with-system-tzdata[=DIR]      to specify use of system timezone data],
++no, no)
++
++if test "$PHP_SYSTEM_TZDATA" != "no"; then
++   AC_DEFINE(HAVE_SYSTEM_TZDATA, 1, [Define if system timezone data is used])
++
++   if test "$PHP_SYSTEM_TZDATA" != "yes"; then
++      AC_DEFINE_UNQUOTED(HAVE_SYSTEM_TZDATA_PREFIX, "$PHP_SYSTEM_TZDATA",
++                         [Define for location of system timezone data])
++   fi
++fi
++
+Index: ext/date/lib/parse_tz.c
+===================================================================
+--- ext/date/lib/parse_tz.c	(revision 284069)
++++ ext/date/lib/parse_tz.c	(working copy)
 @@ -20,6 +20,16 @@
  
  #include "timelib.h"
@@ -30,7 +57,7 @@ r1: initial revision
  #include <stdio.h>
  
  #ifdef HAVE_LOCALE_H
-@@ -31,7 +41,12 @@
+@@ -31,8 +41,13 @@
  #else
  #include <strings.h>
  #endif
@@ -38,15 +65,35 @@ r1: initial revision
 +#ifndef HAVE_SYSTEM_TZDATA
  #include "timezonedb.h"
 +#endif
-+
-+#include <ctype.h>
  
++#include <ctype.h>
++
  #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
  # if defined(__LITTLE_ENDIAN__)
-@@ -253,6 +268,427 @@ void timelib_dump_tzinfo(timelib_tzinfo 
+ #  undef WORDS_BIGENDIAN
+@@ -51,9 +66,14 @@
+ 
+ static void read_preamble(const unsigned char **tzf, timelib_tzinfo *tz)
+ {
+-	/* skip ID */
+-	*tzf += 4;
+-	
++        if (memcmp(tzf, "TZif", 4) == 0) {
++                *tzf += 20;
++                return;
++        }
++        
++        /* skip ID */
++        *tzf += 4;
++                
+ 	/* read BC flag */
+ 	tz->bc = (**tzf == '\1');
+ 	*tzf += 1;
+@@ -253,8 +273,391 @@
  	}
  }
  
+-static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const timelib_tzdb *tzdb)
 +#ifdef HAVE_SYSTEM_TZDATA
 +
 +#ifdef HAVE_SYSTEM_TZDATA_PREFIX
@@ -60,22 +107,22 @@ r1: initial revision
 +
 +/* Hash table entry for the cache of the zone.tab mapping table. */
 +struct location_info {
-+    char code[2];
-+    double latitude, longitude;
-+    char name[64];
-+    char *comment;
-+    struct location_info *next;
++        char code[2];
++        double latitude, longitude;
++        char name[64];
++        char *comment;
++        struct location_info *next;
 +};
 +
 +/* Cache of zone.tab. */
-+static struct location_info **system_zone_info;
++static struct location_info **system_location_table;
 +
 +/* Size of the zone.tab hash table; a random-ish prime big enough to
 + * prevent too many collisions. */
 +#define LOCINFO_HASH_SIZE (1021)
 +
 +static uint32_t tz_hash(const char *str)
-+{
+ {
 +    const unsigned char *p = (const unsigned char *)str;
 +    uint32_t hash = 5381;
 +    int c;
@@ -136,8 +183,10 @@ r1: initial revision
 +        p += 2;
 +    }
 +
-+    /* Round to 3 decimal places. */
-+    *result = round(v * sign * 1000.00)/1000.00;
++    /* Round to five decimal place, not because it's a good idea,
++     * but, because the builtin data uses rounded data, so, match
++     * that. */
++    *result = round(v * sign * 100000.0) / 100000.0;
 +
 +    return p;
 +}
@@ -148,7 +197,7 @@ r1: initial revision
 + *
 + *   tz_hash(timezone-name)
 + */
-+static struct location_info **load_zone_table(void)
++static struct location_info **create_location_table(void)
 +{
 +    struct location_info **li, *i;
 +    char zone_tab[PATH_MAX];
@@ -221,9 +270,11 @@ r1: initial revision
 +        i->latitude = latitude;
 +        i->next = li[hash];
 +        li[hash] = i;
-+        /* printf("%s [%u, %f, %f]\n", name, hash, longitude, latitude); */
++        /* printf("%s [%u, %f, %f]\n", name, hash, latitude, longitude); */
 +    }
-+                 
++
++    fclose(fp);
++
 +    return li;
 +}
 +
@@ -247,16 +298,6 @@ r1: initial revision
 +    return NULL;
 +}    
 +
-+/* Since 5.3, php_date.c:timezone_identifiers_list() peeks directly
-+ * into the data array at position + 4, which is the BC flag, so, we
-+ * need to fake one up.  For each timezone entry, the 'pos' entry will
-+ * be set to either 0 or 1.  pos + 4 will hence be either \1 or \0,
-+ * respectively.  Somewhat gross, but means we can avoid patching
-+ * php_date.c.  */
-+static const unsigned char system_fake_data[] = "1234\1\0";
-+#define SYSTEM_FAKE_BC_POS (0)
-+#define SYSTEM_FAKE_NONBC_POS (1)
-+
 +/* Filter out some non-tzdata files and the posix/right databases, if
 + * present. */
 +static int index_filter(const struct dirent *ent)
@@ -268,6 +309,14 @@ r1: initial revision
 +		&& strcmp(ent->d_name, "right") != 0
 +		&& strstr(ent->d_name, ".tab") == NULL;
 +}
++
++static int sysdbcmp(const void *first, const void *second)
++{
++        const timelib_tzdb_index_entry *alpha = first, *beta = second;
++
++        return strcmp(alpha->id, beta->id);
++}
++
 +
 +/* Create the zone identifier index by trawling the filesystem. */
 +static void create_zone_index(timelib_tzdb *db)
@@ -325,28 +374,13 @@ r1: initial revision
 +					dirstack[dirstack_top++] = strdup(name);
 +				}
 +				else {
-+	                                const struct location_info *li;
-+
 +					if (index_next == index_size) {
 +						index_size *= 2;
 +						db_index = realloc(db_index,
 +								   index_size * sizeof *db_index);
 +					}
 +
-+					db_index[index_next].id = strdup(name);
-+                                        
-+                                        /* Look up the timezone in the zone.tab cache, and see
-+                                         * whether this is a "BC" name or not; fake the pos
-+                                         * pointer appropriately. */
-+                                        li = find_zone_info(system_zone_info, name);
-+                                        if (li) {
-+                                            db_index[index_next].pos = SYSTEM_FAKE_NONBC_POS;
-+                                        }
-+                                        else {
-+                                            db_index[index_next].pos = SYSTEM_FAKE_BC_POS;
-+                                        }
-+
-+                                        index_next++;
++					db_index[index_next++].id = strdup(name);
 +				}
 +			}
 +
@@ -357,11 +391,58 @@ r1: initial revision
 +		free(top);
 +	} while (dirstack_top);
 +
++        qsort(db_index, index_next, sizeof *db_index, sysdbcmp);
++
 +	db->index = db_index;
 +	db->index_size = index_next;
-+        db->data = system_fake_data;
 +
 +	free(dirstack);
++}
++
++#define FAKE_HEADER "1234\0??\1??"
++#define FAKE_UTC_POS (7 - 4)
++
++/* Create a fake data segment for database 'sysdb'. */
++static void fake_data_segment(timelib_tzdb *sysdb,
++                              struct location_info **info)
++{
++        size_t n;
++        char *data, *p;
++        
++        data = malloc(3 * sysdb->index_size + 7);
++
++        p = mempcpy(data, FAKE_HEADER, sizeof(FAKE_HEADER) - 1);
++
++        for (n = 0; n < sysdb->index_size; n++) {
++                const struct location_info *li;
++                timelib_tzdb_index_entry *ent;
++
++                ent = (timelib_tzdb_index_entry *)&sysdb->index[n];
++
++                /* Lookup the timezone name in the hash table. */
++                if (strcmp(ent->id, "UTC") == 0) {
++                        ent->pos = FAKE_UTC_POS;
++                        continue;
++                }
++
++                li = find_zone_info(info, ent->id);
++                if (li) {
++                        /* If found, append the BC byte and the
++                         * country code; set the position for this
++                         * section of timezone data.  */
++                        ent->pos = (p - data) - 4;
++                        *p++ = '\1';
++                        *p++ = li->code[0];
++                        *p++ = li->code[1];
++                }
++                else {
++                        /* If not found, the timezone data can
++                         * point at the header. */
++                        ent->pos = 0;
++                }
++        }
++        
++        sysdb->data = (unsigned char *)data;
 +}
 +
 +/* Return the mmap()ed tzfile if found, else NULL.  On success, the
@@ -373,7 +454,7 @@ r1: initial revision
 +	char *p;
 +	int fd;
 +	
-+	if (strstr(timezone, "..") != NULL) {
++	if (timezone[0] == '\0' || strstr(timezone, "..") != NULL) {
 +		return NULL;
 +	}
 +
@@ -394,108 +475,138 @@ r1: initial revision
 +	return p != MAP_FAILED ? p : NULL;
 +}
 +
-+const timelib_tzdb *timelib_builtin_db(void)
++#endif
++
++static int inmem_seek_to_tz_position(const unsigned char **tzf, char *timezone, const timelib_tzdb *tzdb)
 +{
+ 	int left = 0, right = tzdb->index_size - 1;
+ #ifdef HAVE_SETLOCALE
+ 	char *cur_locale = NULL, *tmp;
+@@ -292,36 +695,124 @@
+ 	return 0;
+ }
+ 
++static int seek_to_tz_position(const unsigned char **tzf, char *timezone, 
++			       char **map, size_t *maplen,
++			       const timelib_tzdb *tzdb)
++{
++	if (tzdb == timezonedb_system) {
++		char *orig;
++
++		orig = map_tzfile(timezone, maplen);
++		if (orig == NULL) {
++			return 0;
++		}
++		
++		(*tzf) = (unsigned char *)orig ;
++		*map = orig;
++                
++                return 1;
++	}
++	else {
++		return inmem_seek_to_tz_position(tzf, timezone, tzdb);
++	}
++}
++
+ const timelib_tzdb *timelib_builtin_db(void)
+ {
++#ifdef HAVE_SYSTEM_TZDATA
 +	if (timezonedb_system == NULL) {
 +		timelib_tzdb *tmp = malloc(sizeof *tmp);
 +
 +		tmp->version = "0.system";
 +		tmp->data = NULL;
 +		create_zone_index(tmp);
-+                system_zone_info = load_zone_table();        
++		system_location_table = create_location_table();
++                fake_data_segment(tmp, system_location_table);
 +		timezonedb_system = tmp;
 +	}
++
 +			
 +	return timezonedb_system;
-+}
-+
-+const timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count)
-+{
++#else
+ 	return &timezonedb_builtin;
++#endif
+ }
+ 
+ const timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count)
+ {
++#ifdef HAVE_SYSTEM_TZDATA
 +	*count = timezonedb_system->index_size;
 +	return timezonedb_system->index;
-+}
-+
-+int timelib_timezone_id_is_valid(char *timezone, const timelib_tzdb *tzdb)
-+{
-+	char fname[PATH_MAX];
-+
-+	if (strstr(timezone, "..") != NULL) {
-+		return 0;
-+	}
-+	
-+	snprintf(fname, sizeof fname, ZONEINFO_PREFIX "/%s", timezone);
-+
-+	return access(fname, R_OK) == 0 ? 1 : 0;
-+}
-+
-+timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
-+{
-+	char *orig;
-+	const unsigned char *tzf;
-+	timelib_tzinfo *tmp;
-+	size_t len;
-+        const struct location_info *li;
-+
-+	orig = map_tzfile(timezone, &len);
-+	if (orig == NULL) {
-+		return NULL;
-+	}
-+
-+	tmp = timelib_tzinfo_ctor(timezone);
-+
-+	tzf = (const unsigned char *)orig + 20;
-+	read_header(&tzf, tmp);
-+	read_transistions(&tzf, tmp);
-+	read_types(&tzf, tmp);
-+        
-+        if ((li = find_zone_info(system_zone_info, timezone)) != NULL) {
-+            tmp->location.comments = strdup(li->comment);
-+            strncpy(tmp->location.country_code, li->code, 2);
-+            tmp->location.longitude = li->longitude;
-+            tmp->location.latitude = li->latitude;
-+            tmp->bc = 1;
-+        }
-+        else {
-+            strcpy(tmp->location.country_code, "??");
-+            tmp->bc = 0;
-+            tmp->location.comments = strdup("");
-+        }
-+
-+	munmap(orig, len);
-+
-+	return tmp;
-+}
-+
-+#else /* !HAVE_SYSTEM_TZDATA */
-+
- static int seek_to_tz_position(const unsigned char **tzf, char *timezone, const timelib_tzdb *tzdb)
- {
- 	int left = 0, right = tzdb->index_size - 1;
-@@ -328,6 +764,7 @@ timelib_tzinfo *timelib_parse_tzfile(cha
- 
- 	return tmp;
- }
++#else
+ 	*count = sizeof(timezonedb_idx_builtin) / sizeof(*timezonedb_idx_builtin);
+ 	return timezonedb_idx_builtin;
 +#endif
+ }
  
- static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib_sll *transition_time)
+ int timelib_timezone_id_is_valid(char *timezone, const timelib_tzdb *tzdb)
  {
---- php-5.3.0/ext/date/lib/timelib.m4.systzdata
-+++ php-5.3.0/ext/date/lib/timelib.m4
-@@ -78,3 +78,17 @@ stdlib.h
+ 	const unsigned char *tzf;
+-	return (seek_to_tz_position(&tzf, timezone, tzdb));
++
++#ifdef HAVE_SYSTEM_TZDATA
++        if (tzdb == timezonedb_system) {
++            char fname[PATH_MAX];
++            
++            if (timezone[0] == '\0' || strstr(timezone, "..") != NULL) {
++		return 0;
++            }
++            
++            snprintf(fname, sizeof fname, ZONEINFO_PREFIX "/%s", timezone);
++            
++            return access(fname, R_OK) == 0 ? 1 : 0;
++        }
++#endif
++
++	return (inmem_seek_to_tz_position(&tzf, timezone, tzdb));
+ }
  
- dnl Check for strtoll, atoll
- AC_CHECK_FUNCS(strtoll atoll strftime)
+ timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
+ {
+ 	const unsigned char *tzf;
++	char *memmap = NULL;
++	size_t maplen;
+ 	timelib_tzinfo *tmp;
+ 
+-	if (seek_to_tz_position(&tzf, timezone, tzdb)) {
++	if (seek_to_tz_position(&tzf, timezone, &memmap, &maplen, tzdb)) {
+ 		tmp = timelib_tzinfo_ctor(timezone);
+ 
+ 		read_preamble(&tzf, tmp);
+ 		read_header(&tzf, tmp);
+ 		read_transistions(&tzf, tmp);
+ 		read_types(&tzf, tmp);
+-		read_location(&tzf, tmp);
 +
-+PHP_ARG_WITH(system-tzdata, for use of system timezone data,
-+[  --with-system-tzdata[=DIR]      to specify use of system timezone data],
-+no, no)
++#ifdef HAVE_SYSTEM_TZDATA
++		if (memmap) {
++			const struct location_info *li;
 +
-+if test "$PHP_SYSTEM_TZDATA" != "no"; then
-+   AC_DEFINE(HAVE_SYSTEM_TZDATA, 1, [Define if system timezone data is used])
++			/* TZif-style - grok the location info from the system database,
++			 * if possible. */
 +
-+   if test "$PHP_SYSTEM_TZDATA" != "yes"; then
-+      AC_DEFINE_UNQUOTED(HAVE_SYSTEM_TZDATA_PREFIX, "$PHP_SYSTEM_TZDATA",
-+                         [Define for location of system timezone data])
-+   fi
-+fi
++			if ((li = find_zone_info(system_location_table, timezone)) != NULL) {
++				tmp->location.comments = strdup(li->comment);
++                                strncpy(tmp->location.country_code, li->code, 2);
++				tmp->location.longitude = li->longitude;
++				tmp->location.latitude = li->latitude;
++				tmp->bc = 1;
++			}
++			else {
++				strcpy(tmp->location.country_code, "??");
++				tmp->bc = 0;
++				tmp->location.comments = strdup("");
++			}
 +
++			/* Now done with the mmap segment - discard it. */
++			munmap(memmap, maplen);
++#endif
++		}
++		else {
++			/* PHP-style - use the embedded info. */
++			read_location(&tzf, tmp);
++		}
+ 	} else {
+ 		tmp = NULL;
+ 	}
