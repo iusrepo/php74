@@ -13,7 +13,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -843,6 +843,9 @@ rm files.* macros.php
 %files enchant -f files.enchant
 
 %changelog
+* Thu Jul 16 2009 Joe Orton <jorton@redhat.com> 5.3.0-4
+- rediff systzdata patch
+
 * Thu Jul 16 2009 Joe Orton <jorton@redhat.com> 5.3.0-3
 - update to v6 of systzdata patch; various fixes
 
