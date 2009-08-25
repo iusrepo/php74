@@ -31,6 +31,7 @@ Patch4: php-5.3.0-phpize64.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
+Patch8: php-5.3.0-openssl.patch
 
 # Fixes for extension modules
 Patch20: php-4.3.11-shutdown.patch
@@ -425,6 +426,7 @@ support for using the enchant library to PHP.
 %patch5 -p1 -b .includedir
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
+%patch8 -p1 -b .openssl
 
 %patch20 -p1 -b .shutdown
 %patch21 -p1 -b .macropen
@@ -843,7 +845,7 @@ rm files.* macros.php
 %files enchant -f files.enchant
 
 %changelog
-* Fri Aug 21 2009 Tomas Mraz <tmraz@redhat.com> - 5.3.0-6
+* Tue Aug 25 2009 Tomas Mraz <tmraz@redhat.com> - 5.3.0-6
 - rebuilt with new openssl
 
 * Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.3.0-5
