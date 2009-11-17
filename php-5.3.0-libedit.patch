@@ -1,0 +1,58 @@
+diff -up php-5.3.0/ext/readline/config.m4.BAD php-5.3.0/ext/readline/config.m4
+--- php-5.3.0/ext/readline/config.m4.BAD	2009-11-17 16:14:45.289616920 -0500
++++ php-5.3.0/ext/readline/config.m4	2009-11-17 16:14:59.588616924 -0500
+@@ -55,7 +55,7 @@ if test "$PHP_READLINE" && test "$PHP_RE
+ elif test "$PHP_LIBEDIT" != "no"; then
+ 
+   for i in $PHP_LIBEDIT /usr/local /usr; do
+-    test -f $i/include/readline/readline.h && LIBEDIT_DIR=$i && break
++    test -f $i/include/editline/readline.h && LIBEDIT_DIR=$i && break
+   done
+ 
+   if test -z "$LIBEDIT_DIR"; then
+diff -up php-5.3.0/ext/readline/readline.c.BAD php-5.3.0/ext/readline/readline.c
+--- php-5.3.0/ext/readline/readline.c.BAD	2009-11-17 16:15:30.151716204 -0500
++++ php-5.3.0/ext/readline/readline.c	2009-11-17 16:16:27.902715621 -0500
+@@ -33,8 +33,10 @@
+ #define rl_completion_matches completion_matches
+ #endif
+ 
++#ifdef HAVE_LIBEDIT
++#include <editline/readline.h>
++#else
+ #include <readline/readline.h>
+-#ifndef HAVE_LIBEDIT
+ #include <readline/history.h>
+ #endif
+ 
+diff -up php-5.3.0/sapi/cli/php_cli.c.BAD php-5.3.0/sapi/cli/php_cli.c
+--- php-5.3.0/sapi/cli/php_cli.c.BAD	2009-11-17 16:16:51.421617342 -0500
++++ php-5.3.0/sapi/cli/php_cli.c	2009-11-17 16:17:35.026715984 -0500
+@@ -76,8 +76,11 @@
+ #endif
+ 
+ #if (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
++
++#if HAVE_LIBEDIT
++#include <editline/readline.h>
++#else
+ #include <readline/readline.h>
+-#if !HAVE_LIBEDIT
+ #include <readline/history.h>
+ #endif
+ #include "php_cli_readline.h"
+diff -up php-5.3.0/sapi/cli/php_cli_readline.c.BAD php-5.3.0/sapi/cli/php_cli_readline.c
+--- php-5.3.0/sapi/cli/php_cli_readline.c.BAD	2009-11-17 16:17:51.398715697 -0500
++++ php-5.3.0/sapi/cli/php_cli_readline.c	2009-11-17 16:18:19.241715654 -0500
+@@ -49,8 +49,10 @@
+ #include <unixlib/local.h>
+ #endif
+ 
++#if HAVE_LIBEDIT
++#include <editline/readline.h>
++#else
+ #include <readline/readline.h>
+-#if !HAVE_LIBEDIT
+ #include <readline/history.h>
+ #endif
+ 

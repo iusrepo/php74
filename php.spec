@@ -13,7 +13,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.0
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -32,6 +32,8 @@ Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
 Patch8: php-5.3.0-openssl.patch
+# Filed upstream: http://bugs.php.net/50209
+Patch9: php-5.3.0-libedit.patch
 
 # Fixes for extension modules
 Patch20: php-4.3.11-shutdown.patch
@@ -50,7 +52,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, gmp-devel
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.6.0
-BuildRequires: zlib-devel, pcre-devel >= 6.6, smtpdaemon, readline-devel
+BuildRequires: zlib-devel, pcre-devel >= 6.6, smtpdaemon, libedit-devel
 BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, php3, phpfi, stronghold-php
 Requires: httpd-mmn = %{httpd_mmn}
@@ -427,6 +429,7 @@ support for using the enchant library to PHP.
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
 %patch8 -p1 -b .openssl
+%patch9 -p1 -b .libedit
 
 %patch20 -p1 -b .shutdown
 %patch21 -p1 -b .macropen
@@ -608,7 +611,8 @@ build --enable-force-cgi-redirect \
       --with-sqlite3=shared,%{_prefix} \
       --enable-json=shared \
       --enable-zip=shared \
-      --with-readline \
+      --without-readline \
+      --with-libedit \
       --with-pspell=shared \
       --enable-phar=shared \
       --with-mcrypt=shared,%{_prefix} \
@@ -845,6 +849,9 @@ rm files.* macros.php
 %files enchant -f files.enchant
 
 %changelog
+* Tue Nov 17 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 5.3.0-7
+- use libedit instead of readline to resolve licensing issues
+
 * Tue Aug 25 2009 Tomas Mraz <tmraz@redhat.com> - 5.3.0-6
 - rebuilt with new openssl
 
