@@ -5,15 +5,16 @@
 %global pdover      20080721
 # Extension version
 %global fileinfover 1.0.5-dev
-%global pharver     2.0.0-dev
+%global pharver     2.0.1
 %global zipver      1.9.1
+%global jsonver     1.2.1
 
 %define httpd_mmn %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.3.0
-Release: 7%{?dist}
+Version: 5.3.1
+Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -24,14 +25,13 @@ Source2: php.ini
 Source3: macros.php
 
 # Build fixes
-Patch1: php-5.3.0-gnusrc.patch
+Patch1: php-5.3.1-gnusrc.patch
 Patch2: php-5.3.0-install.patch
 Patch3: php-5.2.4-norpath.patch
 Patch4: php-5.3.0-phpize64.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
-Patch8: php-5.3.0-openssl.patch
 # Filed upstream: http://bugs.php.net/50209
 Patch9: php-5.3.0-libedit.patch
 
@@ -90,6 +90,7 @@ Group: Development/Languages
 Summary: Thread-safe PHP interpreter for use with the Apache HTTP Server
 Requires: php-common = %{version}-%{release}
 Requires: httpd-mmn = %{httpd_mmn}
+BuildRequires: libtool-ltdl-devel
 
 %description zts
 The php-zts package contains a module for use with the Apache HTTP
@@ -108,6 +109,7 @@ Provides: php-spl, php-tokenizer, php-openssl, php-pcre
 Provides: php-zlib, php-json, php-zip, php-fileinfo
 Obsoletes: php-openssl, php-pecl-zip, php-pecl-json, php-json, php-pecl-phar, php-pecl-Fileinfo
 # For obsoleted pecl extension
+Provides: php-pecl-json = %{jsonver}, php-pecl(json) = %{jsonver}
 Provides: php-pecl-zip = %{zipver}, php-pecl(zip) = %{zipver}
 Provides: php-pecl-phar = %{pharver}, php-pecl(phar) = %{pharver}
 Provides: php-pecl-Fileinfo = %{fileinfover}, php-pecl(Fileinfo) = %{fileinfover}
@@ -428,7 +430,6 @@ support for using the enchant library to PHP.
 %patch5 -p1 -b .includedir
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
-%patch8 -p1 -b .openssl
 %patch9 -p1 -b .libedit
 
 %patch20 -p1 -b .shutdown
@@ -497,6 +498,12 @@ ver=$(sed -n '/#define PHP_ZIP_VERSION_STRING /{s/.* "//;s/".*$//;p}' ext/zip/ph
 if test "$ver" != "%{zipver}"; then
    : Error: Upstream ZIP version is now ${ver}, expecting %{zipver}.
    : Update the zipver macro and rebuild.
+   exit 1
+fi
+ver=$(sed -n '/#define PHP_JSON_VERSION /{s/.* "//;s/".*$//;p}' ext/json/php_json.h)
+if test "$ver" != "%{jsonver}"; then
+   : Error: Upstream JSON version is now ${ver}, expecting %{jsonver}.
+   : Update the jsonver macro and rebuild.
    exit 1
 fi
 
@@ -706,6 +713,7 @@ install -m 755 -d $RPM_BUILD_ROOT/etc/httpd/conf.d
 install -m 644 $RPM_SOURCE_DIR/php.conf $RPM_BUILD_ROOT/etc/httpd/conf.d
 
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
+#install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d
 install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php
 install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
@@ -787,10 +795,13 @@ rm files.* macros.php
 %defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
 %doc Zend/ZEND_* TSRM_LICENSE regex_COPYRIGHT
+%doc php.ini-*
 %config(noreplace) %{_sysconfdir}/php.ini
 %dir %{_sysconfdir}/php.d
+#dir %{_sysconfdir}/php-zts.d
 %dir %{_libdir}/php
 %dir %{_libdir}/php/modules
+#dir %{_libdir}/php/modules-zts
 %dir %{_localstatedir}/lib/php
 %dir %{_libdir}/php/pear
 %dir %{_datadir}/php
@@ -849,6 +860,12 @@ rm files.* macros.php
 %files enchant -f files.enchant
 
 %changelog
+* Fri Nov 20 2009 Remi Collet <Fedora@famillecollet.com> 5.3.1-1
+- update to 5.3.1
+- remove openssl patch (merged upstream)
+- add provides for php-pecl-json
+- add prod/devel php.ini in doc
+
 * Tue Nov 17 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 5.3.0-7
 - use libedit instead of readline to resolve licensing issues
 
