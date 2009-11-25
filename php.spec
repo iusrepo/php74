@@ -14,7 +14,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -32,6 +32,7 @@ Patch4: php-5.3.0-phpize64.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
+Patch8: php-5.3.1-aconf26x.patch
 # Filed upstream: http://bugs.php.net/50209
 Patch9: php-5.3.0-libedit.patch
 
@@ -430,6 +431,7 @@ support for using the enchant library to PHP.
 %patch5 -p1 -b .includedir
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
+%patch8 -p1 -b .aconf26x
 %patch9 -p1 -b .libedit
 
 %patch20 -p1 -b .shutdown
@@ -517,6 +519,7 @@ libtoolize --force --copy
 cat `aclocal --print-ac-dir`/{libtool,ltoptions,ltsugar,ltversion,lt~obsolete}.m4 >build/libtool.m4
 
 # Regenerate configure scripts (patches change config.m4's)
+touch configure.in
 ./buildconf --force
 
 CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign"
@@ -860,6 +863,9 @@ rm files.* macros.php
 %files enchant -f files.enchant
 
 %changelog
+* Wed Nov 25 2009 Joe Orton <jorton@redhat.com> - 5.3.1-2
+- fix build with autoconf 2.6x
+
 * Fri Nov 20 2009 Remi Collet <Fedora@famillecollet.com> 5.3.1-1
 - update to 5.3.1
 - remove openssl patch (merged upstream)
