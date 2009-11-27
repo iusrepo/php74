@@ -14,7 +14,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -43,7 +43,7 @@ Patch21: php-5.2.3-macropen.patch
 # Functional changes
 Patch40: php-5.0.4-dlopen.patch
 Patch41: php-5.3.0-easter.patch
-Patch42: php-5.3.0-systzdata-v6.patch
+Patch42: php-5.3.1-systzdata-v7.patch
 
 # Fixes for tests
 Patch61: php-5.0.4-tests-wddx.patch
@@ -863,6 +863,9 @@ rm files.* macros.php
 %files enchant -f files.enchant
 
 %changelog
+* Fri Nov 27 2009 Joe Orton <jorton@redhat.com> - 5.3.1-3
+- update to v7 of systzdata patch
+
 * Wed Nov 25 2009 Joe Orton <jorton@redhat.com> - 5.3.1-2
 - fix build with autoconf 2.6x
 

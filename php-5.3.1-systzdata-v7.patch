@@ -3,6 +3,7 @@ Add support for use of the system timezone database, rather
 than embedding a copy.  Discussed upstream but was not desired.
 
 History:
+r7: improve check for valid timezone id to exclude directories
 r6: fix fd leak in r5, fix country code/BC flag use in 
     timezone_identifiers_list() using system db,
     fix use of PECL timezonedb to override system db,
@@ -14,10 +15,8 @@ r3: fix a crash if /usr/share/zoneinfo doesn't exist (Raphael Geissert)
 r2: add filesystem trawl to set up name alias index
 r1: initial revision
 
-Index: ext/date/lib/timelib.m4
-===================================================================
---- php-5.3.0/ext/date/lib/parse_tz.c.systzdata
-+++ php-5.3.0/ext/date/lib/parse_tz.c
+--- php-5.3.1/ext/date/lib/parse_tz.c.systzdata
++++ php-5.3.1/ext/date/lib/parse_tz.c
 @@ -20,6 +20,16 @@
  
  #include "timelib.h"
@@ -66,7 +65,7 @@ Index: ext/date/lib/timelib.m4
  	/* read BC flag */
  	tz->bc = (**tzf == '\1');
  	*tzf += 1;
-@@ -253,7 +273,390 @@ void timelib_dump_tzinfo(timelib_tzinfo 
+@@ -253,7 +273,397 @@ void timelib_dump_tzinfo(timelib_tzinfo 
  	}
  }
  
@@ -422,6 +421,13 @@ Index: ext/date/lib/timelib.m4
 +        sysdb->data = (unsigned char *)data;
 +}
 +
++/* Returns true if the passed-in stat structure describes a
++ * probably-valid timezone file. */
++static int is_valid_tzfile(const struct stat *st)
++{
++	return S_ISREG(st->st_mode) && st->st_size > 20;
++}
++
 +/* Return the mmap()ed tzfile if found, else NULL.  On success, the
 + * length of the mapped data is placed in *length. */
 +static char *map_tzfile(const char *timezone, size_t *length)
@@ -440,7 +446,7 @@ Index: ext/date/lib/timelib.m4
 +	fd = open(fname, O_RDONLY);
 +	if (fd == -1) {
 +		return NULL;
-+	} else if (fstat(fd, &st) != 0 || st.st_size < 21) {
++	} else if (fstat(fd, &st) != 0 || !is_valid_tzfile(&st)) {
 +		close(fd);
 +		return NULL;
 +	}
@@ -458,7 +464,7 @@ Index: ext/date/lib/timelib.m4
  {
  	int left = 0, right = tzdb->index_size - 1;
  #ifdef HAVE_SETLOCALE
-@@ -292,36 +695,124 @@ static int seek_to_tz_position(const uns
+@@ -292,36 +702,125 @@ static int seek_to_tz_position(const uns
  	return 0;
  }
  
@@ -524,14 +530,15 @@ Index: ext/date/lib/timelib.m4
 +#ifdef HAVE_SYSTEM_TZDATA
 +        if (tzdb == timezonedb_system) {
 +            char fname[PATH_MAX];
-+            
++            struct stat st;
++
 +            if (timezone[0] == '\0' || strstr(timezone, "..") != NULL) {
 +		return 0;
 +            }
 +            
 +            snprintf(fname, sizeof fname, ZONEINFO_PREFIX "/%s", timezone);
 +            
-+            return access(fname, R_OK) == 0 ? 1 : 0;
++            return stat(fname, &st) == 0 && is_valid_tzfile(&st);
 +        }
 +#endif
 +
@@ -586,8 +593,8 @@ Index: ext/date/lib/timelib.m4
  	} else {
  		tmp = NULL;
  	}
---- php-5.3.0/ext/date/lib/timelib.m4.systzdata
-+++ php-5.3.0/ext/date/lib/timelib.m4
+--- php-5.3.1/ext/date/lib/timelib.m4.systzdata
++++ php-5.3.1/ext/date/lib/timelib.m4
 @@ -78,3 +78,17 @@ stdlib.h
  
  dnl Check for strtoll, atoll
