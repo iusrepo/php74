@@ -17,7 +17,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -867,6 +867,9 @@ rm files.* macros.php
 %files enchant -f files.enchant
 
 %changelog
+* Fri Apr 02 2010 Caolán McNamara <caolanm@redhat.com> 5.3.2-2
+- rebuild for icu 4.4
+
 * Sat Mar 06 2010 Remi Collet <Fedora@famillecollet.com> 5.3.2-1
 - PHP 5.3.2 Released!
 - remove mime_magic option (now provided by fileinfo, by emu)
