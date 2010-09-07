@@ -511,6 +511,9 @@ if test "$ver" != "%{jsonver}"; then
    exit 1
 fi
 
+# Fix some bogus permissions
+find . -name \*.[ch] -exec chmod 644 {} \;
+chmod 644 README.*
 
 %build
 # aclocal workaround - to be improved
