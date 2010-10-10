@@ -14,10 +14,16 @@
 # Regression tests take a long time, you can skip 'em with this
 %{!?runselftest: %{expand: %%global runselftest 1}}
 
+%ifarch %{ix86} x86_64
+%global with_fpm 1
+%else
+%global with_fpm 0
+%endif
+
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -26,6 +32,10 @@ Source0: http://www.php.net/distributions/php-%{version}.tar.bz2
 Source1: php.conf
 Source2: php.ini
 Source3: macros.php
+Source4: php-fpm.conf
+Source5: php-fpm-www.conf
+Source6: php-fpm.init
+Source7: php-fpm.logrotate
 
 # Build fixes
 Patch1: php-5.3.3-gnusrc.patch
@@ -97,6 +107,19 @@ BuildRequires: libtool-ltdl-devel
 %description zts
 The php-zts package contains a module for use with the Apache HTTP
 Server which can operate under a threaded server processing model.
+
+%if %{with_fpm}
+%package fpm
+Group: Development/Languages
+Summary: PHP FastCGI Process Manager
+Requires: php-common = %{version}-%{release}
+BuildRequires: libevent-devel >= 1.4.11
+
+%description fpm
+PHP-FPM (FastCGI Process Manager) is an alternative PHP FastCGI
+implementation with some additional features useful for sites of
+any size, especially busier sites.
+%endif
 
 %package common
 Group: Development/Languages
@@ -450,7 +473,10 @@ cp ext/ereg/regex/COPYRIGHT regex_COPYRIGHT
 cp ext/gd/libgd/README gd_README
 
 # Multiple builds for multiple SAPIs
-mkdir build-cgi build-apache build-embedded build-zts
+mkdir build-cgi build-apache build-embedded build-zts \
+%if %{with_fpm}
+    build-fpm
+%endif
 
 # Remove bogus test; position of read position after fopen(, "a+")
 # is not defined by C standard, so don't presume anything.
@@ -655,6 +681,13 @@ pushd build-apache
 build --with-apxs2=%{_sbindir}/apxs ${without_shared}
 popd
 
+%if %{with_fpm}
+# Build php-fpm
+pushd build-fpm
+build --enable-fpm ${without_shared}
+popd
+%endif
+
 # Build for inclusion as embedded script language into applications,
 # /usr/lib[64]/libphp5.so
 pushd build-embedded
@@ -697,6 +730,11 @@ unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 # Install the version for embedded script language in applications + php_embed.h
 make -C build-embedded install-sapi install-headers INSTALL_ROOT=$RPM_BUILD_ROOT
 
+%if %{with_fpm}
+# Install the php-fpm binary
+make -C build-fpm install-fpm INSTALL_ROOT=$RPM_BUILD_ROOT 
+%endif
+
 # Install everything from the CGI SAPI build
 make -C build-cgi install INSTALL_ROOT=$RPM_BUILD_ROOT 
 
@@ -725,6 +763,24 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 #install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d
 install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php
 install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
+
+%if %{with_fpm}
+# PHP-FPM stuff
+# Log
+install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/log/php-fpm
+install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/run/php-fpm
+# Config
+install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d
+install -m 644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.conf
+install -m 644 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d/www.conf
+mv $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.conf.default .
+# Service
+install -m 755 -d $RPM_BUILD_ROOT%{_initrddir}
+install -m 755 %{SOURCE6} $RPM_BUILD_ROOT%{_initrddir}/php-fpm
+# LogRotate
+install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
+install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
+%endif
 
 # Fix the link
 (cd $RPM_BUILD_ROOT%{_bindir}; ln -sfn phar.phar phar)
@@ -790,6 +846,17 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 rm files.* macros.php
 
+%if %{with_fpm}
+%post fpm
+/sbin/chkconfig --add php-fpm
+
+%preun fpm
+if [ "$1" = 0 ] ; then
+    /sbin/service php-fpm stop >/dev/null 2>&1
+    /sbin/chkconfig --del php-fpm
+fi
+%endif
+
 %post embedded -p /sbin/ldconfig
 %postun embedded -p /sbin/ldconfig
 
@@ -827,6 +894,22 @@ rm files.* macros.php
 %files zts
 %defattr(-,root,root)
 %{_libdir}/httpd/modules/libphp5-zts.so
+
+%if %{with_fpm}
+%files fpm
+%defattr(-,root,root)
+%doc php-fpm.conf.default
+%config(noreplace) %{_sysconfdir}/php-fpm.conf
+%config(noreplace) %{_sysconfdir}/php-fpm.d/www.conf
+%config(noreplace) %{_sysconfdir}/logrotate.d/php-fpm
+%{_sbindir}/php-fpm
+%{_initrddir}/php-fpm
+%dir %{_sysconfdir}/php-fpm.d
+# log owned by apache for log
+%attr(770,apache,apache) %dir %{_localstatedir}/log/php-fpm
+%dir %{_localstatedir}/run/php-fpm
+%{_mandir}/man1/php-fpm.1*
+%endif
 
 %files devel
 %defattr(-,root,root)
@@ -870,6 +953,9 @@ rm files.* macros.php
 %files enchant -f files.enchant
 
 %changelog
+* Sun Oct 10 2010 Remi Collet <Fedora@famillecollet.com> 5.3.3-2
+- add php-fpm sub-package
+
 * Thu Jul 22 2010 Remi Collet <Fedora@famillecollet.com> 5.3.3-1
 - PHP 5.3.3 released
 
