@@ -23,7 +23,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -953,6 +953,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Fri Oct 29 2010 Joe Orton <jorton@redhat.com> - 5.3.3-3
+- rebuild for new net-snmp
+
 * Sun Oct 10 2010 Remi Collet <Fedora@famillecollet.com> 5.3.3-2
 - add php-fpm sub-package
 
