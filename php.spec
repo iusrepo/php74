@@ -14,6 +14,10 @@
 # Regression tests take a long time, you can skip 'em with this
 %{!?runselftest: %{expand: %%global runselftest 1}}
 
+# Use the arch-specific mysql_config binary to avoid mismatch with the
+# arch detection heuristic used by bindir/mysql_config.
+%define mysql_config %{_libdir}/mysql/mysql_config
+
 %ifarch %{ix86} x86_64
 %global with_fpm 1
 %else
@@ -23,7 +27,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.3
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -630,7 +634,7 @@ build --enable-force-cgi-redirect \
       --with-xmlrpc=shared \
       --with-ldap=shared --with-ldap-sasl \
       --with-mysql=shared,%{_prefix} \
-      --with-mysqli=shared,%{_bindir}/mysql_config \
+      --with-mysqli=shared,%{mysql_config} \
       --with-interbase=shared,%{_libdir}/firebird \
       --with-pdo-firebird=shared,%{_libdir}/firebird \
       --enable-dom=shared \
@@ -644,7 +648,7 @@ build --enable-force-cgi-redirect \
       --enable-fastcgi \
       --enable-pdo=shared \
       --with-pdo-odbc=shared,unixODBC,%{_prefix} \
-      --with-pdo-mysql=shared,%{_prefix} \
+      --with-pdo-mysql=shared,%{mysql_config} \
       --with-pdo-pgsql=shared,%{_prefix} \
       --with-pdo-sqlite=shared,%{_prefix} \
       --with-pdo-dblib=shared,%{_prefix} \
@@ -953,6 +957,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Mon Nov  1 2010 Joe Orton <jorton@redhat.com> - 5.3.3-4
+- use mysql_config in libdir directly to avoid biarch build failures
+
 * Fri Oct 29 2010 Joe Orton <jorton@redhat.com> - 5.3.3-3
 - rebuild for new net-snmp
 
