@@ -478,10 +478,6 @@ support for using the enchant library to PHP.
 
 %patch61 -p1 -b .tests-wddx
 
-# Make rpmlint happy
-find . -name \*.c -exec chmod -x {} \;
-find . -name \*.h -exec chmod -x {} \;
-
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
 cp TSRM/LICENSE TSRM_LICENSE
@@ -972,7 +968,6 @@ fi
 * Wed Dec  1 2010 Remi Collet <Fedora@famillecollet.com> 5.3.3-5
 - ghost /var/run/php-fpm (see #656660)
 - add filter_setup to not provides extensions as .so
-- fix perm on .c and .h to make rpmlint happy
 
 * Mon Nov  1 2010 Joe Orton <jorton@redhat.com> - 5.3.3-4
 - use mysql_config in libdir directly to avoid biarch build failures
