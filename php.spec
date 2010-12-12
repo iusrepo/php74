@@ -27,7 +27,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.4
-Release: 1%{?dist}
+Release: 1%{?dist}.1
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -61,6 +61,10 @@ Patch41: php-5.3.0-easter.patch
 Patch42: php-5.3.1-systzdata-v7.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.3.4-phpize.patch
+
+# Security patch from upstream SVN
+# http://svn.php.net/viewvc?view=revision&revision=306154
+Patch50: php-5.3.4-cve.patch
 
 # Fixes for tests
 Patch61: php-5.0.4-tests-wddx.patch
@@ -479,6 +483,8 @@ support for using the enchant library to PHP.
 %patch41 -p1 -b .easter
 %patch42 -p1 -b .systzdata
 %patch43 -p0 -b .headers
+
+%patch50 -p4 -b .cve
 
 %patch61 -p1 -b .tests-wddx
 
@@ -970,6 +976,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Sun Dec 12 2010 Remi Collet <rpms@famillecollet.com> 5.3.4-1.1
+- security patch from upstream for #660517
+
 * Sat Dec 11 2010 Remi Collet <Fedora@famillecollet.com> 5.3.4-1
 - update to 5.3.4
   http://www.php.net/ChangeLog-5.php#5.3.4
