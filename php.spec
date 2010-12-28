@@ -27,7 +27,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.4
-Release: 1%{?dist}.1
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -779,7 +779,7 @@ install -m 755 build-zts/libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/httpd/modules
 
 # Apache config fragment
 install -m 755 -d $RPM_BUILD_ROOT/etc/httpd/conf.d
-install -m 644 $RPM_SOURCE_DIR/php.conf $RPM_BUILD_ROOT/etc/httpd/conf.d
+install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/etc/httpd/conf.d
 
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 #install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d
@@ -851,7 +851,7 @@ cat files.json files.zip files.curl files.phar files.fileinfo > files.common
 # Install the macros file:
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
 sed -e "s/@PHP_APIVER@/%{apiver}/;s/@PHP_ZENDVER@/%{zendver}/;s/@PHP_PDOVER@/%{pdover}/" \
-    < $RPM_SOURCE_DIR/macros.php > macros.php
+    < %{SOURCE3} > macros.php
 install -m 644 -c macros.php \
            $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.php
 
@@ -976,6 +976,10 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Tue Dec 28 2010 Remi Collet <rpms@famillecollet.com> 5.3.4-2
+- rebuild against MySQL 5.5.8
+- remove all RPM_SOURCE_DIR
+
 * Sun Dec 12 2010 Remi Collet <rpms@famillecollet.com> 5.3.4-1.1
 - security patch from upstream for #660517
 
