@@ -27,7 +27,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -975,6 +975,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.3.5-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
 * Fri Jan 07 2011 Remi Collet <Fedora@famillecollet.com> 5.3.5-1
 - update to 5.3.5
   http://www.php.net/ChangeLog-5.php#5.3.5
