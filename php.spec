@@ -16,12 +16,18 @@
 
 # Use the arch-specific mysql_config binary to avoid mismatch with the
 # arch detection heuristic used by bindir/mysql_config.
-%define mysql_config %{_libdir}/mysql/mysql_config
+%global mysql_config %{_libdir}/mysql/mysql_config
 
 %ifarch %{ix86} x86_64
 %global with_fpm 1
 %else
 %global with_fpm 0
+%endif
+
+%if %{?__isa:1}
+%global isasuffix -%{__isa}
+%else
+%global isasuffix %nil
 %endif
 
 Summary: PHP scripting language for creating dynamic web sites
@@ -79,9 +85,9 @@ BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 Obsoletes: php-dbg, php3, phpfi, stronghold-php
 Requires: httpd-mmn = %{httpd_mmn}
 Provides: mod_php = %{version}-%{release}
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 # For backwards-compatibility, require php-cli for the time being:
-Requires: php-cli = %{version}-%{release}
+Requires: php-cli%{?_isa} = %{version}-%{release}
 # To ensure correct /var/lib/php/session ownership:
 Requires(pre): httpd
 
@@ -107,9 +113,10 @@ language to Apache HTTP Server.
 %package cli
 Group: Development/Languages
 Summary: Command-line interface for PHP
-Requires: php-common = %{version}-%{release}
-Provides: php-cgi = %{version}-%{release}
-Provides: php-pcntl, php-readline
+Requires: php-common%{?_isa} = %{version}-%{release}
+Provides: php-cgi = %{version}-%{release}, php-cgi%{?_isa} = %{version}-%{release}
+Provides: php-pcntl, php-pcntl%{?_isa}
+Provides: php-readline, php-readline%{?_isa}
 
 %description cli
 The php-cli package contains the command-line interface 
@@ -118,7 +125,7 @@ executing PHP scripts, /usr/bin/php, and the CGI interface.
 %package zts
 Group: Development/Languages
 Summary: Thread-safe PHP interpreter for use with the Apache HTTP Server
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 Requires: httpd-mmn = %{httpd_mmn}
 BuildRequires: libtool-ltdl-devel
 
@@ -130,7 +137,7 @@ Server which can operate under a threaded server processing model.
 %package fpm
 Group: Development/Languages
 Summary: PHP FastCGI Process Manager
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 Requires: systemd-utils
 BuildRequires: libevent-devel >= 1.4.11
 
@@ -143,20 +150,47 @@ any size, especially busier sites.
 %package common
 Group: Development/Languages
 Summary: Common files for PHP
+# Remove this when value change
 Provides: php-api = %{apiver}, php-zend-abi = %{zendver}
 Provides: php(api) = %{apiver}, php(zend-abi) = %{zendver}
-# Provides for all builtin modules:
-Provides: php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif
-Provides: php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-libxml
-Provides: php-reflection, php-session, php-shmop, php-simplexml, php-sockets
-Provides: php-spl, php-tokenizer, php-openssl, php-pcre
-Provides: php-zlib, php-json, php-zip, php-fileinfo
+# New ABI/API check - Arch specific
+Provides: php-api = %{apiver}%{isasuffix}, php-zend-abi = %{zendver}%{isasuffix}
+Provides: php(api) = %{apiver}%{isasuffix}, php(zend-abi) = %{zendver}%{isasuffix}
+# Provides for all builtin/shared modules:
+Provides: php-bz2, php-bz2%{?_isa}
+Provides: php-calendar, php-calendar%{?_isa}
+Provides: php-ctype, php-ctype%{?_isa}
+Provides: php-curl, php-curl%{?_isa}
+Provides: php-date, php-date%{?_isa}
+Provides: php-exif, php-exif%{?_isa}
+Provides: php-fileinfo, php-fileinfo%{?_isa}
+Provides: php-pecl-Fileinfo = %{fileinfover}, php-pecl-Fileinfo%{?_isa} = %{fileinfover}
+Provides: php-pecl(Fileinfo) = %{fileinfover}, php-pecl(Fileinfo)%{?_isa} = %{fileinfover}
+Provides: php-ftp, php-ftp%{?_isa}
+Provides: php-gettext, php-gettext%{?_isa}
+Provides: php-gmp, php-gmp%{?_isa}
+Provides: php-hash, php-hash%{?_isa}
+Provides: php-iconv, php-iconv%{?_isa}
+Provides: php-json, php-json%{?_isa}
+Provides: php-pecl-json = %{jsonver}, php-pecl-json%{?_isa} = %{jsonver}
+Provides: php-pecl(json) = %{jsonver}, php-pecl(json)%{?_isa} = %{jsonver}
+Provides: php-libxml, php-libxml%{?_isa}
+Provides: php-openssl, php-openssl%{?_isa}
+Provides: php-pecl-phar = %{pharver}, php-pecl-phar%{?_isa} = %{pharver}
+Provides: php-pecl(phar) = %{pharver}, php-pecl(phar)%{?_isa} = %{pharver}
+Provides: php-pcre, php-pcre%{?_isa}
+Provides: php-reflection, php-reflection%{?_isa}
+Provides: php-session, php-session%{?_isa}
+Provides: php-shmop, php-shmop%{?_isa}
+Provides: php-simplexml, php-simplexml%{?_isa}
+Provides: php-sockets, php-sockets%{?_isa}
+Provides: php-spl, php-spl%{?_isa}
+Provides: php-tokenizer, php-tokenizer%{?_isa}
+Provides: php-zip, php-zip%{?_isa}
+Provides: php-pecl-zip = %{zipver}, php-pecl-zip%{?_isa} = %{zipver}
+Provides: php-pecl(zip) = %{zipver}, php-pecl(zip)%{?_isa} = %{zipver}
+Provides: php-zlib, php-zlib%{?_isa}
 Obsoletes: php-openssl, php-pecl-zip, php-pecl-json, php-json, php-pecl-phar, php-pecl-Fileinfo
-# For obsoleted pecl extension
-Provides: php-pecl-json = %{jsonver}, php-pecl(json) = %{jsonver}
-Provides: php-pecl-zip = %{zipver}, php-pecl(zip) = %{zipver}
-Provides: php-pecl-phar = %{pharver}, php-pecl(phar) = %{pharver}
-Provides: php-pecl-Fileinfo = %{fileinfover}, php-pecl(Fileinfo) = %{fileinfover}
 
 %description common
 The php-common package contains files used by both the php
@@ -165,7 +199,7 @@ package and the php-cli package.
 %package devel
 Group: Development/Libraries
 Summary: Files needed for building PHP extensions
-Requires: php = %{version}-%{release}, autoconf, automake
+Requires: php%{?_isa} = %{version}-%{release}, autoconf, automake
 Obsoletes: php-pecl-pdo-devel
 
 %description devel
@@ -176,7 +210,7 @@ need to install this package.
 %package imap
 Summary: A module for PHP applications that use IMAP
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 Obsoletes: mod_php3-imap, stronghold-php-imap
 BuildRequires: krb5-devel, openssl-devel, libc-client-devel
 
@@ -192,7 +226,7 @@ and the php package.
 %package ldap
 Summary: A module for PHP applications that use LDAP
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 Obsoletes: mod_php3-ldap, stronghold-php-ldap
 BuildRequires: cyrus-sasl-devel, openldap-devel, openssl-devel
 
@@ -207,10 +241,14 @@ need to install this package in addition to the php package.
 %package pdo
 Summary: A database access abstraction module for PHP applications
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 Obsoletes: php-pecl-pdo-sqlite, php-pecl-pdo
+# Remove this when value change
 Provides: php-pdo-abi = %{pdover}
-Provides: php-sqlite3, php-pdo_sqlite
+# New ABI/API check - Arch specific
+Provides: php-pdo-abi = %{pdover}%{isasuffix}
+Provides: php-sqlite3, php-sqlite3%{?_isa}
+Provides: php-pdo_sqlite, php-pdo_sqlite%{?_isa}
 
 %description pdo
 The php-pdo package contains a dynamic shared object that will add
@@ -221,8 +259,10 @@ databases.
 %package mysql
 Summary: A module for PHP applications that use MySQL databases
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}, php-pdo
-Provides: php_database, php-mysqli, php-pdo_mysql
+Requires: php-common%{?_isa} = %{version}-%{release}, php-pdo%{?_isa}
+Provides: php_database
+Provides: php-mysqli, php-mysqli%{?_isa}
+Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
 Obsoletes: mod_php3-mysql, stronghold-php-mysql
 BuildRequires: mysql-devel >= 4.1.0
 
@@ -236,8 +276,9 @@ this package and the php package.
 %package pgsql
 Summary: A PostgreSQL database module for PHP
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}, php-pdo
-Provides: php_database, php-pdo_pgsql
+Requires: php-common%{?_isa} = %{version}-%{release}, php-pdo
+Provides: php_database
+Provides: php-pdo_pgsql, php-pdo_pgsql%{?_isa}
 Obsoletes: mod_php3-pgsql, stronghold-php-pgsql
 BuildRequires: krb5-devel, openssl-devel, postgresql-devel
 
@@ -253,8 +294,11 @@ php package.
 %package process
 Summary: Modules for PHP script using system process interfaces
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
-Provides: php-posix, php-sysvsem, php-sysvshm, php-sysvmsg
+Requires: php-common%{?_isa} = %{version}-%{release}
+Provides: php-posix, php-posix%{?_isa}
+Provides: php-sysvsem, php-sysvsem%{?_isa}
+Provides: php-sysvshm, php-sysvshm%{?_isa}
+Provides: php-sysvmsg, php-sysvmsg%{?_isa}
 
 %description process
 The php-process package contains dynamic shared objects which add
@@ -263,9 +307,10 @@ communication.
 
 %package odbc
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}, php-pdo
+Requires: php-common%{?_isa} = %{version}-%{release}, php-pdo
 Summary: A module for PHP applications that use ODBC databases
-Provides: php_database, php-pdo_odbc
+Provides: php_database
+Provides: php-pdo_odbc, php-pdo_odbc%{?_isa}
 Obsoletes: stronghold-php-odbc
 BuildRequires: unixODBC-devel
 
@@ -280,7 +325,7 @@ package.
 
 %package soap
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 Summary: A module for PHP applications that use the SOAP protocol
 BuildRequires: libxml2-devel
 
@@ -292,8 +337,10 @@ support to PHP for using the SOAP web services protocol.
 Summary: 	A module for PHP applications that use Interbase/Firebird databases
 Group: 		Development/Languages
 BuildRequires:  firebird-devel
-Requires: 	php-common = %{version}-%{release}, php-pdo
-Provides: 	php_database, php-firebird, php-pdo_firebird
+Requires: 	php-common%{?_isa} = %{version}-%{release}, php-pdo
+Provides: 	php_database
+Provides: 	php-firebird, php-firebird%{?_isa}
+Provides: 	php-pdo_firebird, php-pdo_firebird%{?_isa}
 
 %description interbase
 The php-interbase package contains a dynamic shared object that will add
@@ -311,7 +358,7 @@ License.
 %package snmp
 Summary: A module for PHP applications that query SNMP-managed devices
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}, net-snmp
+Requires: php-common%{?_isa} = %{version}-%{release}, net-snmp
 BuildRequires: net-snmp-devel
 
 %description snmp
@@ -323,9 +370,12 @@ will need to install this package and the php package.
 %package xml
 Summary: A module for PHP applications which use XML
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 Obsoletes: php-domxml, php-dom
-Provides: php-dom, php-xsl, php-domxml, php-wddx
+Provides: php-dom, php-dom%{?_isa}
+Provides: php-xsl, php-xsl%{?_isa}
+Provides: php-domxml, php-domxml%{?_isa}
+Provides: php-wddx, php-wddx%{?_isa}
 BuildRequires: libxslt-devel >= 1.0.18-1, libxml2-devel >= 2.4.14-1
 
 %description xml
@@ -336,7 +386,7 @@ and performing XSL transformations on XML documents.
 %package xmlrpc
 Summary: A module for PHP applications which use the XML-RPC protocol
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 
 %description xmlrpc
 The php-xmlrpc package contains a dynamic shared object that will add
@@ -345,7 +395,7 @@ support for the XML-RPC protocol to PHP.
 %package mbstring
 Summary: A module for PHP applications which need multi-byte string handling
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 
 %description mbstring
 The php-mbstring package contains a dynamic shared object that will add
@@ -354,7 +404,7 @@ support for multi-byte string handling to PHP.
 %package gd
 Summary: A module for PHP applications for using the gd graphics library
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 # Required to build the bundled GD library
 BuildRequires: libjpeg-devel, libpng-devel, freetype-devel
 BuildRequires: libXpm-devel, t1lib-devel
@@ -366,7 +416,7 @@ support for using the gd graphics library to PHP.
 %package bcmath
 Summary: A module for PHP applications for using the bcmath library
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 
 %description bcmath
 The php-bcmath package contains a dynamic shared object that will add
@@ -375,7 +425,7 @@ support for using the bcmath library to PHP.
 %package dba
 Summary: A database abstraction layer module for PHP applications
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 
 %description dba
 The php-dba package contains a dynamic shared object that will add
@@ -384,7 +434,7 @@ support for using the DBA database abstraction layer to PHP.
 %package mcrypt
 Summary: Standard PHP module provides mcrypt library support
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: libmcrypt-devel
 
 %description mcrypt
@@ -394,7 +444,7 @@ support for using the mcrypt library to PHP.
 %package tidy
 Summary: Standard PHP module provides tidy library support
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: libtidy-devel
 
 %description tidy
@@ -404,9 +454,9 @@ support for using the tidy library to PHP.
 %package mssql
 Summary: MSSQL database module for PHP
 Group: Development/Languages
-Requires: php-common = %{version}-%{release}, php-pdo
+Requires: php-common%{?_isa} = %{version}-%{release}, php-pdo
 BuildRequires: freetds-devel
-Provides: php-pdo_dblib
+Provides: php-pdo_dblib, php-pdo_dblib%{?_isa}
 
 %description mssql
 The php-mssql package contains a dynamic shared object that will
@@ -417,9 +467,10 @@ database server which supports TDS can be accessed.
 %package embedded
 Summary: PHP library for embedding in applications
 Group: System Environment/Libraries
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 # doing a real -devel package for just the .so symlink is a bit overkill
 Provides: php-embedded-devel = %{version}-%{release}
+Provides: php-embedded-devel%{?_isa} = %{version}-%{release}
 
 %description embedded
 The php-embedded package contains a library which can be embedded
@@ -428,7 +479,7 @@ into applications to provide PHP scripting language support.
 %package pspell
 Summary: A module for PHP applications for using pspell interfaces
 Group: System Environment/Libraries
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: aspell-devel >= 0.50.0
 
 %description pspell
@@ -438,7 +489,7 @@ support for using the pspell library to PHP.
 %package recode
 Summary: A module for PHP applications for using the recode library
 Group: System Environment/Libraries
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: recode-devel
 
 %description recode
@@ -448,7 +499,7 @@ support for using the recode library to PHP.
 %package intl
 Summary: Internationalization extension for PHP applications
 Group: System Environment/Libraries
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: libicu-devel >= 3.6
 
 %description intl
@@ -458,7 +509,7 @@ support for using the ICU library to PHP.
 %package enchant
 Summary: Human Language and Character Encoding Support
 Group: System Environment/Libraries
-Requires: php-common = %{version}-%{release}
+Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: enchant-devel >= 1.2.4
 
 %description enchant
@@ -857,7 +908,9 @@ cat files.json files.zip files.curl files.phar files.fileinfo > files.common
 
 # Install the macros file:
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
-sed -e "s/@PHP_APIVER@/%{apiver}/;s/@PHP_ZENDVER@/%{zendver}/;s/@PHP_PDOVER@/%{pdover}/" \
+sed -e "s/@PHP_APIVER@/%{apiver}%{isasuffix}/" \
+    -e "s/@PHP_ZENDVER@/%{zendver}%{isasuffix}/" \
+    -e "s/@PHP_PDOVER@/%{pdover}%{isasuffix}/" \
     < %{SOURCE3} > macros.php
 install -m 644 -c macros.php \
            $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.php
@@ -986,6 +1039,7 @@ fi
 %changelog
 * Thu Feb 24 2011 Remi Collet <Fedora@famillecollet.com> 5.3.5-3
 - add tmpfiles.d configuration for php-fpm
+- add Arch specific requires/provides
 
 * Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.3.5-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
