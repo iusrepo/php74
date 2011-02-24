@@ -27,7 +27,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.5
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -131,6 +131,7 @@ Server which can operate under a threaded server processing model.
 Group: Development/Languages
 Summary: PHP FastCGI Process Manager
 Requires: php-common = %{version}-%{release}
+Requires: systemd-utils
 BuildRequires: libevent-devel >= 1.4.11
 
 %description fpm
@@ -563,6 +564,10 @@ fi
 find . -name \*.[ch] -exec chmod 644 {} \;
 chmod 644 README.*
 
+# php-fpm configuration files for tmpfiles.d
+echo "d %{_localstatedir}/run/php-fpm 755 root root" >php-fpm.tmpfiles
+
+
 %build
 # aclocal workaround - to be improved
 cat `aclocal --print-ac-dir`/{libtool,ltoptions,ltsugar,ltversion,lt~obsolete}.m4 >>aclocal.m4
@@ -801,6 +806,9 @@ install -m 755 %{SOURCE6} $RPM_BUILD_ROOT%{_initrddir}/php-fpm
 # LogRotate
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
 install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
+# tmpfiles.d
+install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/tmpfiles.d
+install -m 644 php-fpm.tmpfiles $RPM_BUILD_ROOT%{_sysconfdir}/tmpfiles.d/php-fpm.conf
 %endif
 
 # Fix the link
@@ -926,12 +934,13 @@ fi
 %config(noreplace) %{_sysconfdir}/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/php-fpm.d/www.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/php-fpm
+%config(noreplace) %{_sysconfdir}/tmpfiles.d/php-fpm.conf
 %{_sbindir}/php-fpm
 %{_initrddir}/php-fpm
 %dir %{_sysconfdir}/php-fpm.d
 # log owned by apache for log
 %attr(770,apache,apache) %dir %{_localstatedir}/log/php-fpm
-%ghost %dir %{_localstatedir}/run/php-fpm
+%dir %{_localstatedir}/run/php-fpm
 %{_mandir}/man8/php-fpm.8*
 %endif
 
@@ -975,6 +984,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Thu Feb 24 2011 Remi Collet <Fedora@famillecollet.com> 5.3.5-3
+- add tmpfiles.d configuration for php-fpm
+
 * Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.3.5-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
