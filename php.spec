@@ -33,7 +33,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -138,7 +138,7 @@ Server which can operate under a threaded server processing model.
 Group: Development/Languages
 Summary: PHP FastCGI Process Manager
 Requires: php-common%{?_isa} = %{version}-%{release}
-Requires: systemd-utils
+Requires: systemd-units
 BuildRequires: libevent-devel >= 1.4.11
 
 %description fpm
@@ -1037,6 +1037,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Mon Feb 28 2011 Remi Collet <Fedora@famillecollet.com> 5.3.5-4
+- fix systemd-units requires
+
 * Thu Feb 24 2011 Remi Collet <Fedora@famillecollet.com> 5.3.5-3
 - add tmpfiles.d configuration for php-fpm
 - add Arch specific requires/provides
