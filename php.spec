@@ -33,7 +33,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1037,6 +1037,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Mon Mar 07 2011 Caolán McNamara <caolanm@redhat.com> 5.3.5-5
+- rebuild for icu 4.6
+
 * Mon Feb 28 2011 Remi Collet <Fedora@famillecollet.com> 5.3.5-4
 - fix systemd-units requires
 
