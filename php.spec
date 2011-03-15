@@ -30,10 +30,14 @@
 %global isasuffix %nil
 %endif
 
+# Flip these to 1 and zip respectively to enable zip support again
+%global with_zip 0
+%global zipmod %nil
+
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.5
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -186,11 +190,14 @@ Provides: php-simplexml, php-simplexml%{?_isa}
 Provides: php-sockets, php-sockets%{?_isa}
 Provides: php-spl, php-spl%{?_isa}
 Provides: php-tokenizer, php-tokenizer%{?_isa}
+%if %{with_zip}
 Provides: php-zip, php-zip%{?_isa}
 Provides: php-pecl-zip = %{zipver}, php-pecl-zip%{?_isa} = %{zipver}
 Provides: php-pecl(zip) = %{zipver}, php-pecl(zip)%{?_isa} = %{zipver}
+Obsoletes: php-pecl-zip
+%endif
 Provides: php-zlib, php-zlib%{?_isa}
-Obsoletes: php-openssl, php-pecl-zip, php-pecl-json, php-json, php-pecl-phar, php-pecl-Fileinfo
+Obsoletes: php-openssl, php-pecl-json, php-json, php-pecl-phar, php-pecl-Fileinfo
 
 %description common
 The php-common package contains files used by both the php
@@ -727,7 +734,9 @@ build --enable-force-cgi-redirect \
       --with-pdo-dblib=shared,%{_prefix} \
       --with-sqlite3=shared,%{_prefix} \
       --enable-json=shared \
+%if %{with_zip}
       --enable-zip=shared \
+%endif
       --without-readline \
       --with-libedit \
       --with-pspell=shared \
@@ -868,7 +877,7 @@ install -m 644 php-fpm.tmpfiles $RPM_BUILD_ROOT%{_sysconfdir}/tmpfiles.d/php-fpm
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
     mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
-    pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json zip \
+    pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json %{zipmod} \
     sqlite3 enchant phar fileinfo intl \
     mcrypt tidy pdo_dblib mssql pspell curl wddx \
     posix sysvshm sysvsem sysvmsg recode interbase pdo_firebird; do
@@ -904,7 +913,10 @@ cat files.pdo_sqlite >> files.pdo
 cat files.sqlite3 >> files.pdo
 
 # Package json, zip, curl, phar and fileinfo in -common.
-cat files.json files.zip files.curl files.phar files.fileinfo > files.common
+cat files.json files.curl files.phar files.fileinfo > files.common
+%if %{with_zip}
+cat files.zip >> files.common
+%endif
 
 # Install the macros file:
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
@@ -1037,6 +1049,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Tue Mar 15 2011 Joe Orton <jorton@redhat.com> - 5.3.5-6
+- disable zip extension per "No Bundled Libraries" policy (#551513)
+
 * Mon Mar 07 2011 Caolán McNamara <caolanm@redhat.com> 5.3.5-5
 - rebuild for icu 4.6
 
