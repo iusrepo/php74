@@ -36,8 +36,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.3.5
-Release: 6%{?dist}
+Version: 5.3.6
+Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -52,14 +52,14 @@ Source6: php-fpm.init
 Source7: php-fpm.logrotate
 
 # Build fixes
-Patch1: php-5.3.4-gnusrc.patch
+Patch1: php-5.3.6-gnusrc.patch
 Patch2: php-5.3.0-install.patch
 Patch3: php-5.2.4-norpath.patch
 Patch4: php-5.3.0-phpize64.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
-Patch8: php-5.3.5-aconf26x.patch
+Patch8: php-5.3.6-aconf26x.patch
 
 # Fixes for extension modules
 Patch20: php-4.3.11-shutdown.patch
@@ -71,10 +71,6 @@ Patch41: php-5.3.0-easter.patch
 Patch42: php-5.3.1-systzdata-v7.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.3.4-phpize.patch
-
-# Security patch from upstream SVN
-# http://svn.php.net/viewvc?view=revision&revision=306154
-Patch50: php-5.3.4-cve.patch
 
 # Fixes for tests
 Patch61: php-5.0.4-tests-wddx.patch
@@ -266,7 +262,7 @@ databases.
 %package mysql
 Summary: A module for PHP applications that use MySQL databases
 Group: Development/Languages
-Requires: php-common%{?_isa} = %{version}-%{release}, php-pdo%{?_isa}
+Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-mysqli, php-mysqli%{?_isa}
 Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
@@ -283,7 +279,7 @@ this package and the php package.
 %package pgsql
 Summary: A PostgreSQL database module for PHP
 Group: Development/Languages
-Requires: php-common%{?_isa} = %{version}-%{release}, php-pdo
+Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-pdo_pgsql, php-pdo_pgsql%{?_isa}
 Obsoletes: mod_php3-pgsql, stronghold-php-pgsql
@@ -314,7 +310,7 @@ communication.
 
 %package odbc
 Group: Development/Languages
-Requires: php-common%{?_isa} = %{version}-%{release}, php-pdo
+Requires: php-pdo%{?_isa} = %{version}-%{release}
 Summary: A module for PHP applications that use ODBC databases
 Provides: php_database
 Provides: php-pdo_odbc, php-pdo_odbc%{?_isa}
@@ -344,7 +340,7 @@ support to PHP for using the SOAP web services protocol.
 Summary: 	A module for PHP applications that use Interbase/Firebird databases
 Group: 		Development/Languages
 BuildRequires:  firebird-devel
-Requires: 	php-common%{?_isa} = %{version}-%{release}, php-pdo
+Requires: 	php-pdo%{?_isa} = %{version}-%{release}
 Provides: 	php_database
 Provides: 	php-firebird, php-firebird%{?_isa}
 Provides: 	php-pdo_firebird, php-pdo_firebird%{?_isa}
@@ -461,7 +457,7 @@ support for using the tidy library to PHP.
 %package mssql
 Summary: MSSQL database module for PHP
 Group: Development/Languages
-Requires: php-common%{?_isa} = %{version}-%{release}, php-pdo
+Requires: php-pdo%{?_isa} = %{version}-%{release}
 BuildRequires: freetds-devel
 Provides: php-pdo_dblib, php-pdo_dblib%{?_isa}
 
@@ -542,8 +538,6 @@ support for using the enchant library to PHP.
 %patch41 -p1 -b .easter
 %patch42 -p1 -b .systzdata
 %patch43 -p0 -b .headers
-
-%patch50 -p4 -b .cve
 
 %patch61 -p1 -b .tests-wddx
 
@@ -1049,6 +1043,11 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Thu Mar 17 2011 Remi Collet <Fedora@famillecollet.com> 5.3.6-1
+- update to 5.3.6
+  http://www.php.net/ChangeLog-5.php#5.3.6
+- fix php-pdo arch specific requires
+
 * Tue Mar 15 2011 Joe Orton <jorton@redhat.com> - 5.3.5-6
 - disable zip extension per "No Bundled Libraries" policy (#551513)
 
