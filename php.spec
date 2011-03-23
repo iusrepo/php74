@@ -37,7 +37,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1043,6 +1043,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Wed Mar 23 2011 Remi Collet <Fedora@famillecollet.com> 5.3.6-2
+- rebuild for new MySQL client library
+
 * Thu Mar 17 2011 Remi Collet <Fedora@famillecollet.com> 5.3.6-1
 - update to 5.3.6
   http://www.php.net/ChangeLog-5.php#5.3.6
