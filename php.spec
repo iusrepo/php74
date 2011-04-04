@@ -37,7 +37,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -170,6 +170,7 @@ Provides: php-ftp, php-ftp%{?_isa}
 Provides: php-gettext, php-gettext%{?_isa}
 Provides: php-gmp, php-gmp%{?_isa}
 Provides: php-hash, php-hash%{?_isa}
+Provides: php-mhash = %{version}, php-mhash%{?_isa} = %{version}
 Provides: php-iconv, php-iconv%{?_isa}
 Provides: php-json, php-json%{?_isa}
 Provides: php-pecl-json = %{jsonver}, php-pecl-json%{?_isa} = %{jsonver}
@@ -194,6 +195,7 @@ Obsoletes: php-pecl-zip
 %endif
 Provides: php-zlib, php-zlib%{?_isa}
 Obsoletes: php-openssl, php-pecl-json, php-json, php-pecl-phar, php-pecl-Fileinfo
+Obsoletes: php-mhash < 5.3.0
 
 %description common
 The php-common package contains files used by both the php
@@ -685,6 +687,7 @@ ln -sf ../configure
         --with-libxml-dir=%{_prefix} \
 	--enable-xml \
         --with-system-tzdata \
+        --with-mhash \
 	$* 
 if test $? != 0; then 
   tail -500 config.log
@@ -1043,6 +1046,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Mon Apr  4 2011 Remi Collet <Fedora@famillecollet.com> 5.3.6-3
+- enable mhash extension (emulated by hash extension)
+
 * Wed Mar 23 2011 Remi Collet <Fedora@famillecollet.com> 5.3.6-2
 - rebuild for new MySQL client library
 
