@@ -24,7 +24,7 @@
 %global with_fpm 0
 %endif
 
-%if %{?__isa:1}
+%if 0%{?__isa:1}
 %global isasuffix -%{__isa}
 %else
 %global isasuffix %nil
