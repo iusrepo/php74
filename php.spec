@@ -37,7 +37,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1046,6 +1046,9 @@ fi
 %files enchant -f files.enchant
 
 %changelog
+* Tue Jul 12 2011 Joe Orton <jorton@redhat.com> - 5.3.6-4
+- rebuild for net-snmp SONAME bump
+
 * Mon Apr  4 2011 Remi Collet <Fedora@famillecollet.com> 5.3.6-3
 - enable mhash extension (emulated by hash extension)
 
