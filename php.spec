@@ -36,8 +36,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.3.6
-Release: 4%{?dist}
+Version: 5.3.7
+Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -52,14 +52,16 @@ Source6: php-fpm.init
 Source7: php-fpm.logrotate
 
 # Build fixes
-Patch1: php-5.3.6-gnusrc.patch
+Patch1: php-5.3.7-gnusrc.patch
 Patch2: php-5.3.0-install.patch
 Patch3: php-5.2.4-norpath.patch
 Patch4: php-5.3.0-phpize64.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
-Patch8: php-5.3.6-aconf26x.patch
+# from http://svn.php.net/viewvc?view=revision&revision=311042
+# and  http://svn.php.net/viewvc?view=revision&revision=311908
+Patch8: php-5.3.7-aconf259.patch
 
 # Fixes for extension modules
 Patch20: php-4.3.11-shutdown.patch
@@ -82,7 +84,12 @@ BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel, sqlite-devel >= 3.6.0
 BuildRequires: zlib-devel, pcre-devel >= 6.6, smtpdaemon, libedit-devel
 BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
-Obsoletes: php-dbg, php3, phpfi, stronghold-php
+BuildRequires: libtool-ltdl-devel
+
+Obsoletes: php-dbg, php3, phpfi, stronghold-php, php-zts < 5.3.7
+Provides: php-zts = %{version}-%{release}
+Provides: php-zts%{?_isa} = %{version}-%{release}
+
 Requires: httpd-mmn = %{httpd_mmn}
 Provides: mod_php = %{version}-%{release}
 Requires: php-common%{?_isa} = %{version}-%{release}
@@ -93,10 +100,11 @@ Requires(pre): httpd
 
 
 # Don't provides extensions, which are not shared library, as .so
-%{?filter_setup:
-%filter_provides_in %{_libdir}/php/modules/.*\.so$
-%filter_setup
-}
+# RPM 4.8
+%{?filter_provides_in: %filter_provides_in %{_libdir}/php/modules/.*\.so$}
+%{?filter_setup}
+# RPM 4.9
+%global __provides_exclude_from %{?__provides_exclude_from:%__provides_exclude_from|}%{_libdir}/php/modules/.*\\.so$
 
 
 %description
@@ -121,17 +129,6 @@ Provides: php-readline, php-readline%{?_isa}
 %description cli
 The php-cli package contains the command-line interface 
 executing PHP scripts, /usr/bin/php, and the CGI interface.
-
-%package zts
-Group: Development/Languages
-Summary: Thread-safe PHP interpreter for use with the Apache HTTP Server
-Requires: php-common%{?_isa} = %{version}-%{release}
-Requires: httpd-mmn = %{httpd_mmn}
-BuildRequires: libtool-ltdl-devel
-
-%description zts
-The php-zts package contains a module for use with the Apache HTTP
-Server which can operate under a threaded server processing model.
 
 %if %{with_fpm}
 %package fpm
@@ -954,6 +951,7 @@ fi
 %files
 %defattr(-,root,root)
 %{_libdir}/httpd/modules/libphp5.so
+%{_libdir}/httpd/modules/libphp5-zts.so
 %attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/php.conf
 %{contentdir}/icons/php.gif
@@ -984,10 +982,6 @@ fi
 %{_mandir}/man1/php.1*
 %{_mandir}/man1/phpize.1*
 %doc sapi/cgi/README* sapi/cli/README
-
-%files zts
-%defattr(-,root,root)
-%{_libdir}/httpd/modules/libphp5-zts.so
 
 %if %{with_fpm}
 %files fpm
@@ -1045,7 +1039,13 @@ fi
 %files interbase -f files.interbase
 %files enchant -f files.enchant
 
+
 %changelog
+* Thu Aug 18 2011 Remi Collet <remi@fedoraproject.org> 5.3.7-1
+- update to 5.3.7
+  http://www.php.net/ChangeLog-5.php#5.3.7
+- merge php-zts into php (#698084)
+
 * Tue Jul 12 2011 Joe Orton <jorton@redhat.com> - 5.3.6-4
 - rebuild for net-snmp SONAME bump
 
