@@ -36,7 +36,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.3.7
+Version: 5.3.8
 Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
@@ -61,7 +61,7 @@ Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
 # from http://svn.php.net/viewvc?view=revision&revision=311042
 # and  http://svn.php.net/viewvc?view=revision&revision=311908
-Patch8: php-5.3.7-aconf259.patch
+Patch8: php-5.3.8-aconf259.patch
 
 # Fixes for extension modules
 Patch20: php-4.3.11-shutdown.patch
@@ -1041,6 +1041,10 @@ fi
 
 
 %changelog
+* Tue Aug 23 2011 Remi Collet <remi@fedoraproject.org> 5.3.8-1
+- update to 5.3.8
+  http://www.php.net/ChangeLog-5.php#5.3.8
+
 * Thu Aug 18 2011 Remi Collet <remi@fedoraproject.org> 5.3.7-1
 - update to 5.3.7
   http://www.php.net/ChangeLog-5.php#5.3.7
