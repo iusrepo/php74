@@ -37,7 +37,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -55,13 +55,15 @@ Source7: php-fpm.logrotate
 Patch1: php-5.3.7-gnusrc.patch
 Patch2: php-5.3.0-install.patch
 Patch3: php-5.2.4-norpath.patch
-Patch4: php-5.3.0-phpize64.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
 # from http://svn.php.net/viewvc?view=revision&revision=311042
 # and  http://svn.php.net/viewvc?view=revision&revision=311908
 Patch8: php-5.3.8-aconf259.patch
+# from http://svn.php.net/viewvc?view=revision&revision=316281
+# + fix harcoded mysql.sock path
+Patch9: php-5.3.8-mysqlnd.patch
 
 # Fixes for extension modules
 Patch20: php-4.3.11-shutdown.patch
@@ -263,10 +265,12 @@ Summary: A module for PHP applications that use MySQL databases
 Group: Development/Languages
 Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
-Provides: php-mysqli, php-mysqli%{?_isa}
+Provides: php-mysqli = %{version}-%{release}
+Provides: php-mysqli%{?_isa} = %{version}-%{release}
 Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
 Obsoletes: mod_php3-mysql, stronghold-php-mysql
 BuildRequires: mysql-devel >= 4.1.0
+Conflicts: php-mysqlnd
 
 %description mysql
 The php-mysql package contains a dynamic shared object that will add
@@ -274,6 +278,26 @@ MySQL database support to PHP. MySQL is an object-relational database
 management system. PHP is an HTML-embeddable scripting language. If
 you need MySQL support for PHP applications, you will need to install
 this package and the php package.
+
+%package mysqlnd
+Summary: A module for PHP applications that use MySQL databases
+Group: Development/Languages
+Requires: php-pdo%{?_isa} = %{version}-%{release}
+Provides: php_database
+Provides: php-mysql = %{version}-%{release}
+Provides: php-mysql%{?_isa} = %{version}-%{release}
+Provides: php-mysqli = %{version}-%{release}
+Provides: php-mysqli%{?_isa} = %{version}-%{release}
+Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
+
+%description mysqlnd
+The php-mysqlnd package contains a dynamic shared object that will add
+MySQL database support to PHP. MySQL is an object-relational database
+management system. PHP is an HTML-embeddable scripting language. If
+you need MySQL support for PHP applications, you will need to install
+this package and the php package.
+
+This package use the MySQL Native Driver
 
 %package pgsql
 Summary: A PostgreSQL database module for PHP
@@ -524,11 +548,11 @@ support for using the enchant library to PHP.
 %patch1 -p1 -b .gnusrc
 %patch2 -p1 -b .install
 %patch3 -p1 -b .norpath
-%patch4 -p1 -b .phpize64
 %patch5 -p1 -b .includedir
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
 %patch8 -p1 -b .aconf26x
+%patch9 -p1 -b .mysqlnd
 
 %patch20 -p1 -b .shutdown
 %patch21 -p1 -b .macropen
@@ -698,6 +722,7 @@ make %{?_smp_mflags}
 # Build /usr/bin/php-cgi with the CGI SAPI, and all the shared extensions
 pushd build-cgi
 build --enable-force-cgi-redirect \
+      --libdir=%{_libdir}/php \
       --enable-pcntl \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
@@ -707,8 +732,9 @@ build --enable-force-cgi-redirect \
       --enable-dba=shared --with-db4=%{_prefix} \
       --with-xmlrpc=shared \
       --with-ldap=shared --with-ldap-sasl \
-      --with-mysql=shared,%{_prefix} \
-      --with-mysqli=shared,%{mysql_config} \
+      --enable-mysqlnd=shared \
+      --with-mysql=shared,mysqlnd \
+      --with-mysqli=shared,mysqlnd \
       --with-interbase=shared,%{_libdir}/firebird \
       --with-pdo-firebird=shared,%{_libdir}/firebird \
       --enable-dom=shared \
@@ -722,7 +748,7 @@ build --enable-force-cgi-redirect \
       --enable-fastcgi \
       --enable-pdo=shared \
       --with-pdo-odbc=shared,unixODBC,%{_prefix} \
-      --with-pdo-mysql=shared,%{mysql_config} \
+      --with-pdo-mysql=shared,mysqlnd \
       --with-pdo-pgsql=shared,%{_prefix} \
       --with-pdo-sqlite=shared,%{_prefix} \
       --with-pdo-dblib=shared,%{_prefix} \
@@ -748,9 +774,9 @@ build --enable-force-cgi-redirect \
       --with-recode=shared,%{_prefix}
 popd
 
-without_shared="--without-mysql --without-gd \
+without_shared="--without-gd \
       --disable-dom --disable-dba --without-unixODBC \
-      --disable-pdo --disable-xmlreader --disable-xmlwriter \
+      --disable-xmlreader --disable-xmlwriter \
       --without-sqlite3 --disable-phar --disable-fileinfo \
       --disable-json --without-pspell --disable-wddx \
       --without-curl --disable-posix \
@@ -758,26 +784,40 @@ without_shared="--without-mysql --without-gd \
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
 pushd build-apache
-build --with-apxs2=%{_sbindir}/apxs ${without_shared}
+build --with-apxs2=%{_sbindir}/apxs \
+      --libdir=%{_libdir}/php \
+      --enable-pdo=shared \
+      --with-mysql=shared,%{_prefix} \
+      --with-mysqli=shared,%{mysql_config} \
+      --with-pdo-mysql=shared,%{mysql_config} \
+      --with-pdo-sqlite=shared,%{_prefix} \
+      ${without_shared}
 popd
 
 %if %{with_fpm}
 # Build php-fpm
 pushd build-fpm
-build --enable-fpm ${without_shared}
+build --enable-fpm \
+      --libdir=%{_libdir}/php \
+      --without-mysql --disable-pdo \
+      ${without_shared}
 popd
 %endif
 
 # Build for inclusion as embedded script language into applications,
 # /usr/lib[64]/libphp5.so
 pushd build-embedded
-build --enable-embed ${without_shared}
+build --enable-embed \
+      --without-mysql --disable-pdo \
+      ${without_shared}
 popd
 
 # Build a special thread-safe Apache SAPI
 pushd build-zts
-EXTENSION_DIR=%{_libdir}/php/modules-zts
+EXTENSION_DIR=%{_libdir}/php-zts/modules
 build --with-apxs2=%{_sbindir}/apxs ${without_shared} \
+      --libdir=%{_libdir}/php-zts \
+      --without-mysql --disable-pdo \
       --enable-maintainer-zts \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d
 popd
@@ -812,11 +852,25 @@ make -C build-embedded install-sapi install-headers INSTALL_ROOT=$RPM_BUILD_ROOT
 
 %if %{with_fpm}
 # Install the php-fpm binary
-make -C build-fpm install-fpm INSTALL_ROOT=$RPM_BUILD_ROOT 
+make -C build-fpm install-fpm \
+     INSTALL_ROOT=$RPM_BUILD_ROOT
 %endif
 
 # Install everything from the CGI SAPI build
-make -C build-cgi install INSTALL_ROOT=$RPM_BUILD_ROOT 
+make -C build-cgi install \
+     INSTALL_ROOT=$RPM_BUILD_ROOT
+
+# rename extensions build with mysqlnd
+mv $RPM_BUILD_ROOT%{_libdir}/php/modules/mysql.so \
+   $RPM_BUILD_ROOT%{_libdir}/php/modules/mysqlnd_mysql.so
+mv $RPM_BUILD_ROOT%{_libdir}/php/modules/mysqli.so \
+   $RPM_BUILD_ROOT%{_libdir}/php/modules/mysqlnd_mysqli.so
+mv $RPM_BUILD_ROOT%{_libdir}/php/modules/pdo_mysql.so \
+   $RPM_BUILD_ROOT%{_libdir}/php/modules/pdo_mysqlnd.so
+
+# Install the mysql extension build with libmysql
+make -C build-apache install-modules \
+     INSTALL_ROOT=$RPM_BUILD_ROOT
 
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
@@ -870,6 +924,7 @@ install -m 644 php-fpm.tmpfiles $RPM_BUILD_ROOT%{_sysconfdir}/tmpfiles.d/php-fpm
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
+    mysqlnd mysqlnd_mysql mysqlnd_mysqli pdo_mysqlnd \
     mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
     pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json %{zipmod} \
     sqlite3 enchant phar fileinfo intl \
@@ -890,6 +945,11 @@ cat files.dom files.xsl files.xml{reader,writer} files.wddx > files.xml
 
 # The mysql and mysqli modules are both packaged in php-mysql
 cat files.mysqli >> files.mysql
+# mysqlnd
+cat files.mysqlnd_mysql \
+    files.mysqlnd_mysqli \
+    files.pdo_mysqlnd \
+    >> files.mysqlnd
 
 # Split out the PDO modules
 cat files.pdo_dblib >> files.mssql
@@ -966,7 +1026,7 @@ fi
 #dir %{_sysconfdir}/php-zts.d
 %dir %{_libdir}/php
 %dir %{_libdir}/php/modules
-#dir %{_libdir}/php/modules-zts
+#dir %{_libdir}/php-zts/modules
 %dir %{_localstatedir}/lib/php
 %dir %{_libdir}/php/pear
 %dir %{_datadir}/php
@@ -1038,9 +1098,15 @@ fi
 %files recode -f files.recode
 %files interbase -f files.interbase
 %files enchant -f files.enchant
+%files mysqlnd -f files.mysqlnd
 
 
 %changelog
+* Tue Sep 13 2011 Remi Collet <remi@fedoraproject.org> 5.3.8-2
+- add mysqlnd sub-package
+- drop patch4, use --libdir to use /usr/lib*/php/build
+- add patch to redirect mysql.sock (in mysqlnd)
+
 * Tue Aug 23 2011 Remi Collet <remi@fedoraproject.org> 5.3.8-1
 - update to 5.3.8
   http://www.php.net/ChangeLog-5.php#5.3.8
