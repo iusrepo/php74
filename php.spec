@@ -37,7 +37,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.8
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -75,6 +75,8 @@ Patch41: php-5.3.0-easter.patch
 Patch42: php-5.3.1-systzdata-v7.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.3.4-phpize.patch
+# http://svn.php.net/viewvc?view=revision&revision=317183
+Patch44: php-5.3.8-isa.patch
 
 # Fixes for tests
 Patch61: php-5.0.4-tests-wddx.patch
@@ -1102,6 +1104,10 @@ fi
 
 
 %changelog
+* Wed Sep 28 2011 Remi Collet <remi@fedoraproject.org> 5.3.8-3
+- revert is_a() to php <= 5.3.6 behavior (from upstream)
+  with new option (allow_string) for new behavior
+
 * Tue Sep 13 2011 Remi Collet <remi@fedoraproject.org> 5.3.8-2
 - add mysqlnd sub-package
 - drop patch4, use --libdir to use /usr/lib*/php/build
