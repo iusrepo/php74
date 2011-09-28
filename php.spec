@@ -563,6 +563,7 @@ support for using the enchant library to PHP.
 %patch41 -p1 -b .easter
 %patch42 -p1 -b .systzdata
 %patch43 -p0 -b .headers
+%patch44 -p4 -b .isa
 
 %patch61 -p1 -b .tests-wddx
 
