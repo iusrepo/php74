@@ -37,7 +37,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.8
-Release: 3%{?dist}.2
+Release: 4%{?dist}.2
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1105,6 +1105,9 @@ fi
 
 
 %changelog
+* Tue Dec 06 2011 Adam Jackson <ajax@redhat.com> - 5.3.8-4.2
+- Rebuild for new libpng
+
 * Wed Oct 26 2011 Marcela Mašláňová <mmaslano@redhat.com> - 5.3.8-3.2
 - rebuild with new gmp without compat lib
 
