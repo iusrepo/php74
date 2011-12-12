@@ -37,7 +37,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.8
-Release: 4%{?dist}.2
+Release: 4%{?dist}.3
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -48,7 +48,7 @@ Source2: php.ini
 Source3: macros.php
 Source4: php-fpm.conf
 Source5: php-fpm-www.conf
-Source6: php-fpm.init
+Source6: php-fpm.service
 Source7: php-fpm.logrotate
 
 # Build fixes
@@ -139,8 +139,16 @@ executing PHP scripts, /usr/bin/php, and the CGI interface.
 Group: Development/Languages
 Summary: PHP FastCGI Process Manager
 Requires: php-common%{?_isa} = %{version}-%{release}
-Requires: systemd-units
 BuildRequires: libevent-devel >= 1.4.11
+BuildRequires: systemd-units
+Requires: systemd-units
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
+# This is actually needed for the %%triggerun script but Requires(triggerun)
+# is not valid.  We can use %%post because this particular %%triggerun script
+# should fire just after this package is installed.
+Requires(post): systemd-sysv
 
 %description fpm
 PHP-FPM (FastCGI Process Manager) is an alternative PHP FastCGI
@@ -911,9 +919,9 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d
 install -m 644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.conf
 install -m 644 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d/www.conf
 mv $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.conf.default .
-# Service
-install -m 755 -d $RPM_BUILD_ROOT%{_initrddir}
-install -m 755 %{SOURCE6} $RPM_BUILD_ROOT%{_initrddir}/php-fpm
+# install systemd unit files and scripts for handling server startup
+install -m 755 -d $RPM_BUILD_ROOT%{_unitdir}
+install -m 644 %{SOURCE6} $RPM_BUILD_ROOT%{_unitdir}/
 # LogRotate
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
 install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
@@ -999,12 +1007,38 @@ rm files.* macros.php
 
 %if %{with_fpm}
 %post fpm
-/sbin/chkconfig --add php-fpm
+if [ $1 = 1 ]; then
+    # Initial installation
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
 
 %preun fpm
-if [ "$1" = 0 ] ; then
-    /sbin/service php-fpm stop >/dev/null 2>&1
-    /sbin/chkconfig --del php-fpm
+if [ $1 = 0 ]; then
+    # Package removal, not upgrade
+    /bin/systemctl --no-reload disable php-fpm.service >/dev/null 2>&1 || :
+    /bin/systemctl stop php-fpm.service >/dev/null 2>&1 || :
+fi
+
+%postun fpm
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ]; then
+    # Package upgrade, not uninstall
+    /bin/systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
+fi
+
+# Handle upgrading from SysV initscript to native systemd unit.
+# We can tell if a SysV version of php-fpm was previously installed by
+# checking to see if the initscript is present.
+%triggerun fpm -- php-fpm
+if [ -f /etc/rc.d/init.d/php-fpm ]; then
+    # Save the current service runlevel info
+    # User must manually run systemd-sysv-convert --apply php-fpm
+    # to migrate them to systemd targets
+    /usr/bin/systemd-sysv-convert --save php-fpm >/dev/null 2>&1 || :
+
+    # Run these because the SysV package being removed won't do them
+    /sbin/chkconfig --del php-fpm >/dev/null 2>&1 || :
+    /bin/systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 fi
 %endif
 
@@ -1055,7 +1089,7 @@ fi
 %config(noreplace) %{_sysconfdir}/logrotate.d/php-fpm
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/php-fpm.conf
 %{_sbindir}/php-fpm
-%{_initrddir}/php-fpm
+%{_unitdir}/php-fpm.service
 %dir %{_sysconfdir}/php-fpm.d
 # log owned by apache for log
 %attr(770,apache,apache) %dir %{_localstatedir}/log/php-fpm
@@ -1105,6 +1139,9 @@ fi
 
 
 %changelog
+* Wed Sep 28 2011 Remi Collet <remi@fedoraproject.org> 5.3.8-4.3
+- switch to systemd
+
 * Tue Dec 06 2011 Adam Jackson <ajax@redhat.com> - 5.3.8-4.2
 - Rebuild for new libpng
 
