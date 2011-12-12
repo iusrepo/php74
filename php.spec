@@ -1139,7 +1139,7 @@ fi
 
 
 %changelog
-* Wed Sep 28 2011 Remi Collet <remi@fedoraproject.org> 5.3.8-4.3
+* Mon Dec 12 2011 Remi Collet <remi@fedoraproject.org> 5.3.8-4.3
 - switch to systemd
 
 * Tue Dec 06 2011 Adam Jackson <ajax@redhat.com> - 5.3.8-4.2
