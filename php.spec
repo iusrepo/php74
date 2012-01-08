@@ -37,7 +37,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.3.8
-Release: 4%{?dist}.3
+Release: 4%{?dist}.4
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1139,6 +1139,9 @@ fi
 
 
 %changelog
+* Sun Jan 08 2012 Remi Collet <remi@fedoraproject.org> 5.3.8-4.4
+- fix systemd unit
+
 * Mon Dec 12 2011 Remi Collet <remi@fedoraproject.org> 5.3.8-4.3
 - switch to systemd
 
