@@ -1,7 +1,7 @@
-diff -up php-5.3.0/ext/standard/basic_functions.c.easter php-5.3.0/ext/standard/basic_functions.c
---- php-5.3.0/ext/standard/basic_functions.c.easter	2009-06-20 08:07:35.000000000 +0200
-+++ php-5.3.0/ext/standard/basic_functions.c	2009-07-12 13:46:08.000000000 +0200
-@@ -1547,9 +1547,6 @@ ZEND_END_ARG_INFO()
+diff -up php-5.4.0RC5/ext/standard/basic_functions.c.easter php-5.4.0RC5/ext/standard/basic_functions.c
+--- php-5.4.0RC5/ext/standard/basic_functions.c.easter	2012-01-18 17:17:54.016033939 +0100
++++ php-5.4.0RC5/ext/standard/basic_functions.c	2012-01-18 17:18:54.022036314 +0100
+@@ -1554,9 +1554,6 @@ ZEND_END_ARG_INFO()
  ZEND_BEGIN_ARG_INFO(arginfo_php_real_logo_guid, 0)
  ZEND_END_ARG_INFO()
  
@@ -11,7 +11,7 @@ diff -up php-5.3.0/ext/standard/basic_functions.c.easter php-5.3.0/ext/standard/
  ZEND_BEGIN_ARG_INFO(arginfo_zend_logo_guid, 0)
  ZEND_END_ARG_INFO()
  
-@@ -2695,7 +2692,6 @@ const zend_function_entry basic_function
+@@ -2719,7 +2716,6 @@ const zend_function_entry basic_function
  	PHP_FE(phpcredits,														arginfo_phpcredits)
  	PHP_FE(php_logo_guid,													arginfo_php_logo_guid)
  	PHP_FE(php_real_logo_guid,												arginfo_php_real_logo_guid)
@@ -19,10 +19,10 @@ diff -up php-5.3.0/ext/standard/basic_functions.c.easter php-5.3.0/ext/standard/
  	PHP_FE(zend_logo_guid,													arginfo_zend_logo_guid)
  	PHP_FE(php_sapi_name,													arginfo_php_sapi_name)
  	PHP_FE(php_uname,														arginfo_php_uname)
-diff -up php-5.3.0/ext/standard/info.c.easter php-5.3.0/ext/standard/info.c
---- php-5.3.0/ext/standard/info.c.easter	2009-01-17 03:05:13.000000000 +0100
-+++ php-5.3.0/ext/standard/info.c	2009-07-12 13:46:11.000000000 +0200
-@@ -1268,21 +1268,7 @@ PHP_FUNCTION(phpcredits)
+diff -up php-5.4.0RC5/ext/standard/info.c.easter php-5.4.0RC5/ext/standard/info.c
+--- php-5.4.0RC5/ext/standard/info.c.easter	2012-01-18 17:17:44.712033203 +0100
++++ php-5.4.0RC5/ext/standard/info.c	2012-01-18 17:19:58.097039189 +0100
+@@ -1195,21 +1195,7 @@ PHP_FUNCTION(phpcredits)
   */
  PHPAPI char *php_logo_guid(void)
  {
@@ -45,7 +45,7 @@ diff -up php-5.3.0/ext/standard/info.c.easter php-5.3.0/ext/standard/info.c
  
  }
  /* }}} */
-@@ -1313,18 +1299,6 @@ PHP_FUNCTION(php_real_logo_guid)
+@@ -1238,18 +1224,6 @@ PHP_FUNCTION(php_real_logo_guid)
  }
  /* }}} */
  
@@ -64,9 +64,9 @@ diff -up php-5.3.0/ext/standard/info.c.easter php-5.3.0/ext/standard/info.c
  /* {{{ proto string zend_logo_guid(void)
     Return the special ID used to request the Zend logo in phpinfo screens*/
  PHP_FUNCTION(zend_logo_guid)
-diff -up php-5.3.0/ext/standard/info.h.easter php-5.3.0/ext/standard/info.h
---- php-5.3.0/ext/standard/info.h.easter	2008-12-31 12:15:45.000000000 +0100
-+++ php-5.3.0/ext/standard/info.h	2009-07-12 13:45:34.000000000 +0200
+diff -up php-5.4.0RC5/ext/standard/info.h.easter php-5.4.0RC5/ext/standard/info.h
+--- php-5.4.0RC5/ext/standard/info.h.easter	2012-01-18 17:17:37.245032832 +0100
++++ php-5.4.0RC5/ext/standard/info.h	2012-01-18 17:20:17.160040044 +0100
 @@ -51,7 +51,6 @@
  #endif /* HAVE_CREDITS_DEFS */
  
@@ -83,10 +83,10 @@ diff -up php-5.3.0/ext/standard/info.h.easter php-5.3.0/ext/standard/info.h
  PHP_FUNCTION(php_sapi_name);
  PHP_FUNCTION(php_uname);
  PHP_FUNCTION(php_ini_scanned_files);
-diff -up php-5.3.0/main/logos.h.easter php-5.3.0/main/logos.h
---- php-5.3.0/main/logos.h.easter	2008-12-31 12:15:47.000000000 +0100
-+++ php-5.3.0/main/logos.h	2009-07-12 13:46:15.000000000 +0200
-@@ -492,589 +492,3 @@ static const unsigned char php_logo[] = 
+diff -up php-5.4.0RC5/main/logos.h.easter php-5.4.0RC5/main/logos.h
+--- php-5.4.0RC5/main/logos.h.easter	2012-01-18 17:17:27.975032470 +0100
++++ php-5.4.0RC5/main/logos.h	2012-01-18 17:21:27.036043180 +0100
+@@ -492,589 +492,3 @@ static const unsigned char php_logo[] =
  	 21, 116, 187, 251, 221, 240, 142, 119, 188,   3, 
  	  1,   0,  59,   0 };
  
@@ -676,9 +676,9 @@ diff -up php-5.3.0/main/logos.h.easter php-5.3.0/main/logos.h
 -	 54, 240,   3,  66, 148,   6, 228, 178,  11, 192, 
 -	192,   4, 236, 158, 239,   2,  17,  16,   0,  59};
 -
-diff -up php-5.3.0/main/php_logos.c.easter php-5.3.0/main/php_logos.c
---- php-5.3.0/main/php_logos.c.easter	2008-12-31 12:15:47.000000000 +0100
-+++ php-5.3.0/main/php_logos.c	2009-07-12 13:45:50.000000000 +0200
+diff -up php-5.4.0RC5/main/php_logos.c.easter php-5.4.0RC5/main/php_logos.c
+--- php-5.4.0RC5/main/php_logos.c.easter	2012-01-18 17:17:17.895031787 +0100
++++ php-5.4.0RC5/main/php_logos.c	2012-01-18 17:21:46.877044070 +0100
 @@ -56,7 +56,6 @@ int php_init_info_logos(void)
  		return FAILURE;
  
