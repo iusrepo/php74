@@ -40,7 +40,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.0
-Release: 0.1.%{rcver}%{?dist}
+Release: 0.2.%{rcver}%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -819,7 +819,6 @@ pushd build-ztscli
 
 EXTENSION_DIR=%{_libdir}/php-zts/modules
 build --enable-force-cgi-redirect \
-      --bindir=%{_bindir}/php-zts \
       --includedir=%{_includedir}/php-zts \
       --libdir=%{_libdir}/php-zts \
       --enable-maintainer-zts \
@@ -880,7 +879,6 @@ popd
 # Build a special thread-safe Apache SAPI
 pushd build-zts
 build --with-apxs2=%{_sbindir}/apxs \
-      --bindir=%{_bindir}/php-zts \
       --includedir=%{_includedir}/php-zts \
       --libdir=%{_libdir}/php-zts \
       --enable-maintainer-zts \
@@ -933,6 +931,11 @@ mv $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/pdo_mysql.so \
 # Install the extensions for the ZTS version modules for libmysql
 make -C build-zts install-modules \
      INSTALL_ROOT=$RPM_BUILD_ROOT
+
+# rename ZTS binary
+mv $RPM_BUILD_ROOT%{_bindir}/php        $RPM_BUILD_ROOT%{_bindir}/php-zts
+mv $RPM_BUILD_ROOT%{_bindir}/phpize     $RPM_BUILD_ROOT%{_bindir}/phpize-zts
+mv $RPM_BUILD_ROOT%{_bindir}/php-config $RPM_BUILD_ROOT%{_bindir}/php-config-zts
 
 # Install the version for embedded script language in applications + php_embed.h
 make -C build-embedded install-sapi install-headers \
@@ -1079,8 +1082,6 @@ install -m 644 -c macros.php \
 rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
        $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/*.a \
        $RPM_BUILD_ROOT%{_bindir}/{phptar} \
-       $RPM_BUILD_ROOT%{_bindir}/php-zts/phar* \
-       $RPM_BUILD_ROOT%{_bindir}/php-zts/php-cgi \
        $RPM_BUILD_ROOT%{_datadir}/pear \
        $RPM_BUILD_ROOT%{_libdir}/libphp5.la
 
@@ -1187,10 +1188,10 @@ fi
 %files devel
 %defattr(-,root,root)
 %{_bindir}/php-config
-%{_bindir}/php-zts/php-config
-%{_bindir}/php-zts/phpize
+%{_bindir}/php-config-zts
+%{_bindir}/phpize-zts
 # usefull only to test other module during build
-%{_bindir}/php-zts/php
+%{_bindir}/php-zts
 %{_includedir}/php
 %{_includedir}/php-zts
 %{_libdir}/php/build
@@ -1232,6 +1233,9 @@ fi
 
 
 %changelog
+* Wed Jan 25 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-0.2.RC6
+- all binaries in /usr/bin with zts suffix
+
 * Wed Jan 18 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-0.1.RC6
 - update to PHP 5.4.0RC6
   https://fedoraproject.org/wiki/Features/Php54
