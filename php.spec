@@ -933,9 +933,9 @@ make -C build-zts install-modules \
      INSTALL_ROOT=$RPM_BUILD_ROOT
 
 # rename ZTS binary
-mv $RPM_BUILD_ROOT%{_bindir}/php        $RPM_BUILD_ROOT%{_bindir}/php-zts
-mv $RPM_BUILD_ROOT%{_bindir}/phpize     $RPM_BUILD_ROOT%{_bindir}/phpize-zts
-mv $RPM_BUILD_ROOT%{_bindir}/php-config $RPM_BUILD_ROOT%{_bindir}/php-config-zts
+mv $RPM_BUILD_ROOT%{_bindir}/php        $RPM_BUILD_ROOT%{_bindir}/zts-php
+mv $RPM_BUILD_ROOT%{_bindir}/phpize     $RPM_BUILD_ROOT%{_bindir}/zts-phpize
+mv $RPM_BUILD_ROOT%{_bindir}/php-config $RPM_BUILD_ROOT%{_bindir}/zts-php-config
 
 # Install the version for embedded script language in applications + php_embed.h
 make -C build-embedded install-sapi install-headers \
@@ -1188,10 +1188,10 @@ fi
 %files devel
 %defattr(-,root,root)
 %{_bindir}/php-config
-%{_bindir}/php-config-zts
-%{_bindir}/phpize-zts
+%{_bindir}/zts-php-config
+%{_bindir}/zts-phpize
 # usefull only to test other module during build
-%{_bindir}/php-zts
+%{_bindir}/zts-php
 %{_includedir}/php
 %{_includedir}/php-zts
 %{_libdir}/php/build
@@ -1234,7 +1234,7 @@ fi
 
 %changelog
 * Wed Jan 25 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-0.2.RC6
-- all binaries in /usr/bin with zts suffix
+- all binaries in /usr/bin with zts prefix
 
 * Wed Jan 18 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-0.1.RC6
 - update to PHP 5.4.0RC6
