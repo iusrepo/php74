@@ -9,7 +9,7 @@
 %global zipver      1.9.1
 %global jsonver     1.2.1
 # For PHP Release Candidate version
-%global rcver       RC6
+%global rcver       RC7
 
 %global httpd_mmn %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 %global mysql_sock %(mysql_config --socket || echo /var/lib/mysql/mysql.sock)
@@ -33,14 +33,20 @@
 %global isasuffix %nil
 %endif
 
-# Flip these to 1 and zip respectively to enable zip support again
-%global with_zip 0
-%global zipmod %nil
+%if 0%{?fedora} >= 17
+%global with_zip     1
+%global with_libzip  1
+%global zipmod       zip
+%else
+%global with_zip     0
+%global with_libzip  0
+%global zipmod       %nil
+%endif
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.0
-Release: 0.2.%{rcver}%{?dist}
+Release: 0.3.%{rcver}%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -53,6 +59,7 @@ Source4: php-fpm.conf
 Source5: php-fpm-www.conf
 Source6: php-fpm.service
 Source7: php-fpm.logrotate
+Source8: php-fpm.sysconfig
 
 # Build fixes
 Patch5: php-5.2.0-includedir.patch
@@ -67,6 +74,8 @@ Patch41: php-5.4.0-easter.patch
 Patch42: php-5.3.1-systzdata-v7.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
+# Use system libzip instead of bundled one
+Patch44: php-5.4.0-system-libzip.patch
 
 # Fixes for tests
 
@@ -82,6 +91,9 @@ BuildRequires: pcre-devel >= 6.6
 BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 BuildRequires: libtool-ltdl-devel
 BuildRequires: bison
+%if %{with_libzip}
+BuildRequires: libzip-devel >= 0.10
+%endif
 
 Obsoletes: php-dbg, php3, phpfi, stronghold-php, php-zts < 5.3.7
 Provides: php-zts = %{version}-%{release}
@@ -557,6 +569,9 @@ support for using the enchant library to PHP.
 %patch41 -p1 -b .easter
 %patch42 -p1 -b .systzdata
 %patch43 -p1 -b .headers
+%if %{with_libzip}
+%patch44 -p1 -b .systzip
+%endif
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -759,6 +774,9 @@ build --enable-force-cgi-redirect \
 %if %{with_zip}
       --enable-zip=shared \
 %endif
+%if %{with_libzip}
+      --with-libzip \
+%endif
       --without-readline \
       --with-libedit \
       --with-pspell=shared \
@@ -858,6 +876,9 @@ build --enable-force-cgi-redirect \
       --enable-json=shared \
 %if %{with_zip}
       --enable-zip=shared \
+%endif
+%if %{with_libzip}
+      --with-libzip \
 %endif
       --without-readline \
       --with-libedit \
@@ -1007,8 +1028,10 @@ install -m 644 %{SOURCE6} $RPM_BUILD_ROOT%{_unitdir}/
 # LogRotate
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
 install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
+# Environment file
+install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
+install -m 644 %{SOURCE8} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/php-fpm
 %endif
-
 # Fix the link
 (cd $RPM_BUILD_ROOT%{_bindir}; ln -sfn phar.phar phar)
 
@@ -1142,7 +1165,7 @@ fi
 
 %files common -f files.common
 %defattr(-,root,root)
-%doc CODING_STANDARDS CREDITS EXTENSIONS INSTALL LICENSE NEWS README*
+%doc CODING_STANDARDS CREDITS EXTENSIONS LICENSE NEWS README*
 %doc Zend/ZEND_* TSRM_LICENSE regex_COPYRIGHT
 %doc php.ini-*
 %config(noreplace) %{_sysconfdir}/php.ini
@@ -1174,6 +1197,7 @@ fi
 %config(noreplace) %{_sysconfdir}/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/php-fpm.d/www.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/php-fpm
+%config(noreplace) %{_sysconfdir}/sysconfig/php-fpm
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/php-fpm.conf
 %{_unitdir}/php-fpm.service
 %{_sbindir}/php-fpm
@@ -1233,6 +1257,12 @@ fi
 
 
 %changelog
+* Sat Feb 04 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-0.3.RC7
+- update to PHP 5.4.0RC7
+- provides env file for php-fpm (#784770)
+- add patch to use system libzip (thanks to spot)
+- don't provide INSTALL file
+
 * Wed Jan 25 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-0.2.RC6
 - all binaries in /usr/bin with zts prefix
 
