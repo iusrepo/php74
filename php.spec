@@ -9,7 +9,7 @@
 %global zipver      1.9.1
 %global jsonver     1.2.1
 # For PHP Release Candidate version
-%global rcver       RC7
+%global rcver       RC8
 
 %global httpd_mmn %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
 %global mysql_sock %(mysql_config --socket || echo /var/lib/mysql/mysql.sock)
@@ -46,7 +46,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.0
-Release: 0.3.%{rcver}%{?dist}
+Release: 0.4.%{rcver}%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1257,6 +1257,9 @@ fi
 
 
 %changelog
+* Sat Feb 18 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-0.4.RC8
+- update to PHP 5.4.0RC8
+
 * Sat Feb 04 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-0.3.RC7
 - update to PHP 5.4.0RC7
 - provides env file for php-fpm (#784770)
