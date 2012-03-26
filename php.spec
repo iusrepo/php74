@@ -46,7 +46,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -100,7 +100,7 @@ Obsoletes: php-dbg, php3, phpfi, stronghold-php, php-zts < 5.3.7
 Provides: php-zts = %{version}-%{release}
 Provides: php-zts%{?_isa} = %{version}-%{release}
 
-Requires: httpd-mmn = %{httpd_mmn}
+Requires: httpd-mmn = %{_httpd_mmn}
 Provides: mod_php = %{version}-%{release}
 Requires: php-common%{?_isa} = %{version}-%{release}
 # For backwards-compatibility, require php-cli for the time being:
@@ -1259,6 +1259,9 @@ fi
 
 
 %changelog
+* Mon Mar 26 2012 Joe Orton <jorton@redhat.com> - 5.4.0-3
+- really use _httpd_mmn
+
 * Mon Mar 26 2012 Joe Orton <jorton@redhat.com> - 5.4.0-2
 - rebuild against httpd 2.4
 - use _httpd_mmn, _httpd_apxs macros
