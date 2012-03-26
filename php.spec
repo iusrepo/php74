@@ -9,7 +9,7 @@
 %global zipver      1.9.1
 %global jsonver     1.2.1
 
-%global httpd_mmn %(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)
+%{!?_httpd_mmn: %{expand: %%global _httpd_mmn %%(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)}}
 %global mysql_sock %(mysql_config --socket || echo /var/lib/mysql/mysql.sock)
 
 # Regression tests take a long time, you can skip 'em with this
@@ -31,6 +31,8 @@
 %global isasuffix %nil
 %endif
 
+%{!?_httpd_apxs: %{expand: %%global _httpd_apxs %%{_sbindir}/apxs}}
+
 %if 0%{?fedora} >= 17
 %global with_zip     1
 %global with_libzip  1
@@ -44,7 +46,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -60,6 +62,7 @@ Source7: php-fpm.logrotate
 Source8: php-fpm.sysconfig
 
 # Build fixes
+Patch1: php-5.4.0-httpd24.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
@@ -69,7 +72,7 @@ Patch7: php-5.3.0-recode.patch
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
 Patch41: php-5.4.0-easter.patch
-Patch42: php-5.3.1-systzdata-v7.patch
+Patch42: php-5.3.1-systzdata-v8.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
@@ -559,6 +562,7 @@ support for using the enchant library to PHP.
 %prep
 %setup -q -n php-%{version}%{?rcver}
 
+%patch1 -p1 -b .httpd24
 %patch5 -p1 -b .includedir
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
@@ -802,7 +806,7 @@ without_shared="--without-gd \
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
 pushd build-apache
-build --with-apxs2=%{_sbindir}/apxs \
+build --with-apxs2=%{_httpd_apxs} \
       --libdir=%{_libdir}/php \
       --enable-pdo=shared \
       --with-mysql=shared,%{_prefix} \
@@ -897,7 +901,7 @@ popd
 
 # Build a special thread-safe Apache SAPI
 pushd build-zts
-build --with-apxs2=%{_sbindir}/apxs \
+build --with-apxs2=%{_httpd_apxs} \
       --includedir=%{_includedir}/php-zts \
       --libdir=%{_libdir}/php-zts \
       --enable-maintainer-zts \
@@ -1255,6 +1259,10 @@ fi
 
 
 %changelog
+* Mon Mar 26 2012 Joe Orton <jorton@redhat.com> - 5.4.0-2
+- rebuild against httpd 2.4
+- use _httpd_mmn, _httpd_apxs macros
+
 * Fri Mar 02 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-1
 - update to PHP 5.4.0 finale
 
