@@ -46,7 +46,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1259,6 +1259,9 @@ fi
 
 
 %changelog
+* Thu Mar 29 2012 Joe Orton <jorton@redhat.com> - 5.4.0-4
+- rebuild for missing automatic provides (#807889)
+
 * Mon Mar 26 2012 Joe Orton <jorton@redhat.com> - 5.4.0-3
 - really use _httpd_mmn
 
