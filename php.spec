@@ -9,7 +9,6 @@
 %global zipver      1.9.1
 %global jsonver     1.2.1
 
-%{!?_httpd_mmn: %{expand: %%global _httpd_mmn %%(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)}}
 %global mysql_sock %(mysql_config --socket || echo /var/lib/mysql/mysql.sock)
 
 # Regression tests take a long time, you can skip 'em with this
@@ -31,7 +30,12 @@
 %global isasuffix %nil
 %endif
 
-%{!?_httpd_apxs: %{expand: %%global _httpd_apxs %%{_sbindir}/apxs}}
+# /usr/sbin/apsx with httpd < 2.4 and defined as /usr/bin/apxs with httpd >= 2.4
+%{!?_httpd_apxs:       %{expand: %%global _httpd_apxs       %%{_sbindir}/apxs}}
+%{!?_httpd_mmn:        %{expand: %%global _httpd_mmn        %%(cat %{_includedir}/httpd/.mmn || echo missing-httpd-devel)}}
+%{!?_httpd_confdir:    %{expand: %%global _httpd_confdir    %%{_sysconfdir}/httpd/conf.d}}
+# /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
+%{!?_httpd_modconfdir: %{expand: %%global _httpd_modconfdir %%{_sysconfdir}/httpd/conf.d}}
 
 %if 0%{?fedora} >= 17
 %global with_zip     1
@@ -46,7 +50,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -60,6 +64,7 @@ Source5: php-fpm-www.conf
 Source6: php-fpm.service
 Source7: php-fpm.logrotate
 Source8: php-fpm.sysconfig
+Source9: php.modconf
 
 # Build fixes
 Patch1: php-5.4.0-httpd24.patch
@@ -1003,8 +1008,15 @@ install -m 755 build-apache/libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/httpd/modu
 install -m 755 build-zts/libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/httpd/modules/libphp5-zts.so
 
 # Apache config fragment
-install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d
-install -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d
+%if "%{_httpd_modconfdir}" == "%{_httpd_confdir}"
+# Single config file with httpd < 2.4 (fedora <= 17)
+install -D -m 644 %{SOURCE9} $RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
+cat %{SOURCE1} >>$RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
+%else
+# Dual config file with httpd >= 2.4 (fedora >= 18)
+install -D -m 644 %{SOURCE9} $RPM_BUILD_ROOT%{_httpd_modconfdir}/10-php.conf
+install -D -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
+%endif
 
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d
@@ -1162,7 +1174,10 @@ fi
 %{_libdir}/httpd/modules/libphp5.so
 %{_libdir}/httpd/modules/libphp5-zts.so
 %attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/php.conf
+%config(noreplace) %{_httpd_confdir}/php.conf
+%if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
+%config(noreplace) %{_httpd_modconfdir}/10-php.conf
+%endif
 %{contentdir}/icons/php.gif
 
 %files common -f files.common
@@ -1259,6 +1274,10 @@ fi
 
 
 %changelog
+* Sat Mar 31 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-5
+- fix Loadmodule with MPM event (use ZTS if not MPM worker)
+- split conf.d/php.conf + conf.modules.d/10-php.conf with httpd 2.4
+
 * Thu Mar 29 2012 Joe Orton <jorton@redhat.com> - 5.4.0-4
 - rebuild for missing automatic provides (#807889)
 
