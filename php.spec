@@ -49,7 +49,7 @@
 
 %if 0%{?fedora} < 18
 %global db_devel  db4-devel
-else
+%else
 %global db_devel  libdb-devel
 %endif
 
