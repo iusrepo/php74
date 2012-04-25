@@ -50,7 +50,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.0
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1274,6 +1274,9 @@ fi
 
 
 %changelog
+* Wed Apr 25 2012 Joe Orton <jorton@redhat.com> - 5.4.0-6
+- rebuild for new icu
+
 * Sat Mar 31 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-5
 - fix Loadmodule with MPM event (use ZTS if not MPM worker)
 - split conf.d/php.conf + conf.modules.d/10-php.conf with httpd 2.4
