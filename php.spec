@@ -47,6 +47,12 @@
 %global zipmod       %nil
 %endif
 
+%if 0%{?fedora} < 18
+%global db_devel  db4-devel
+else
+%global db_devel  libdb-devel
+%endif
+
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.0
@@ -88,7 +94,7 @@ Patch44: php-5.4.0-system-libzip.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: bzip2-devel, curl-devel >= 7.9, db4-devel, gmp-devel
+BuildRequires: bzip2-devel, curl-devel >= 7.9, %{db_devel}, gmp-devel
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: sqlite-devel >= 3.6.0
@@ -1276,6 +1282,7 @@ fi
 %changelog
 * Wed Apr 25 2012 Joe Orton <jorton@redhat.com> - 5.4.0-6
 - rebuild for new icu
+- switch (conditionally) to libdb-devel
 
 * Sat Mar 31 2012 Remi Collet <remi@fedoraproject.org> 5.4.0-5
 - fix Loadmodule with MPM event (use ZTS if not MPM worker)
