@@ -55,8 +55,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.4.0
-Release: 6%{?dist}
+Version: 5.4.1
+Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -73,7 +73,6 @@ Source8: php-fpm.sysconfig
 Source9: php.modconf
 
 # Build fixes
-Patch1: php-5.4.0-httpd24.patch
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
@@ -573,7 +572,6 @@ support for using the enchant library to PHP.
 %prep
 %setup -q -n php-%{version}%{?rcver}
 
-%patch1 -p1 -b .httpd24
 %patch5 -p1 -b .includedir
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
@@ -1280,6 +1278,9 @@ fi
 
 
 %changelog
+* Fri Apr 27 2012 Remi Collet <remi@fedoraproject.org> 5.4.1-1
+- update to 5.4.1
+
 * Wed Apr 25 2012 Joe Orton <jorton@redhat.com> - 5.4.0-6
 - rebuild for new icu
 - switch (conditionally) to libdb-devel
