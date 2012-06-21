@@ -56,7 +56,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -184,13 +184,16 @@ Provides: php(api) = %{apiver}%{isasuffix}, php(zend-abi) = %{zendver}%{isasuffi
 # Provides for all builtin/shared modules:
 Provides: php-bz2, php-bz2%{?_isa}
 Provides: php-calendar, php-calendar%{?_isa}
+Provides: php-core = %{version}, php-core%{?_isa} = %{version}
 Provides: php-ctype, php-ctype%{?_isa}
 Provides: php-curl, php-curl%{?_isa}
 Provides: php-date, php-date%{?_isa}
+Provides: php-ereg, php-ereg%{?_isa}
 Provides: php-exif, php-exif%{?_isa}
 Provides: php-fileinfo, php-fileinfo%{?_isa}
 Provides: php-pecl-Fileinfo = %{fileinfover}, php-pecl-Fileinfo%{?_isa} = %{fileinfover}
 Provides: php-pecl(Fileinfo) = %{fileinfover}, php-pecl(Fileinfo)%{?_isa} = %{fileinfover}
+Provides: php-filter, php-filter%{?_isa}
 Provides: php-ftp, php-ftp%{?_isa}
 Provides: php-gettext, php-gettext%{?_isa}
 Provides: php-gmp, php-gmp%{?_isa}
@@ -211,6 +214,7 @@ Provides: php-shmop, php-shmop%{?_isa}
 Provides: php-simplexml, php-simplexml%{?_isa}
 Provides: php-sockets, php-sockets%{?_isa}
 Provides: php-spl, php-spl%{?_isa}
+Provides: php-standard = %{version}, php-standard%{?_isa} = %{version}
 Provides: php-tokenizer, php-tokenizer%{?_isa}
 %if %{with_zip}
 Provides: php-zip, php-zip%{?_isa}
@@ -1278,8 +1282,11 @@ fi
 
 
 %changelog
+* Thu Jun 21 2012 Remi Collet <remi@fedoraproject.org> 5.4.4-2
+- add missing provides (core, ereg, filter, standard)
+
 * Thu Jun 14 2012 Remi Collet <remi@fedoraproject.org> 5.4.4-1
-- update to 5.4.4 finale
+- update to 5.4.4 (CVE-2012-2143, CVE-2012-2386)
 - use /usr/lib/tmpfiles.d instead of /etc/tmpfiles.d
 - use /run/php-fpm instead of /var/run/php-fpm
 
