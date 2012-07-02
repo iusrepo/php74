@@ -158,7 +158,6 @@ executing PHP scripts, /usr/bin/php, and the CGI interface.
 Group: Development/Languages
 Summary: PHP FastCGI Process Manager
 Requires: php-common%{?_isa} = %{version}-%{release}
-BuildRequires: libevent-devel >= 1.4.11
 BuildRequires: systemd-units
 Requires: systemd-units
 Requires(post): systemd-units
@@ -181,6 +180,7 @@ Summary: Common files for PHP
 # ABI/API check - Arch specific
 Provides: php-api = %{apiver}%{isasuffix}, php-zend-abi = %{zendver}%{isasuffix}
 Provides: php(api) = %{apiver}%{isasuffix}, php(zend-abi) = %{zendver}%{isasuffix}
+Provides: php(language) = %{version}
 # Provides for all builtin/shared modules:
 Provides: php-bz2, php-bz2%{?_isa}
 Provides: php-calendar, php-calendar%{?_isa}
@@ -1282,6 +1282,10 @@ fi
 
 
 %changelog
+* Mon Jul 02 2012 Remi Collet <remi@fedoraproject.org> 5.4.4-3
+- drop BR for libevent (#835671)
+- provide php(language) to allow version check
+
 * Thu Jun 21 2012 Remi Collet <remi@fedoraproject.org> 5.4.4-2
 - add missing provides (core, ereg, filter, standard)
 
