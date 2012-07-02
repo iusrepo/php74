@@ -56,7 +56,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -180,7 +180,7 @@ Summary: Common files for PHP
 # ABI/API check - Arch specific
 Provides: php-api = %{apiver}%{isasuffix}, php-zend-abi = %{zendver}%{isasuffix}
 Provides: php(api) = %{apiver}%{isasuffix}, php(zend-abi) = %{zendver}%{isasuffix}
-Provides: php(language) = %{version}
+Provides: php(language) = %{version}, php(language)%{?_isa} = %{version}
 # Provides for all builtin/shared modules:
 Provides: php-bz2, php-bz2%{?_isa}
 Provides: php-calendar, php-calendar%{?_isa}
@@ -1119,6 +1119,7 @@ install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
 sed -e "s/@PHP_APIVER@/%{apiver}%{isasuffix}/" \
     -e "s/@PHP_ZENDVER@/%{zendver}%{isasuffix}/" \
     -e "s/@PHP_PDOVER@/%{pdover}%{isasuffix}/" \
+    -e "s/@PHP_VERSION@/%{version}/" \
     < %{SOURCE3} > macros.php
 install -m 644 -c macros.php \
            $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.php
@@ -1282,6 +1283,10 @@ fi
 
 
 %changelog
+* Mon Jul 02 2012 Remi Collet <remi@fedoraproject.org> 5.4.4-4
+- also provide php(language)%%{_isa}
+- define %%{php_version}
+
 * Mon Jul 02 2012 Remi Collet <remi@fedoraproject.org> 5.4.4-3
 - drop BR for libevent (#835671)
 - provide php(language) to allow version check
