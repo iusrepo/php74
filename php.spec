@@ -6,7 +6,7 @@
 # Extension version
 %global fileinfover 1.0.5
 %global pharver     2.0.1
-%global zipver      1.9.1
+%global zipver      1.11.0
 %global jsonver     1.2.1
 
 %global mysql_sock %(mysql_config --socket || echo /var/lib/mysql/mysql.sock)
@@ -55,8 +55,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.4.4
-Release: 4%{?dist}
+Version: 5.4.5
+Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -86,7 +86,7 @@ Patch42: php-5.3.1-systzdata-v8.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
-Patch44: php-5.4.1-system-libzip.patch
+Patch44: php-5.4.5-system-libzip.patch
 
 # Fixes for tests
 
@@ -1283,6 +1283,9 @@ fi
 
 
 %changelog
+* Fri Jul 20 2012 Remi Collet <remi@fedoraproject.org> 5.4.5-1
+- update to 5.4.5
+
 * Mon Jul 02 2012 Remi Collet <remi@fedoraproject.org> 5.4.4-4
 - also provide php(language)%%{_isa}
 - define %%{php_version}
