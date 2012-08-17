@@ -87,6 +87,9 @@ Patch42: php-5.3.1-systzdata-v9.patch
 Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
 Patch44: php-5.4.5-system-libzip.patch
+# Fix for libxml 2.9.0
+# http://git.php.net/?p=php-src.git;a=commitdiff;h=c4b26cc1b0b0521c75e653fffec2a9e3b4bf8cbb
+Patch45: php-5.4.6-libxml.patch
 
 # Fixes for tests
 
@@ -587,6 +590,7 @@ support for using the enchant library to PHP.
 %if %{with_libzip}
 %patch44 -p1 -b .systzip
 %endif
+%patch45 -p1 -b .libxml290
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -1286,6 +1290,7 @@ fi
 * Fri Aug 17 2012 Remi Collet <remi@fedoraproject.org> 5.4.6-1
 - update to 5.4.6
 - update to v9 of systzdata patch
+- backport fix for new libxml
 
 * Fri Jul 20 2012 Remi Collet <remi@fedoraproject.org> 5.4.5-1
 - update to 5.4.5
