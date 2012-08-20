@@ -18,11 +18,7 @@
 # arch detection heuristic used by bindir/mysql_config.
 %global mysql_config %{_libdir}/mysql/mysql_config
 
-%ifarch %{ix86} x86_64
 %global with_fpm 1
-%else
-%global with_fpm 0
-%endif
 
 %if 0%{?__isa:1}
 %global isasuffix -%{__isa}
@@ -56,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1287,6 +1283,9 @@ fi
 
 
 %changelog
+* Mon Aug 20 2012 Remi Collet <remi@fedoraproject.org> 5.4.6-2
+- enable php-fpm on secondary arch (#849490)
+
 * Fri Aug 17 2012 Remi Collet <remi@fedoraproject.org> 5.4.6-1
 - update to 5.4.6
 - update to v9 of systzdata patch
