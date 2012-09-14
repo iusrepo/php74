@@ -1282,6 +1282,7 @@ fi
 * Fri Sep 14 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-1
 - update to 5.4.6
   http://www.php.net/releases/5_4_6.php
+- php-fpm: don't daemonize
 
 * Mon Aug 20 2012 Remi Collet <remi@fedoraproject.org> 5.4.6-2
 - enable php-fpm on secondary arch (#849490)
