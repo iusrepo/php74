@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1279,6 +1279,10 @@ fi
 
 
 %changelog
+* Mon Sep 17 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-2
+- remove session.save_path from php.ini
+  move it to apache and php-fpm configuration files
+
 * Fri Sep 14 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-1
 - update to 5.4.7
   http://www.php.net/releases/5_4_7.php
