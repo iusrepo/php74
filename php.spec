@@ -33,14 +33,14 @@
 # /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
 %{!?_httpd_modconfdir: %{expand: %%global _httpd_modconfdir %%{_sysconfdir}/httpd/conf.d}}
 
-%if 0%{?fedora} >= 17
-%global with_zip     1
-%global with_libzip  1
-%global zipmod       zip
-%else
+%if 0%{?fedora} < 17
 %global with_zip     0
 %global with_libzip  0
 %global zipmod       %nil
+%else
+%global with_zip     1
+%global with_libzip  1
+%global zipmod       zip
 %endif
 
 %if 0%{?fedora} < 18
@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.7
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1279,6 +1279,9 @@ fi
 
 
 %changelog
+* Tue Sep 18 2012 Remi Collet <rcollet@redhat.com> 5.4.7-3
+- fix test to enable zip extension on RHEL-7
+
 * Mon Sep 17 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-2
 - remove session.save_path from php.ini
   move it to apache and php-fpm configuration files
