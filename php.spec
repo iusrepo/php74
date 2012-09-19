@@ -33,7 +33,7 @@
 # /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
 %{!?_httpd_modconfdir: %{expand: %%global _httpd_modconfdir %%{_sysconfdir}/httpd/conf.d}}
 
-%if 0%{?fedora} < 17
+%if 0%{?fedora} < 17 && 0%{?rhel} < 7
 %global with_zip     0
 %global with_libzip  0
 %global zipmod       %nil
@@ -43,7 +43,7 @@
 %global zipmod       zip
 %endif
 
-%if 0%{?fedora} < 18
+%if 0%{?fedora} < 18 && 0%{?rhel} < 7
 %global db_devel  db4-devel
 %else
 %global db_devel  libdb-devel
@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.7
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1279,6 +1279,9 @@ fi
 
 
 %changelog
+* Wed Sep 19 2012 Remi Collet <rcollet@redhat.com> 5.4.7-4
+- really fix rhel tests (use libzip and libdb)
+
 * Tue Sep 18 2012 Remi Collet <rcollet@redhat.com> 5.4.7-3
 - fix test to enable zip extension on RHEL-7
 
