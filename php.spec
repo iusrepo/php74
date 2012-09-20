@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.7
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -72,6 +72,7 @@ Source9: php.modconf
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
+Patch8: php-5.4.7-libdb.patch
 
 # Fixes for extension modules
 
@@ -575,6 +576,7 @@ support for using the enchant library to PHP.
 %patch5 -p1 -b .includedir
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
+%patch8 -p1 -b .libdb
 
 %patch40 -p1 -b .dlopen
 %patch41 -p1 -b .easter
@@ -1279,6 +1281,9 @@ fi
 
 
 %changelog
+* Wed Sep 19 2012 Remi Collet <rcollet@redhat.com> 5.4.7-5
+- patch to ensure we use latest libdb (not libdb4)
+
 * Wed Sep 19 2012 Remi Collet <rcollet@redhat.com> 5.4.7-4
 - really fix rhel tests (use libzip and libdb)
 
