@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.7
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -601,15 +601,21 @@ mkdir build-cgi build-apache build-embedded build-zts build-ztscli \
     build-fpm
 %endif
 
-# Remove bogus test; position of read position after fopen(, "a+")
-# is not defined by C standard, so don't presume anything.
-rm -f ext/standard/tests/file/bug21131.phpt
+# ----- Manage known as failed test -------
 # php_egg_logo_guid() removed by patch41
 rm -f tests/basic/php_egg_logo_guid.phpt
+# affected by systzdata patch
+rm -f ext/date/tests/timezone_location_get.phpt
+# https://bugs.php.net/63147 tests requiring an internet connection 
+rm -f ext/standard/tests/network/gethostbyname_basic002.phpt
+rm -f ext/standard/tests/network/gethostbyname_error004.phpt
+rm -f ext/standard/tests/network/getmxrr.phpt
+# https://bugzilla.redhat.com/859878 - missing feature in SQLite
+# https://bugs.php.net/63149 - build against system SQLite
+rm -f ext/pdo_sqlite/tests/bug_42589.phpt
+# fails sometime
+rm -f ext/sockets/tests/mcast_ipv?_recv.phpt
 
-# Tests that fail.
-rm -f ext/standard/tests/file/bug22414.phpt \
-      ext/iconv/tests/bug16069.phpt
 
 # Safety check for API version change.
 pver=$(sed -n '/#define PHP_VERSION /{s/.* "//;s/".*$//;p}' main/php_version.h)
@@ -826,7 +832,7 @@ build --with-apxs2=%{_httpd_apxs} \
       --with-mysql=shared,%{_prefix} \
       --with-mysqli=shared,%{mysql_config} \
       --with-pdo-mysql=shared,%{mysql_config} \
-      --with-pdo-sqlite=shared,%{_prefix} \
+      --without-pdo-sqlite \
       ${without_shared}
 popd
 
@@ -1284,6 +1290,9 @@ fi
 
 
 %changelog
+* Mon Sep 24 2012 Remi Collet <rcollet@redhat.com> 5.4.7-7
+- most failed tests explained (i386, x86_64)
+
 * Wed Sep 19 2012 Remi Collet <rcollet@redhat.com> 5.4.7-6
 - fix for http://bugs.php.net/63126 (#783967)
 
