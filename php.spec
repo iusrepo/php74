@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.7
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -85,6 +85,8 @@ Patch42: php-5.3.1-systzdata-v9.patch
 Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
 Patch44: php-5.4.5-system-libzip.patch
+# https://bugs.php.net/63085 systemd integration
+Patch45: php-fpm-systemd.patch.patch
 
 # Fixes for tests
 
@@ -588,6 +590,7 @@ support for using the enchant library to PHP.
 %if %{with_libzip}
 %patch44 -p1 -b .systzip
 %endif
+%patch45 -p0 -b .systemd
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -1290,6 +1293,9 @@ fi
 
 
 %changelog
+* Fri Sep 28 2012 Remi Collet <rcollet@redhat.com> 5.4.7-8
+- systemd integration, https://bugs.php.net/63085
+
 * Mon Sep 24 2012 Remi Collet <rcollet@redhat.com> 5.4.7-7
 - most failed tests explained (i386, x86_64)
 
