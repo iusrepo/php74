@@ -78,6 +78,8 @@ Patch8: php-5.4.7-libdb.patch
 Patch20: php-5.4.7-imap.patch
 # https://bugs.php.net/63171 no odbc call during timeout
 Patch21: php-5.4.7-odbctimer.patch
+# https://bugs.php.net/63149 check sqlite3_column_table_name
+Patch22: php-5.4.7-sqlite.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
@@ -585,6 +587,7 @@ support for using the enchant library to PHP.
 
 %patch20 -p1 -b .imap
 %patch21 -p1 -b .odbctimer
+%patch22 -p1 -b .tablename
 
 %patch40 -p1 -b .dlopen
 %patch41 -p1 -b .easter
@@ -1299,6 +1302,7 @@ fi
 * Fri Sep 28 2012 Remi Collet <rcollet@redhat.com> 5.4.7-8
 - systemd integration, https://bugs.php.net/63085
 - no odbc call during timeout, https://bugs.php.net/63171
+- check sqlite3_column_table_name, https://bugs.php.net/63149
 
 * Mon Sep 24 2012 Remi Collet <rcollet@redhat.com> 5.4.7-7
 - most failed tests explained (i386, x86_64)
