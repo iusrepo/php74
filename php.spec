@@ -76,6 +76,8 @@ Patch8: php-5.4.7-libdb.patch
 
 # Fixes for extension modules
 Patch20: php-5.4.7-imap.patch
+# https://bugs.php.net/63171 no odbc call during timeout
+Patch21: php-5.4.7-odbctimer.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
@@ -582,6 +584,7 @@ support for using the enchant library to PHP.
 %patch8 -p1 -b .libdb
 
 %patch20 -p1 -b .imap
+%patch21 -p1 -b .odbctimer
 
 %patch40 -p1 -b .dlopen
 %patch41 -p1 -b .easter
@@ -1295,6 +1298,7 @@ fi
 %changelog
 * Fri Sep 28 2012 Remi Collet <rcollet@redhat.com> 5.4.7-8
 - systemd integration, https://bugs.php.net/63085
+- no odbc call during timeout, https://bugs.php.net/63171
 
 * Mon Sep 24 2012 Remi Collet <rcollet@redhat.com> 5.4.7-7
 - most failed tests explained (i386, x86_64)
