@@ -75,6 +75,7 @@ Patch7: php-5.3.0-recode.patch
 Patch8: php-5.4.7-libdb.patch
 
 # Fixes for extension modules
+# https://bugs.php.net/63126 - DISABLE_AUTHENTICATOR ignores array
 Patch20: php-5.4.7-imap.patch
 # https://bugs.php.net/63171 no odbc call during timeout
 Patch21: php-5.4.7-odbctimer.patch
