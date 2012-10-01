@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.7
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1299,6 +1299,9 @@ fi
 
 
 %changelog
+* Mon Oct  1 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-9
+- php-fpm: enable PrivateTmp
+
 * Fri Sep 28 2012 Remi Collet <rcollet@redhat.com> 5.4.7-8
 - systemd integration, https://bugs.php.net/63085
 - no odbc call during timeout, https://bugs.php.net/63171
