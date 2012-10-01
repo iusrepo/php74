@@ -1156,24 +1156,36 @@ rm files.* macros.php
 
 %if %{with_fpm}
 %post fpm
+%if 0%{?systemd_post:1}
+%systemd_post php-fpm.service
+%else
 if [ $1 = 1 ]; then
     # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
+%endif
 
 %preun fpm
+%if 0%{?systemd_preun:1}
+%systemd_preun php-fpm.service
+%else
 if [ $1 = 0 ]; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable php-fpm.service >/dev/null 2>&1 || :
     /bin/systemctl stop php-fpm.service >/dev/null 2>&1 || :
 fi
+%endif
 
 %postun fpm
+%if 0%{?systemd_postun_with_restart:1}
+%systemd_postun_with_restart mysqld.service
+%else
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 if [ $1 -ge 1 ]; then
     # Package upgrade, not uninstall
     /bin/systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 fi
+%endif
 
 # Handle upgrading from SysV initscript to native systemd unit.
 # We can tell if a SysV version of php-fpm was previously installed by
@@ -1301,6 +1313,7 @@ fi
 %changelog
 * Mon Oct  1 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-9
 - php-fpm: enable PrivateTmp
+- php-fpm: new systemd macros (#850268)
 
 * Fri Sep 28 2012 Remi Collet <rcollet@redhat.com> 5.4.7-8
 - systemd integration, https://bugs.php.net/63085
