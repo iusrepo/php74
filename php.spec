@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.7
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1181,7 +1181,7 @@ fi
 
 %postun fpm
 %if 0%{?systemd_postun_with_restart:1}
-%systemd_postun_with_restart mysqld.service
+%systemd_postun_with_restart php-fpm.service
 %else
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 if [ $1 -ge 1 ]; then
@@ -1314,6 +1314,9 @@ fi
 
 
 %changelog
+* Mon Oct  1 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-10
+- fix typo in systemd macro
+
 * Mon Oct  1 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-9
 - php-fpm: enable PrivateTmp
 - php-fpm: new systemd macros (#850268)
