@@ -80,6 +80,8 @@ Patch20: php-5.4.7-imap.patch
 Patch21: php-5.4.7-odbctimer.patch
 # https://bugs.php.net/63149 check sqlite3_column_table_name
 Patch22: php-5.4.7-sqlite.patch
+# https://bugs.php.net/bug.php?id=62886 - php-fpm startup
+Patch23: php-5.4.7-fpm.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
@@ -90,7 +92,7 @@ Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
 Patch44: php-5.4.5-system-libzip.patch
 # https://bugs.php.net/63085 systemd integration
-Patch45: php-fpm-systemd.patch.patch
+Patch45: php-5.4.7-fpm-systemd.patch
 
 # Fixes for tests
 
@@ -588,6 +590,7 @@ support for using the enchant library to PHP.
 %patch20 -p1 -b .imap
 %patch21 -p1 -b .odbctimer
 %patch22 -p1 -b .tablename
+%patch23 -p1 -b .fpmstartup
 
 %patch40 -p1 -b .dlopen
 %patch41 -p1 -b .easter
@@ -596,7 +599,7 @@ support for using the enchant library to PHP.
 %if %{with_libzip}
 %patch44 -p1 -b .systzip
 %endif
-%patch45 -p0 -b .systemd
+%patch45 -p1 -b .systemd
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -1314,6 +1317,7 @@ fi
 * Mon Oct  1 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-9
 - php-fpm: enable PrivateTmp
 - php-fpm: new systemd macros (#850268)
+- php-fpm: add upstream patch for startup issue (#846858)
 
 * Fri Sep 28 2012 Remi Collet <rcollet@redhat.com> 5.4.7-8
 - systemd integration, https://bugs.php.net/63085
