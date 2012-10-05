@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.7
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -87,7 +87,7 @@ Patch23: php-5.4.7-fpm.patch
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
 Patch41: php-5.4.0-easter.patch
-Patch42: php-5.3.1-systzdata-v9.patch
+Patch42: php-5.3.1-systzdata-v10.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
@@ -214,6 +214,7 @@ Provides: php-libxml, php-libxml%{?_isa}
 Provides: php-openssl, php-openssl%{?_isa}
 Provides: php-pecl-phar = %{pharver}, php-pecl-phar%{?_isa} = %{pharver}
 Provides: php-pecl(phar) = %{pharver}, php-pecl(phar)%{?_isa} = %{pharver}
+Provides: php-phar, php-phar%{?_isa}
 Provides: php-pcre, php-pcre%{?_isa}
 Provides: php-reflection, php-reflection%{?_isa}
 Provides: php-session, php-session%{?_isa}
@@ -1315,6 +1316,10 @@ fi
 
 
 %changelog
+* Fri Oct  5 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-11
+- provides php-phar
+- update systzdata patch to v10, timezone are case insensitive
+
 * Mon Oct  1 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-10
 - fix typo in systemd macro
 
