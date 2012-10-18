@@ -51,8 +51,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.4.7
-Release: 11%{?dist}
+Version: 5.4.8
+Release: 1%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -81,8 +81,8 @@ Patch20: php-5.4.7-imap.patch
 Patch21: php-5.4.7-odbctimer.patch
 # https://bugs.php.net/63149 check sqlite3_column_table_name
 Patch22: php-5.4.7-sqlite.patch
-# https://bugs.php.net/bug.php?id=62886 - php-fpm startup
-Patch23: php-5.4.7-fpm.patch
+# https://bugs.php.net/61557 crash in libxml
+Patch23: php-5.4.8-libxml.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
@@ -92,8 +92,6 @@ Patch42: php-5.3.1-systzdata-v10.patch
 Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
 Patch44: php-5.4.5-system-libzip.patch
-# https://bugs.php.net/63085 systemd integration
-Patch45: php-5.4.7-fpm-systemd.patch
 
 # Fixes for tests
 
@@ -167,6 +165,7 @@ Summary: PHP FastCGI Process Manager
 Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: systemd-units
 Requires: systemd-units
+Requires(pre): /usr/sbin/useradd
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
@@ -241,7 +240,8 @@ package and the php-cli package.
 %package devel
 Group: Development/Libraries
 Summary: Files needed for building PHP extensions
-Requires: php%{?_isa} = %{version}-%{release}, autoconf, automake
+Requires: php-cli%{?_isa} = %{version}-%{release}, autoconf, automake
+Requires: pcre-devel%{?_isa}
 Obsoletes: php-pecl-pdo-devel
 Provides: php-zts-devel = %{version}-%{release}
 Provides: php-zts-devel%{?_isa} = %{version}-%{release}
@@ -592,7 +592,7 @@ support for using the enchant library to PHP.
 %patch20 -p1 -b .imap
 %patch21 -p1 -b .odbctimer
 %patch22 -p1 -b .tablename
-%patch23 -p1 -b .fpmstartup
+%patch23 -p1 -b .libxmlcrash
 
 %patch40 -p1 -b .dlopen
 %patch41 -p1 -b .easter
@@ -601,7 +601,6 @@ support for using the enchant library to PHP.
 %if %{with_libzip}
 %patch44 -p1 -b .systzip
 %endif
-%patch45 -p1 -b .systemd
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -620,16 +619,8 @@ mkdir build-cgi build-apache build-embedded build-zts build-ztscli \
 rm -f tests/basic/php_egg_logo_guid.phpt
 # affected by systzdata patch
 rm -f ext/date/tests/timezone_location_get.phpt
-# https://bugs.php.net/63147 tests requiring an internet connection 
-rm -f ext/standard/tests/network/gethostbyname_basic002.phpt
-rm -f ext/standard/tests/network/gethostbyname_error004.phpt
-rm -f ext/standard/tests/network/getmxrr.phpt
-# https://bugzilla.redhat.com/859878 - missing feature in SQLite
-# https://bugs.php.net/63149 - build against system SQLite
-rm -f ext/pdo_sqlite/tests/bug_42589.phpt
 # fails sometime
 rm -f ext/sockets/tests/mcast_ipv?_recv.phpt
-
 
 # Safety check for API version change.
 pver=$(sed -n '/#define PHP_VERSION /{s/.* "//;s/".*$//;p}' main/php_version.h)
@@ -944,7 +935,7 @@ build --with-apxs2=%{_httpd_apxs} \
       --with-mysql=shared,%{_prefix} \
       --with-mysqli=shared,%{mysql_config} \
       --with-pdo-mysql=shared,%{mysql_config} \
-      --with-pdo-sqlite=shared,%{_prefix} \
+      --without-pdo-sqlite \
       ${without_shared}
 popd
 
@@ -956,6 +947,7 @@ popd
 cd build-apache
 # Run tests, using the CLI SAPI
 export NO_INTERACTION=1 REPORT_EXIT_STATUS=1 MALLOC_CHECK_=2
+export SKIP_ONLINE_TESTS=1
 unset TZ LANG LC_ALL
 if ! make test; then
   set +x
@@ -1160,6 +1152,15 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 rm files.* macros.php
 
 %if %{with_fpm}
+%pre fpm
+# Add the "apache" user as we don't require httpd
+getent group  apache >/dev/null || \
+  groupadd -g 48 -r apache
+getent passwd apache >/dev/null || \
+  useradd -r -u 48 -g apache -s /sbin/nologin \
+    -d %{contentdir} -c "Apache" apache
+exit 0
+
 %post fpm
 %if 0%{?systemd_post:1}
 %systemd_post php-fpm.service
@@ -1316,6 +1317,14 @@ fi
 
 
 %changelog
+* Thu Oct 18 2012 Remi Collet <remi@fedoraproject.org> 5.4.8-1
+- update to 5.4.8
+- define both session.save_handler and session.save_path
+- fix possible segfault in libxml (#828526)
+- php-fpm: create apache user if needed
+- use SKIP_ONLINE_TEST during make test
+- php-devel requires pcre-devel and php-cli (instead of php)
+
 * Fri Oct  5 2012 Remi Collet <remi@fedoraproject.org> 5.4.7-11
 - provides php-phar
 - update systzdata patch to v10, timezone are case insensitive
