@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -92,6 +92,9 @@ Patch42: php-5.3.1-systzdata-v10.patch
 Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
 Patch44: php-5.4.5-system-libzip.patch
+# Use -lldap_r for OpenLDAP
+Patch45: php-5.4.8-ldap_r.patch
+
 
 # Fixes for tests
 
@@ -601,6 +604,7 @@ support for using the enchant library to PHP.
 %if %{with_libzip}
 %patch44 -p1 -b .systzip
 %endif
+%patch45 -p1 -b .ldap_r
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -1317,6 +1321,9 @@ fi
 
 
 %changelog
+* Tue Oct 23 2012 Joe Orton <jorton@redhat.com> - 5.4.8-2
+- use libldap_r for ldap extension
+
 * Thu Oct 18 2012 Remi Collet <remi@fedoraproject.org> 5.4.8-1
 - update to 5.4.8
 - define both session.save_handler and session.save_path
