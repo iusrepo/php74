@@ -9,7 +9,7 @@
 %global zipver      1.11.0
 %global jsonver     1.2.1
 
-%global mysql_sock %(mysql_config --socket || echo /var/lib/mysql/mysql.sock)
+%global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
 # Regression tests take a long time, you can skip 'em with this
 %{!?runselftest: %{expand: %%global runselftest 1}}
@@ -52,7 +52,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.8
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: PHP
 Group: Development/Languages
 URL: http://www.php.net/
@@ -1335,6 +1335,9 @@ fi
 
 
 %changelog
+* Mon Nov  5 2012 Remi Collet <rcollet@redhat.com> 5.4.8-4
+- fix mysql_sock macro definition
+
 * Thu Oct 25 2012 Remi Collet <rcollet@redhat.com> 5.4.8-3
 - fix installed headers
 
