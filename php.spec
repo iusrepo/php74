@@ -9,6 +9,9 @@
 %global zipver      1.11.0
 %global jsonver     1.2.1
 
+# version used for php embedded library soname
+%global embed_version 5.4
+
 %global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
 # Regression tests take a long time, you can skip 'em with this
@@ -1369,7 +1372,7 @@ fi
 
 %files embedded
 %{_libdir}/libphp5.so
-%{_libdir}/libphp5-%{version}%{?rcver}.so
+%{_libdir}/libphp5-%{embed_version}.so
 
 %files pgsql -f files.pgsql
 %files mysql -f files.mysql
@@ -1408,6 +1411,7 @@ fi
 - clarify Licenses
 - missing provides xmlreader and xmlwriter
 - modernize spec
+- change php embedded library soname version to 5.4
 
 * Tue Nov  6 2012 Remi Collet <rcollet@redhat.com> 5.4.8-5
 - fix _httpd_mmn macro definition
