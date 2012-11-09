@@ -481,6 +481,8 @@ Provides: php-dom, php-dom%{?_isa}
 Provides: php-xsl, php-xsl%{?_isa}
 Provides: php-domxml, php-domxml%{?_isa}
 Provides: php-wddx, php-wddx%{?_isa}
+Provides: php-xmlreader, php-xmlreader%{?_isa}
+Provides: php-xmlwriter, php-xmlwriter%{?_isa}
 BuildRequires: libxslt-devel >= 1.0.18-1, libxml2-devel >= 2.4.14-1
 
 %description xml
@@ -1419,6 +1421,7 @@ fi
 %changelog
 * Fri Nov  9 2012 Remi Collet <rcollet@redhat.com> 5.4.8-6
 - clarify Licenses
+- missing provides xmlreader and xmlwriter
 
 * Tue Nov  6 2012 Remi Collet <rcollet@redhat.com> 5.4.8-5
 - fix _httpd_mmn macro definition
