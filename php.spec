@@ -103,9 +103,6 @@ Patch45: php-5.4.8-ldap_r.patch
 
 # Fixes for tests
 
-
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-
 BuildRequires: bzip2-devel, curl-devel >= 7.9, %{db_devel}, gmp-devel
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel
@@ -1057,8 +1054,6 @@ unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 %endif
 
 %install
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-
 # Install the extensions for the ZTS version
 make -C build-ztscli install \
      INSTALL_ROOT=$RPM_BUILD_ROOT
@@ -1241,9 +1236,6 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
 # Remove irrelevant docs
 rm -f README.{Zeus,QNX,CVS-RULES}
 
-%clean
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-rm files.* macros.php
 
 %if %{with_fpm}
 %pre fpm
@@ -1307,7 +1299,6 @@ fi
 %postun embedded -p /sbin/ldconfig
 
 %files
-%defattr(-,root,root)
 %{_libdir}/httpd/modules/libphp5.so
 %{_libdir}/httpd/modules/libphp5-zts.so
 %attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
@@ -1318,7 +1309,6 @@ fi
 %{contentdir}/icons/php.gif
 
 %files common -f files.common
-%defattr(-,root,root)
 %doc CODING_STANDARDS CREDITS EXTENSIONS LICENSE NEWS README*
 %doc Zend/ZEND_* TSRM_LICENSE regex_COPYRIGHT
 %doc libmagic_LICENSE
@@ -1335,7 +1325,6 @@ fi
 %dir %{_datadir}/php
 
 %files cli
-%defattr(-,root,root)
 %{_bindir}/php
 %{_bindir}/php-cgi
 %{_bindir}/phar.phar
@@ -1348,7 +1337,6 @@ fi
 
 %if %{with_fpm}
 %files fpm
-%defattr(-,root,root)
 %doc php-fpm.conf.default
 %doc fpm_LICENSE
 %config(noreplace) %{_sysconfdir}/php-fpm.conf
@@ -1367,7 +1355,6 @@ fi
 %endif
 
 %files devel
-%defattr(-,root,root)
 %{_bindir}/php-config
 %{_bindir}/zts-php-config
 %{_bindir}/zts-phpize
@@ -1381,7 +1368,6 @@ fi
 %config %{_sysconfdir}/rpm/macros.php
 
 %files embedded
-%defattr(-,root,root,-)
 %{_libdir}/libphp5.so
 %{_libdir}/libphp5-%{version}%{?rcver}.so
 
@@ -1398,7 +1384,6 @@ fi
 %doc oniguruma_COPYING
 %doc ucgendat_LICENSE
 %files gd -f files.gd
-%defattr(-,root,root,-)
 %doc libgd_README
 %doc libgd_COPYING
 %files soap -f files.soap
@@ -1422,6 +1407,7 @@ fi
 * Fri Nov  9 2012 Remi Collet <rcollet@redhat.com> 5.4.8-6
 - clarify Licenses
 - missing provides xmlreader and xmlwriter
+- modernize spec
 
 * Tue Nov  6 2012 Remi Collet <rcollet@redhat.com> 5.4.8-5
 - fix _httpd_mmn macro definition
