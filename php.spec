@@ -52,10 +52,12 @@
 %global db_devel  libdb-devel
 %endif
 
+%global rcver RC1
+
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.4.8
-Release: 6%{?dist}
+Version: 5.4.9
+Release: 0.1.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -133,13 +135,10 @@ Requires(pre): httpd
 
 
 # Don't provides extensions, which are not shared library, as .so
-# RPM 4.8
 %{?filter_provides_in: %filter_provides_in %{_libdir}/php/modules/.*\.so$}
 %{?filter_provides_in: %filter_provides_in %{_libdir}/php-zts/modules/.*\.so$}
+%{?filter_provides_in: %filter_provides_in %{_libdir}/httpd/modules/.*\.so$}
 %{?filter_setup}
-# RPM 4.9
-%global __provides_exclude_from %{?__provides_exclude_from:%__provides_exclude_from|}%{_libdir}/php/modules/.*\\.so$
-%global __provides_exclude_from %{__provides_exclude_from}|%{_libdir}/php-zts/modules/.*\\.so$
 
 
 %description
@@ -675,7 +674,9 @@ support for using the enchant library to PHP.
 %if %{with_libzip}
 %patch44 -p1 -b .systzip
 %endif
+%if 0%{?fedora} >= 18
 %patch45 -p1 -b .ldap_r
+%endif
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -1407,6 +1408,12 @@ fi
 
 
 %changelog
+* Wed Nov 14 2012 Remi Collet <remi@fedoraproject.org> 5.4.9-0.1.RC1
+- update to 5.4.9RC1
+- improves php.conf (use FilesMatch + SetHandler)
+- improves filter (httpd module)
+- apply ldap_r patch on fedora >= 18 only
+
 * Fri Nov  9 2012 Remi Collet <rcollet@redhat.com> 5.4.8-6
 - clarify Licenses
 - missing provides xmlreader and xmlwriter
