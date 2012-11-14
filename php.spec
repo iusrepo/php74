@@ -58,7 +58,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.9
-Release: 0.2.%{rcver}%{?dist}
+Release: 0.3.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1409,6 +1409,9 @@ fi
 
 
 %changelog
+* Wed Nov 14 2012 Remi Collet <rcollet@redhat.com> 5.4.9-0.3.RC1
+- improve system libzip patch to use pkg-config
+
 * Wed Nov 14 2012 Remi Collet <rcollet@redhat.com> 5.4.9-0.2.RC1
 - use _httpd_moddir macro
 
