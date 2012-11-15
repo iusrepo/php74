@@ -1,4 +1,3 @@
-%global contentdir  /var/www
 # API/ABI check
 %global apiver      20100412
 %global zendver     20100525
@@ -36,6 +35,7 @@
 # /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
 %{!?_httpd_modconfdir: %{expand: %%global _httpd_modconfdir %%{_sysconfdir}/httpd/conf.d}}
 %{!?_httpd_moddir:     %{expand: %%global _httpd_moddir     %%{_libdir}/httpd/modules}}
+%{!?_httpd_contentdir: %{expand: %%global _httpd_contentdir /var/www}}
 
 %if 0%{?fedora} < 17 && 0%{?rhel} < 7
 %global with_zip     0
@@ -58,7 +58,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.9
-Release: 0.3.%{rcver}%{?dist}
+Release: 0.4.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1109,8 +1109,8 @@ make -C build-apache install-modules \
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
 install -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
-install -m 755 -d $RPM_BUILD_ROOT%{contentdir}/icons
-install -m 644 php.gif $RPM_BUILD_ROOT%{contentdir}/icons/php.gif
+install -m 755 -d $RPM_BUILD_ROOT%{_httpd_contentdir}/icons
+install -m 644 php.gif $RPM_BUILD_ROOT%{_httpd_contentdir}/icons/php.gif
 
 # For third-party packaging:
 install -m 755 -d $RPM_BUILD_ROOT%{_datadir}/php
@@ -1249,7 +1249,7 @@ getent group  apache >/dev/null || \
   groupadd -g 48 -r apache
 getent passwd apache >/dev/null || \
   useradd -r -u 48 -g apache -s /sbin/nologin \
-    -d %{contentdir} -c "Apache" apache
+    -d %{_httpd_contentdir} -c "Apache" apache
 exit 0
 
 %post fpm
@@ -1311,7 +1311,7 @@ fi
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
 %config(noreplace) %{_httpd_modconfdir}/10-php.conf
 %endif
-%{contentdir}/icons/php.gif
+%{_httpd_contentdir}/icons/php.gif
 
 %files common -f files.common
 %doc CODING_STANDARDS CREDITS EXTENSIONS LICENSE NEWS README*
@@ -1409,6 +1409,9 @@ fi
 
 
 %changelog
+* Thu Nov 15 2012 Remi Collet <rcollet@redhat.com> 5.4.9-0.4.RC1
+- use _httpd_contentdir macro and fix php.gif path
+
 * Wed Nov 14 2012 Remi Collet <rcollet@redhat.com> 5.4.9-0.3.RC1
 - improve system libzip patch to use pkg-config
 
