@@ -53,12 +53,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver RC1
+#global rcver RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.9
-Release: 0.5.%{rcver}%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -674,7 +674,7 @@ support for using the enchant library to PHP.
 %if %{with_libzip}
 %patch44 -p1 -b .systzip
 %endif
-%if 0%{?fedora} >= 18
+%if 0%{?fedora} >= 18 || 0%{?rhel} >= 7
 %patch45 -p1 -b .ldap_r
 %endif
 
@@ -1409,6 +1409,9 @@ fi
 
 
 %changelog
+* Thu Nov 22 2012 Remi Collet <rcollet@redhat.com> 5.4.9-1
+- update to 5.4.9
+
 * Thu Nov 15 2012 Remi Collet <rcollet@redhat.com> 5.4.9-0.5.RC1
 - switch back to upstream generated scanner/parser
 
