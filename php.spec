@@ -58,7 +58,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -105,6 +105,8 @@ Patch43: php-5.4.0-phpize.patch
 Patch44: php-5.4.5-system-libzip.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-5.4.8-ldap_r.patch
+# Make php_config.h constant across builds
+Patch46: php-5.4.9-fixheader.patch
 
 
 # Fixes for tests
@@ -677,6 +679,7 @@ support for using the enchant library to PHP.
 %if 0%{?fedora} >= 18 || 0%{?rhel} >= 7
 %patch45 -p1 -b .ldap_r
 %endif
+%patch46 -p1 -b .fixheader
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -1409,6 +1412,9 @@ fi
 
 
 %changelog
+* Tue Dec 11 2012 Joe Orton <jorton@redhat.com> - 5.4.9-2
+- prevent php_config.h changes across (otherwise identical) rebuilds
+
 * Thu Nov 22 2012 Remi Collet <rcollet@redhat.com> 5.4.9-1
 - update to 5.4.9
 
