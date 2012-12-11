@@ -8,7 +8,7 @@ Make generated php_config.h constant across rebuilds.
  EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
  
 -PHP_BUILD_DATE=`date '+%Y-%m-%d'`
-+PHP_BUILD_DATE=`date '+%Y-%m-%d' -r LICENSE`
++PHP_BUILD_DATE=`date '+%Y-%m-%d' -r $srcdir/NEWS`
  AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
  
  case $host_alias in
