@@ -53,12 +53,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver RC1
+#global rcver RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.11
-Release: 0.2.rc1%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1403,6 +1403,9 @@ fi
 
 
 %changelog
+* Wed Jan 16 2013 Remi Collet <rcollet@redhat.com> 5.4.11-1
+- update to 5.4.10
+
 * Thu Jan 10 2013 Remi Collet <rcollet@redhat.com> 5.4.11-0.2.RC1
 - fix php.conf to allow MultiViews managed by php scripts
 
