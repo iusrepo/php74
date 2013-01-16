@@ -1404,7 +1404,7 @@ fi
 
 %changelog
 * Wed Jan 16 2013 Remi Collet <rcollet@redhat.com> 5.4.11-1
-- update to 5.4.10
+- update to 5.4.11
 
 * Thu Jan 10 2013 Remi Collet <rcollet@redhat.com> 5.4.11-0.2.RC1
 - fix php.conf to allow MultiViews managed by php scripts
