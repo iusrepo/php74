@@ -58,7 +58,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1403,6 +1403,9 @@ fi
 
 
 %changelog
+* Mon Jan 21 2013 Adam Tkac <atkac redhat com> - 5.4.11-2
+- rebuild due to "jpeg8-ABI" feature drop
+
 * Wed Jan 16 2013 Remi Collet <rcollet@redhat.com> 5.4.11-1
 - update to 5.4.11
 
