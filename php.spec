@@ -1736,7 +1736,7 @@ fi
 - raise sqlite version to 3.6.0 (for sqlite3, build with --enable-load-extension)
 - sync with upstream "production" php.ini
 
-* Sat Jun 21 2009 Remi Collet <Fedora@famillecollet.com> 5.2.10-1
+* Sun Jun 21 2009 Remi Collet <Fedora@famillecollet.com> 5.2.10-1
 - update to 5.2.10
 - add interbase sub-package
 
