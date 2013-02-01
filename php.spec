@@ -58,7 +58,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.12
-Release: 0.1.RC1%{?dist}
+Release: 0.2.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -86,6 +86,8 @@ Patch8: php-5.4.7-libdb.patch
 # Fixes for extension modules
 # https://bugs.php.net/63171 no odbc call during timeout
 Patch21: php-5.4.7-odbctimer.patch
+# https://bugs.php.net/64128 buit-in web server is broken on ppc64
+Patch22: php-5.4.11-select.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
@@ -658,6 +660,7 @@ support for using the enchant library to PHP.
 %patch8 -p1 -b .libdb
 
 %patch21 -p1 -b .odbctimer
+%patch22 -p1 -b .select
 
 %patch40 -p1 -b .dlopen
 %patch41 -p1 -b .easter
@@ -1403,6 +1406,10 @@ fi
 
 
 %changelog
+* Fri Feb  1 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.2.RC1
+- fix buit-in web server on ppc64 (fdset usage)
+  https://bugs.php.net/64128
+
 * Thu Jan 31 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.1.RC1
 - update to 5.4.12RC1
 
