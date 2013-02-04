@@ -58,7 +58,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.12
-Release: 0.2.RC1%{?dist}
+Release: 0.3.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -106,6 +106,8 @@ Patch47: php-5.4.9-phpinfo.patch
 
 
 # Fixes for tests
+Patch50: php-5.4.11-sockets.patch
+
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9, %{db_devel}, gmp-devel
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
@@ -674,6 +676,7 @@ support for using the enchant library to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
+%patch50 -p1 -b .sockets
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -1406,6 +1409,9 @@ fi
 
 
 %changelog
+* Mon Feb  4 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.3.RC1
+- upstream patch (5.4.13) for 2 failed tests
+
 * Fri Feb  1 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.2.RC1
 - fix buit-in web server on ppc64 (fdset usage)
   https://bugs.php.net/64128
