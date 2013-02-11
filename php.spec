@@ -58,7 +58,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.12
-Release: 0.3.RC1%{?dist}
+Release: 0.4.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -88,6 +88,8 @@ Patch8: php-5.4.7-libdb.patch
 Patch21: php-5.4.7-odbctimer.patch
 # https://bugs.php.net/64128 buit-in web server is broken on ppc64
 Patch22: php-5.4.11-select.patch
+# https://bugs.php.net/64142 dval to lval issue on ppc64
+Patch23: php-5.4.11-conv.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
@@ -663,6 +665,7 @@ support for using the enchant library to PHP.
 
 %patch21 -p1 -b .odbctimer
 %patch22 -p1 -b .select
+%patch23 -p1 -b .conv
 
 %patch40 -p1 -b .dlopen
 %patch41 -p1 -b .easter
@@ -1409,6 +1412,10 @@ fi
 
 
 %changelog
+* Mon Feb 11 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.4.RC1
+- upstream patch (5.4.13) to fix dval to lval conversion
+  https://bugs.php.net/64142
+
 * Mon Feb  4 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.3.RC1
 - upstream patch (5.4.13) for 2 failed tests
 
