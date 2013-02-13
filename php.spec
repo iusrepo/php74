@@ -53,12 +53,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver RC1
+%global rcver RC2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.12
-Release: 0.4.RC1%{?dist}
+Release: 0.5.RC2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1412,6 +1412,9 @@ fi
 
 
 %changelog
+* Wed Feb 13 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.5.RC2
+- update to 5.4.12RC2
+
 * Mon Feb 11 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.4.RC1
 - upstream patch (5.4.13) to fix dval to lval conversion
   https://bugs.php.net/64142
