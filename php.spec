@@ -53,12 +53,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver RC2
+#global rcver RC2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.12
-Release: 0.6.RC2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1417,6 +1417,10 @@ fi
 
 
 %changelog
+* Wed Feb 20 2013 Remi Collet <remi@fedoraproject.org> 5.4.12-1
+- update to 5.4.12
+- security fixes for CVE-2013-1635 and CVE-2013-1643
+
 * Wed Feb 13 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.6.RC2
 - enable tokyocabinet and gdbm dba handlers
 
