@@ -22,6 +22,9 @@
 
 %global with_fpm 1
 
+# Build mysql/mysqli/pdo extensions using libmysqlclient or only mysqlnd
+%global with_libmysql 0
+
 %if 0%{?__isa:1}
 %global isasuffix -%{__isa}
 %else
@@ -58,7 +61,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.12
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -321,6 +324,7 @@ a database access abstraction layer to PHP.  This module provides
 a common interface for accessing MySQL, PostgreSQL or other 
 databases.
 
+%if %{with_libmysql}
 %package mysql
 Summary: A module for PHP applications that use MySQL databases
 Group: Development/Languages
@@ -341,6 +345,7 @@ MySQL database support to PHP. MySQL is an object-relational database
 management system. PHP is an HTML-embeddable scripting language. If
 you need MySQL support for PHP applications, you will need to install
 this package and the php package.
+%endif
 
 %package mysqlnd
 Summary: A module for PHP applications that use MySQL databases
@@ -354,6 +359,9 @@ Provides: php-mysql%{?_isa} = %{version}-%{release}
 Provides: php-mysqli = %{version}-%{release}
 Provides: php-mysqli%{?_isa} = %{version}-%{release}
 Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
+%if ! %{with_libmysql}
+Obsoletes: php-mysql < %{version}-%{release}
+%endif
 
 %description mysqlnd
 The php-mysqlnd package contains a dynamic shared object that will add
@@ -934,11 +942,16 @@ without_shared="--without-gd \
 pushd build-apache
 build --with-apxs2=%{_httpd_apxs} \
       --libdir=%{_libdir}/php \
+%if %{with_libmysql}
       --enable-pdo=shared \
       --with-mysql=shared,%{_prefix} \
       --with-mysqli=shared,%{mysql_config} \
       --with-pdo-mysql=shared,%{mysql_config} \
       --without-pdo-sqlite \
+%else
+      --without-mysql \
+      --disable-pdo \
+%endif
       ${without_shared}
 popd
 
@@ -947,7 +960,8 @@ popd
 pushd build-fpm
 build --enable-fpm \
       --libdir=%{_libdir}/php \
-      --without-mysql --disable-pdo \
+      --without-mysql \
+      --disable-pdo \
       ${without_shared}
 popd
 %endif
@@ -1033,11 +1047,16 @@ build --with-apxs2=%{_httpd_apxs} \
       --libdir=%{_libdir}/php-zts \
       --enable-maintainer-zts \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d \
+%if %{with_libmysql}
       --enable-pdo=shared \
       --with-mysql=shared,%{_prefix} \
       --with-mysqli=shared,%{mysql_config} \
       --with-pdo-mysql=shared,%{mysql_config} \
       --without-pdo-sqlite \
+%else
+      --without-mysql \
+      --disable-pdo \
+%endif
       ${without_shared}
 popd
 
@@ -1077,9 +1096,11 @@ mv $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/mysqli.so \
 mv $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/pdo_mysql.so \
    $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/pdo_mysqlnd.so
 
+%if %{with_libmysql}
 # Install the extensions for the ZTS version modules for libmysql
 make -C build-zts install-modules \
      INSTALL_ROOT=$RPM_BUILD_ROOT
+%endif
 
 # rename ZTS binary
 mv $RPM_BUILD_ROOT%{_bindir}/php        $RPM_BUILD_ROOT%{_bindir}/zts-php
@@ -1108,9 +1129,11 @@ mv $RPM_BUILD_ROOT%{_libdir}/php/modules/mysqli.so \
 mv $RPM_BUILD_ROOT%{_libdir}/php/modules/pdo_mysql.so \
    $RPM_BUILD_ROOT%{_libdir}/php/modules/pdo_mysqlnd.so
 
+%if %{with_libmysql}
 # Install the mysql extension build with libmysql
 make -C build-apache install-modules \
      INSTALL_ROOT=$RPM_BUILD_ROOT
+%endif
 
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
@@ -1171,14 +1194,18 @@ install -m 644 %{SOURCE8} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/php-fpm
 (cd $RPM_BUILD_ROOT%{_bindir}; ln -sfn phar.phar phar)
 
 # Generate files lists and stub .ini files for each subpackage
-for mod in pgsql mysql mysqli odbc ldap snmp xmlrpc imap \
+for mod in pgsql odbc ldap snmp xmlrpc imap \
     mysqlnd mysqlnd_mysql mysqlnd_mysqli pdo_mysqlnd \
     mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
-    pdo pdo_mysql pdo_pgsql pdo_odbc pdo_sqlite json %{zipmod} \
+    pdo pdo_pgsql pdo_odbc pdo_sqlite json %{zipmod} \
     sqlite3  interbase pdo_firebird \
     enchant phar fileinfo intl \
     mcrypt tidy pdo_dblib mssql pspell curl wddx \
-    posix sysvshm sysvsem sysvmsg recode; do
+    posix sysvshm sysvsem sysvmsg recode \
+%if %{with_libmysql}
+    mysql mysqli pdo_mysql \
+%endif
+    ; do
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
@@ -1199,7 +1226,11 @@ done
 cat files.dom files.xsl files.xml{reader,writer} files.wddx > files.xml
 
 # The mysql and mysqli modules are both packaged in php-mysql
+%if %{with_libmysql}
 cat files.mysqli >> files.mysql
+cat files.pdo_mysql >> files.mysql
+%endif
+
 # mysqlnd
 cat files.mysqlnd_mysql \
     files.mysqlnd_mysqli \
@@ -1208,7 +1239,6 @@ cat files.mysqlnd_mysql \
 
 # Split out the PDO modules
 cat files.pdo_dblib >> files.mssql
-cat files.pdo_mysql >> files.mysql
 cat files.pdo_pgsql >> files.pgsql
 cat files.pdo_odbc >> files.odbc
 cat files.pdo_firebird >> files.interbase
@@ -1383,7 +1413,9 @@ fi
 %{_libdir}/libphp5-%{embed_version}.so
 
 %files pgsql -f files.pgsql
+%if %{with_libmysql}
 %files mysql -f files.mysql
+%endif
 %files odbc -f files.odbc
 %files imap -f files.imap
 %files ldap -f files.ldap
@@ -1415,6 +1447,9 @@ fi
 
 
 %changelog
+* Wed Feb 20 2013 Remi Collet <rcollet@redhat.com> 5.4.12-2
+- make php-mysql package optional and disabled
+
 * Wed Feb 20 2013 Remi Collet <remi@fedoraproject.org> 5.4.12-1
 - update to 5.4.12
 - security fixes for CVE-2013-1635 and CVE-2013-1643
