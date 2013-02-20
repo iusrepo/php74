@@ -549,7 +549,7 @@ Summary: A database abstraction layer module for PHP applications
 Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
-BuildRequires: %{db_devel}, gdbm-devel, tokyocabinet-devel
+BuildRequires: %{db_devel}, tokyocabinet-devel
 Requires: php-common%{?_isa} = %{version}-%{release}
 
 %description dba
@@ -873,7 +873,6 @@ build --enable-force-cgi-redirect \
       --with-gd=shared \
       --enable-bcmath=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
-                          --with-gdbm=%{_prefix} \
                           --with-tcadb=%{_prefix} \
       --with-xmlrpc=shared \
       --with-ldap=shared --with-ldap-sasl \
@@ -977,7 +976,6 @@ build --enable-force-cgi-redirect \
       --with-gd=shared \
       --enable-bcmath=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
-                          --with-gdbm=%{_prefix} \
                           --with-tcadb=%{_prefix} \
       --with-xmlrpc=shared \
       --with-ldap=shared --with-ldap-sasl \
@@ -1420,6 +1418,7 @@ fi
 * Wed Feb 20 2013 Remi Collet <remi@fedoraproject.org> 5.4.12-1
 - update to 5.4.12
 - security fixes for CVE-2013-1635 and CVE-2013-1643
+- drop gdbm because of license incompatibility
 
 * Wed Feb 13 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.6.RC2
 - enable tokyocabinet and gdbm dba handlers
