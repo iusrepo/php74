@@ -25,6 +25,9 @@
 # Build mysql/mysqli/pdo extensions using libmysqlclient or only mysqlnd
 %global with_libmysql 0
 
+# Build ZTS extension or only NTS
+%global with_zts 1
+
 %if 0%{?__isa:1}
 %global isasuffix -%{__isa}
 %else
@@ -61,7 +64,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.12
-Release: 2%{?dist}
+Release: 3%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -79,6 +82,7 @@ Source6: php-fpm.service
 Source7: php-fpm.logrotate
 Source8: php-fpm.sysconfig
 Source9: php.modconf
+Source10: php.ztsmodconf
 
 # Build fixes
 Patch5: php-5.2.0-includedir.patch
@@ -126,9 +130,12 @@ BuildRequires: libtool-ltdl-devel
 BuildRequires: libzip-devel >= 0.10
 %endif
 
-Obsoletes: php-dbg, php3, phpfi, stronghold-php, php-zts < 5.3.7
+Obsoletes: php-dbg, php3, phpfi, stronghold-php
+%if %{with_zts}
+Obsoletes: php-zts < 5.3.7
 Provides: php-zts = %{version}-%{release}
 Provides: php-zts%{?_isa} = %{version}-%{release}
+%endif
 
 Requires: httpd-mmn = %{_httpd_mmn}
 Provides: mod_php = %{version}-%{release}
@@ -263,8 +270,10 @@ Summary: Files needed for building PHP extensions
 Requires: php-cli%{?_isa} = %{version}-%{release}, autoconf, automake
 Requires: pcre-devel%{?_isa}
 Obsoletes: php-pecl-pdo-devel
+%if %{with_zts}
 Provides: php-zts-devel = %{version}-%{release}
 Provides: php-zts-devel%{?_isa} = %{version}-%{release}
+%endif
 
 %description devel
 The php-devel package contains the files needed for building PHP
@@ -705,7 +714,10 @@ cp ext/phar/LICENSE phar_LICENSE
 cp ext/bcmath/libbcmath/COPYING.LIB libbcmath_COPYING
 
 # Multiple builds for multiple SAPIs
-mkdir build-cgi build-apache build-embedded build-zts build-ztscli \
+mkdir build-cgi build-apache build-embedded \
+%if %{with_zts}
+    build-zts build-ztscli \
+%endif
 %if %{with_fpm}
     build-fpm
 %endif
@@ -974,6 +986,7 @@ build --enable-embed \
       ${without_shared}
 popd
 
+%if %{with_zts}
 # Build a special thread-safe (mainly for modules)
 pushd build-ztscli
 
@@ -1062,6 +1075,8 @@ popd
 
 ### NOTE!!! EXTENSION_DIR was changed for the -zts build, so it must remain
 ### the last SAPI to be built.
+%endif
+
 
 %check
 %if %runselftest
@@ -1084,6 +1099,7 @@ unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 %endif
 
 %install
+%if %{with_zts}
 # Install the extensions for the ZTS version
 make -C build-ztscli install \
      INSTALL_ROOT=$RPM_BUILD_ROOT
@@ -1106,6 +1122,7 @@ make -C build-zts install-modules \
 mv $RPM_BUILD_ROOT%{_bindir}/php        $RPM_BUILD_ROOT%{_bindir}/zts-php
 mv $RPM_BUILD_ROOT%{_bindir}/phpize     $RPM_BUILD_ROOT%{_bindir}/zts-phpize
 mv $RPM_BUILD_ROOT%{_bindir}/php-config $RPM_BUILD_ROOT%{_bindir}/zts-php-config
+%endif
 
 # Install the version for embedded script language in applications + php_embed.h
 make -C build-embedded install-sapi install-headers \
@@ -1148,22 +1165,33 @@ install -m 755 -d $RPM_BUILD_ROOT%{_datadir}/php
 install -m 755 -d $RPM_BUILD_ROOT%{_httpd_moddir}
 install -m 755 build-apache/libs/libphp5.so $RPM_BUILD_ROOT%{_httpd_moddir}
 
+%if %{with_zts}
 # install the ZTS DSO
 install -m 755 build-zts/libs/libphp5.so $RPM_BUILD_ROOT%{_httpd_moddir}/libphp5-zts.so
+%endif
 
 # Apache config fragment
 %if "%{_httpd_modconfdir}" == "%{_httpd_confdir}"
 # Single config file with httpd < 2.4 (fedora <= 17)
 install -D -m 644 %{SOURCE9} $RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
+%if %{with_zts}
+cat %{SOURCE10} >>$RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
+%endif
 cat %{SOURCE1} >>$RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
 %else
 # Dual config file with httpd >= 2.4 (fedora >= 18)
 install -D -m 644 %{SOURCE9} $RPM_BUILD_ROOT%{_httpd_modconfdir}/10-php.conf
+%if %{with_zts}
+cat %{SOURCE10} >>$RPM_BUILD_ROOT%{_httpd_modconfdir}/10-php.conf
+%endif
+
 install -D -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
 %endif
 
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
+%if %{with_zts}
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d
+%endif
 install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php
 install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
@@ -1210,15 +1238,19 @@ for mod in pgsql odbc ldap snmp xmlrpc imap \
 ; Enable ${mod} extension module
 extension=${mod}.so
 EOF
+%if %{with_zts}
     cat > $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/${mod}.ini <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
 EOF
+%endif
     cat > files.${mod} <<EOF
 %attr(755,root,root) %{_libdir}/php/modules/${mod}.so
-%attr(755,root,root) %{_libdir}/php-zts/modules/${mod}.so
 %config(noreplace) %attr(644,root,root) %{_sysconfdir}/php.d/${mod}.ini
+%if %{with_zts}
+%attr(755,root,root) %{_libdir}/php-zts/modules/${mod}.so
 %config(noreplace) %attr(644,root,root) %{_sysconfdir}/php-zts.d/${mod}.ini
+%endif
 EOF
 done
 
@@ -1263,6 +1295,9 @@ sed -e "s/@PHP_APIVER@/%{apiver}%{isasuffix}/" \
     -e "s/@PHP_ZENDVER@/%{zendver}%{isasuffix}/" \
     -e "s/@PHP_PDOVER@/%{pdover}%{isasuffix}/" \
     -e "s/@PHP_VERSION@/%{version}/" \
+%if ! %{with_zts}
+    -e "/zts/d" \
+%endif
     < %{SOURCE3} > macros.php
 install -m 644 -c macros.php \
            $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.php
@@ -1341,7 +1376,9 @@ fi
 
 %files
 %{_httpd_moddir}/libphp5.so
+%if %{with_zts}
 %{_httpd_moddir}/libphp5-zts.so
+%endif
 %attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
 %config(noreplace) %{_httpd_confdir}/php.conf
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
@@ -1357,11 +1394,13 @@ fi
 %doc php.ini-*
 %config(noreplace) %{_sysconfdir}/php.ini
 %dir %{_sysconfdir}/php.d
-%dir %{_sysconfdir}/php-zts.d
 %dir %{_libdir}/php
 %dir %{_libdir}/php/modules
+%if %{with_zts}
+%dir %{_sysconfdir}/php-zts.d
 %dir %{_libdir}/php-zts
 %dir %{_libdir}/php-zts/modules
+%endif
 %dir %{_localstatedir}/lib/php
 %dir %{_datadir}/php
 
@@ -1397,14 +1436,16 @@ fi
 
 %files devel
 %{_bindir}/php-config
+%{_includedir}/php
+%{_libdir}/php/build
+%if %{with_zts}
 %{_bindir}/zts-php-config
+%{_includedir}/php-zts
 %{_bindir}/zts-phpize
 # usefull only to test other module during build
 %{_bindir}/zts-php
-%{_includedir}/php
-%{_includedir}/php-zts
-%{_libdir}/php/build
 %{_libdir}/php-zts/build
+%endif
 %{_mandir}/man1/php-config.1*
 %config %{_sysconfdir}/rpm/macros.php
 
@@ -1447,6 +1488,9 @@ fi
 
 
 %changelog
+* Thu Feb 21 2013 Remi Collet <rcollet@redhat.com> 5.4.12-3
+- make ZTS build optional (still enabled)
+
 * Wed Feb 20 2013 Remi Collet <rcollet@redhat.com> 5.4.12-2
 - make php-mysql package optional and disabled
 
