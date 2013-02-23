@@ -64,7 +64,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.12
-Release: 3%{?dist}
+Release: 4%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -804,6 +804,8 @@ chmod 644 README.*
 # php-fpm configuration files for tmpfiles.d
 echo "d /run/php-fpm 755 root root" >php-fpm.tmpfiles
 
+# add ppc64p7 as a valid build target
+sed -i -e "s/ppc64-\*/ppc64-\* \| ppc64p7-\*/" config.sub
 
 %build
 # aclocal workaround - to be improved
@@ -1488,6 +1490,9 @@ fi
 
 
 %changelog
+* Sat Feb 23 2013 Karsten Hopp <karsten@redhat.com> 5.4.12-4
+- add support for ppc64p7 arch (Power7 optimized)
+
 * Thu Feb 21 2013 Remi Collet <rcollet@redhat.com> 5.4.12-3
 - make ZTS build optional (still enabled)
 
