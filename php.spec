@@ -59,12 +59,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver RC2
+%global rcver RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.4.12
-Release: 4%{?dist}
+Version: 5.4.13
+Release: 0.1.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -93,10 +93,6 @@ Patch8: php-5.4.7-libdb.patch
 # Fixes for extension modules
 # https://bugs.php.net/63171 no odbc call during timeout
 Patch21: php-5.4.7-odbctimer.patch
-# https://bugs.php.net/64128 buit-in web server is broken on ppc64
-Patch22: php-5.4.11-select.patch
-# https://bugs.php.net/64142 dval to lval issue on ppc64
-Patch23: php-5.4.11-conv.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
@@ -115,7 +111,6 @@ Patch47: php-5.4.9-phpinfo.patch
 
 
 # Fixes for tests
-Patch50: php-5.4.11-sockets.patch
 
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9, gmp-devel
@@ -682,8 +677,6 @@ support for using the enchant library to PHP.
 %patch8 -p1 -b .libdb
 
 %patch21 -p1 -b .odbctimer
-%patch22 -p1 -b .select
-%patch23 -p1 -b .conv
 
 %patch40 -p1 -b .dlopen
 %patch41 -p1 -b .easter
@@ -697,7 +690,6 @@ support for using the enchant library to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
-%patch50 -p1 -b .sockets
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -804,8 +796,6 @@ chmod 644 README.*
 # php-fpm configuration files for tmpfiles.d
 echo "d /run/php-fpm 755 root root" >php-fpm.tmpfiles
 
-# add ppc64p7 as a valid build target
-sed -i -e "s/ppc64-\*/ppc64-\* \| ppc64p7-\*/" config.sub
 
 %build
 # aclocal workaround - to be improved
@@ -1490,6 +1480,10 @@ fi
 
 
 %changelog
+* Thu Feb 28 2013 Remi Collet <rcollet@redhat.com> 5.4.13-0.1.RC1
+- update to 5.4.13RC1
+- drop patches merged upstream
+
 * Sat Feb 23 2013 Karsten Hopp <karsten@redhat.com> 5.4.12-4
 - add support for ppc64p7 arch (Power7 optimized)
 
