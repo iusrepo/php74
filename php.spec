@@ -64,7 +64,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.4.13
-Release: 0.1.RC1%{?dist}
+Release: 0.2.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1439,7 +1439,7 @@ fi
 %{_libdir}/php-zts/build
 %endif
 %{_mandir}/man1/php-config.1*
-%config %{_sysconfdir}/rpm/macros.php
+%{_sysconfdir}/rpm/macros.php
 
 %files embedded
 %{_libdir}/libphp5.so
@@ -1480,6 +1480,10 @@ fi
 
 
 %changelog
+* Mon Mar 11 2013 Ralf Corsépius <corsepiu@fedoraproject.org> -  5.4.13-0.2.RC1
+- Remove %%config from %%{_sysconfdir}/rpm/macros.*
+  (https://fedorahosted.org/fpc/ticket/259).
+
 * Thu Feb 28 2013 Remi Collet <rcollet@redhat.com> 5.4.13-0.1.RC1
 - update to 5.4.13RC1
 - drop patches merged upstream
