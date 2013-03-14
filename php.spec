@@ -1482,7 +1482,7 @@ fi
 %changelog
 * Thu Mar 14 2013 Remi Collet <rcollet@redhat.com> 5.4.13-1
 - update to 5.4.13
-- security fixes for CVE-2013-1635 and CVE-2013-1643
+- security fix for CVE-2013-1643
 
 * Mon Mar 11 2013 Ralf Corsépius <corsepiu@fedoraproject.org> -  5.4.13-0.2.RC1
 - Remove %%config from %%{_sysconfdir}/rpm/macros.*
@@ -1503,6 +1503,7 @@ fi
 
 * Wed Feb 20 2013 Remi Collet <remi@fedoraproject.org> 5.4.12-1
 - update to 5.4.12
+- security fix for CVE-2013-1635
 - drop gdbm because of license incompatibility
 
 * Wed Feb 13 2013 Remi Collet <rcollet@redhat.com> 5.4.12-0.6.RC2
