@@ -8,6 +8,9 @@
 %global zipver      1.11.0
 %global jsonver     1.2.1
 
+# Adds -z now to the linker flags
+%global _hardened_build 1
+
 # version used for php embedded library soname
 %global embed_version 5.4
 
@@ -1483,6 +1486,7 @@ fi
 * Thu Mar 14 2013 Remi Collet <rcollet@redhat.com> 5.4.13-1
 - update to 5.4.13
 - security fix for CVE-2013-1643
+- Hardened build (links with -z now option)
 
 * Mon Mar 11 2013 Ralf Corsépius <corsepiu@fedoraproject.org> -  5.4.13-0.2.RC1
 - Remove %%config from %%{_sysconfdir}/rpm/macros.*
