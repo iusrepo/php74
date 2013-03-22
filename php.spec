@@ -1,18 +1,15 @@
 # API/ABI check
-%global apiver      20100412
-%global zendver     20100525
+%global apiver      20121113
+%global zendver     20121212
 %global pdover      20080721
 # Extension version
-%global fileinfover 1.0.5
-%global pharver     2.0.1
-%global zipver      1.11.0
-%global jsonver     1.2.1
+%global opcachever  7.0.1-dev
 
 # Adds -z now to the linker flags
 %global _hardened_build 1
 
 # version used for php embedded library soname
-%global embed_version 5.4
+%global embed_version 5.5
 
 %global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
@@ -23,16 +20,16 @@
 # arch detection heuristic used by bindir/mysql_config.
 %global mysql_config %{_libdir}/mysql/mysql_config
 
-%global with_fpm 1
+%global with_fpm      1
 
 # Build mysql/mysqli/pdo extensions using libmysqlclient or only mysqlnd
 %global with_libmysql 0
 
 # Build ZTS extension or only NTS
-%global with_zts 1
+%global with_zts      1
 
-%if 0%{?__isa:1}
-%global isasuffix -%{__isa}
+%if 0%{?__isa_bits:1}
+%global isasuffix -%{__isa_bits}
 %else
 %global isasuffix %nil
 %endif
@@ -45,6 +42,8 @@
 %{!?_httpd_modconfdir: %{expand: %%global _httpd_modconfdir %%{_sysconfdir}/httpd/conf.d}}
 %{!?_httpd_moddir:     %{expand: %%global _httpd_moddir     %%{_libdir}/httpd/modules}}
 %{!?_httpd_contentdir: %{expand: %%global _httpd_contentdir /var/www}}
+
+%global with_dtrace 1
 
 %if 0%{?fedora} < 17 && 0%{?rhel} < 7
 %global with_zip     0
@@ -62,12 +61,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver RC1
+%global rcver beta1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.4.13
-Release: 1%{?dist}
+Version: 5.5.0
+Release: 0.1.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -75,7 +74,7 @@ License: PHP and Zend and BSD
 Group: Development/Languages
 URL: http://www.php.net/
 
-Source0: http://www.php.net/distributions/php-%{version}%{?rcver}.tar.bz2
+Source0: http://www.php.net/distributions/php-%{version}%{?rcver}.tar.xz
 Source1: php.conf
 Source2: php.ini
 Source3: macros.php
@@ -86,12 +85,16 @@ Source7: php-fpm.logrotate
 Source8: php-fpm.sysconfig
 Source9: php.modconf
 Source10: php.ztsmodconf
+# Configuration files for some extensions
+Source50: opcache.ini
 
 # Build fixes
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
 Patch8: php-5.4.7-libdb.patch
+# revert to bison 2.4 generated parser
+Patch9: php-5.5.0-build.patch
 
 # Fixes for extension modules
 # https://bugs.php.net/63171 no odbc call during timeout
@@ -99,7 +102,6 @@ Patch21: php-5.4.7-odbctimer.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
-Patch41: php-5.4.0-easter.patch
 Patch42: php-5.3.1-systzdata-v10.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
@@ -116,7 +118,7 @@ Patch47: php-5.4.9-phpinfo.patch
 # Fixes for tests
 
 
-BuildRequires: bzip2-devel, curl-devel >= 7.9, gmp-devel
+BuildRequires: bzip2-devel, curl-devel >= 7.9
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: sqlite-devel >= 3.6.0
@@ -126,6 +128,9 @@ BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 BuildRequires: libtool-ltdl-devel
 %if %{with_libzip}
 BuildRequires: libzip-devel >= 0.10
+%endif
+%if %{with_dtrace}
+BuildRequires: systemtap-sdt-devel
 %endif
 
 Obsoletes: php-dbg, php3, phpfi, stronghold-php
@@ -184,9 +189,9 @@ Summary: PHP FastCGI Process Manager
 # TSRM and fpm are licensed under BSD
 License: PHP and Zend and BSD
 Requires: php-common%{?_isa} = %{version}-%{release}
+Requires(pre): /usr/sbin/useradd
 BuildRequires: systemd-units
 Requires: systemd-units
-Requires(pre): /usr/sbin/useradd
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
@@ -209,8 +214,8 @@ Summary: Common files for PHP
 # regex, libmagic are licensed under BSD
 License: PHP and BSD
 # ABI/API check - Arch specific
-Provides: php-api = %{apiver}%{isasuffix}, php-zend-abi = %{zendver}%{isasuffix}
-Provides: php(api) = %{apiver}%{isasuffix}, php(zend-abi) = %{zendver}%{isasuffix}
+Provides: php(api) = %{apiver}%{isasuffix}
+Provides: php(zend-abi) = %{zendver}%{isasuffix}
 Provides: php(language) = %{version}, php(language)%{?_isa} = %{version}
 # Provides for all builtin/shared modules:
 Provides: php-bz2, php-bz2%{?_isa}
@@ -222,36 +227,25 @@ Provides: php-date, php-date%{?_isa}
 Provides: php-ereg, php-ereg%{?_isa}
 Provides: php-exif, php-exif%{?_isa}
 Provides: php-fileinfo, php-fileinfo%{?_isa}
-Provides: php-pecl-Fileinfo = %{fileinfover}, php-pecl-Fileinfo%{?_isa} = %{fileinfover}
-Provides: php-pecl(Fileinfo) = %{fileinfover}, php-pecl(Fileinfo)%{?_isa} = %{fileinfover}
 Provides: php-filter, php-filter%{?_isa}
 Provides: php-ftp, php-ftp%{?_isa}
 Provides: php-gettext, php-gettext%{?_isa}
-Provides: php-gmp, php-gmp%{?_isa}
 Provides: php-hash, php-hash%{?_isa}
 Provides: php-mhash = %{version}, php-mhash%{?_isa} = %{version}
 Provides: php-iconv, php-iconv%{?_isa}
 Provides: php-json, php-json%{?_isa}
-Provides: php-pecl-json = %{jsonver}, php-pecl-json%{?_isa} = %{jsonver}
-Provides: php-pecl(json) = %{jsonver}, php-pecl(json)%{?_isa} = %{jsonver}
 Provides: php-libxml, php-libxml%{?_isa}
 Provides: php-openssl, php-openssl%{?_isa}
-Provides: php-pecl-phar = %{pharver}, php-pecl-phar%{?_isa} = %{pharver}
-Provides: php-pecl(phar) = %{pharver}, php-pecl(phar)%{?_isa} = %{pharver}
 Provides: php-phar, php-phar%{?_isa}
 Provides: php-pcre, php-pcre%{?_isa}
 Provides: php-reflection, php-reflection%{?_isa}
 Provides: php-session, php-session%{?_isa}
-Provides: php-shmop, php-shmop%{?_isa}
-Provides: php-simplexml, php-simplexml%{?_isa}
 Provides: php-sockets, php-sockets%{?_isa}
 Provides: php-spl, php-spl%{?_isa}
 Provides: php-standard = %{version}, php-standard%{?_isa} = %{version}
 Provides: php-tokenizer, php-tokenizer%{?_isa}
 %if %{with_zip}
 Provides: php-zip, php-zip%{?_isa}
-Provides: php-pecl-zip = %{zipver}, php-pecl-zip%{?_isa} = %{zipver}
-Provides: php-pecl(zip) = %{zipver}, php-pecl(zip)%{?_isa} = %{zipver}
 Obsoletes: php-pecl-zip
 %endif
 Provides: php-zlib, php-zlib%{?_isa}
@@ -277,6 +271,28 @@ Provides: php-zts-devel%{?_isa} = %{version}-%{release}
 The php-devel package contains the files needed for building PHP
 extensions. If you need to compile your own PHP extensions, you will
 need to install this package.
+
+%package opcache
+Summary:   The Zend Optimizer+
+Group:     Development/Languages
+License:   PHP
+Requires:  php-common%{?_isa} = %{version}-%{release}
+Obsoletes: php-pecl-zendoptimizerplus
+Provides:  php-pecl-zendoptimizerplus = %{opcachever}
+Provides:  php-pecl-zendoptimizerplus%{?_isa} = %{opcachever}
+Provides:  php-pecl(opcache) = %{opcachever}
+Provides:  php-pecl(opcache)%{?_isa} = %{opcachever}
+# Only one opcode cache could be enabled
+Conflicts: php-xcache
+# APC 3.1.15 offer an option to disable opcache
+Conflicts: php-pecl-apc < 3.1.15
+
+%description opcache
+The Zend Optimizer+ provides faster PHP execution through opcode caching and
+optimization. It improves PHP performance by storing precompiled script
+bytecode in the shared memory. This eliminates the stages of reading code from
+the disk and compiling it on future access. In addition, it applies a few
+bytecode optimization patterns that make code execution faster.
 
 %package imap
 Summary: A module for PHP applications that use IMAP
@@ -406,6 +422,7 @@ Group: Development/Languages
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
 Provides: php-posix, php-posix%{?_isa}
+Provides: php-shmop, php-shmop%{?_isa}
 Provides: php-sysvsem, php-sysvsem%{?_isa}
 Provides: php-sysvshm, php-sysvshm%{?_isa}
 Provides: php-sysvmsg, php-sysvmsg%{?_isa}
@@ -494,11 +511,12 @@ License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
 Obsoletes: php-domxml, php-dom
 Provides: php-dom, php-dom%{?_isa}
-Provides: php-xsl, php-xsl%{?_isa}
 Provides: php-domxml, php-domxml%{?_isa}
+Provides: php-simplexml, php-simplexml%{?_isa}
 Provides: php-wddx, php-wddx%{?_isa}
 Provides: php-xmlreader, php-xmlreader%{?_isa}
 Provides: php-xmlwriter, php-xmlwriter%{?_isa}
+Provides: php-xsl, php-xsl%{?_isa}
 BuildRequires: libxslt-devel >= 1.0.18-1, libxml2-devel >= 2.4.14-1
 
 %description xml
@@ -558,6 +576,18 @@ Requires: php-common%{?_isa} = %{version}-%{release}
 %description bcmath
 The php-bcmath package contains a dynamic shared object that will add
 support for using the bcmath library to PHP.
+
+%package gmp
+Summary: A module for PHP applications for using the GNU MP library
+Group: Development/Languages
+# All files licensed under PHP version 3.01
+License: PHP
+BuildRequires: gmp-devel
+Requires: php-common%{?_isa} = %{version}-%{release}
+
+%description gmp
+These functions allow you to work with arbitrary-length integers
+using the GNU MP library.
 
 %package dba
 Summary: A database abstraction layer module for PHP applications
@@ -652,7 +682,7 @@ Group: System Environment/Libraries
 # All files licensed under PHP version 3.01
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
-BuildRequires: libicu-devel >= 3.6
+BuildRequires: libicu-devel >= 4.0
 
 %description intl
 The php-intl package contains a dynamic shared object that will add
@@ -678,11 +708,11 @@ support for using the enchant library to PHP.
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
 %patch8 -p1 -b .libdb
+%patch9 -p1 -b .build
 
 %patch21 -p1 -b .odbctimer
 
 %patch40 -p1 -b .dlopen
-%patch41 -p1 -b .easter
 %patch42 -p1 -b .systzdata
 %patch43 -p1 -b .headers
 %if %{with_libzip}
@@ -718,8 +748,6 @@ mkdir build-cgi build-apache build-embedded \
 %endif
 
 # ----- Manage known as failed test -------
-# php_egg_logo_guid() removed by patch41
-rm -f tests/basic/php_egg_logo_guid.phpt
 # affected by systzdata patch
 rm -f ext/date/tests/timezone_location_get.phpt
 # fails sometime
@@ -756,28 +784,10 @@ if test "x${vpdo}" != "x%{pdover}"; then
 fi
 
 # Check for some extension version
-ver=$(sed -n '/#define PHP_FILEINFO_VERSION /{s/.* "//;s/".*$//;p}' ext/fileinfo/php_fileinfo.h)
-if test "$ver" != "%{fileinfover}"; then
-   : Error: Upstream FILEINFO version is now ${ver}, expecting %{fileinfover}.
-   : Update the fileinfover macro and rebuild.
-   exit 1
-fi
-ver=$(sed -n '/#define PHP_PHAR_VERSION /{s/.* "//;s/".*$//;p}' ext/phar/php_phar.h)
-if test "$ver" != "%{pharver}"; then
-   : Error: Upstream PHAR version is now ${ver}, expecting %{pharver}.
-   : Update the pharver macro and rebuild.
-   exit 1
-fi
-ver=$(sed -n '/#define PHP_ZIP_VERSION_STRING /{s/.* "//;s/".*$//;p}' ext/zip/php_zip.h)
-if test "$ver" != "%{zipver}"; then
-   : Error: Upstream ZIP version is now ${ver}, expecting %{zipver}.
-   : Update the zipver macro and rebuild.
-   exit 1
-fi
-ver=$(sed -n '/#define PHP_JSON_VERSION /{s/.* "//;s/".*$//;p}' ext/json/php_json.h)
-if test "$ver" != "%{jsonver}"; then
-   : Error: Upstream JSON version is now ${ver}, expecting %{jsonver}.
-   : Update the jsonver macro and rebuild.
+ver=$(sed -n '/#define ACCELERATOR_VERSION /{s/.* "//;s/".*$//;p}' ext/opcache/ZendAccelerator.h)
+if test "$ver" != "%{opcachever}"; then
+   : Error: Upstream PHAR version is now ${ver}, expecting %{opcachever}.
+   : Update the opcachever macro and rebuild.
    exit 1
 fi
 
@@ -798,6 +808,9 @@ chmod 644 README.*
 
 # php-fpm configuration files for tmpfiles.d
 echo "d /run/php-fpm 755 root root" >php-fpm.tmpfiles
+
+# Some extensions have their own configuration file
+cp %{SOURCE50} .
 
 
 %build
@@ -828,17 +841,27 @@ build() {
 # Old/recent bison version seems to produce a broken parser;
 # upstream uses GNU Bison 2.3. Workaround:
 mkdir Zend && cp ../Zend/zend_{language,ini}_{parser,scanner}.[ch] Zend
+
+# Always static:
+# date, filter, libxml, reflection, spl: not supported
+# ereg: build options vary per SAPI
+# hash: for PHAR_SIG_SHA256 and PHAR_SIG_SHA512
+# session: dep on hash, used by soap and wddx
+# pcre: used by filter, zip
+# pcntl, readline: only used by CLI sapi
+# openssl: for PHAR_SIG_OPENSSL
+# zlib: used by image
+
 ln -sf ../configure
 %configure \
 	--cache-file=../config.cache \
-        --with-libdir=%{_lib} \
+	--with-libdir=%{_lib} \
 	--with-config-file-path=%{_sysconfdir} \
 	--with-config-file-scan-dir=%{_sysconfdir}/php.d \
 	--disable-debug \
 	--with-pic \
 	--disable-rpath \
 	--without-pear \
-	--with-bz2 \
 	--with-exec-dir=%{_bindir} \
 	--with-freetype-dir=%{_prefix} \
 	--with-png-dir=%{_prefix} \
@@ -846,27 +869,21 @@ ln -sf ../configure
 	--enable-gd-native-ttf \
 	--with-t1lib=%{_prefix} \
 	--without-gdbm \
-	--with-gettext \
-	--with-gmp \
-	--with-iconv \
 	--with-jpeg-dir=%{_prefix} \
 	--with-openssl \
-        --with-pcre-regex=%{_prefix} \
+	--with-pcre-regex=%{_prefix} \
 	--with-zlib \
 	--with-layout=GNU \
-	--enable-exif \
-	--enable-ftp \
 	--enable-magic-quotes \
-	--enable-sockets \
 	--with-kerberos \
 	--enable-ucd-snmp-hack \
-	--enable-shmop \
-	--enable-calendar \
-        --with-libxml-dir=%{_prefix} \
-	--enable-xml \
-        --with-system-tzdata \
+	--with-libxml-dir=%{_prefix} \
+	--with-system-tzdata \
 	--with-mhash \
-	$* 
+%if %{with_dtrace}
+	--enable-dtrace \
+%endif
+	$*
 if test $? != 0; then 
   tail -500 config.log
   : configure failed
@@ -882,13 +899,24 @@ pushd build-cgi
 build --enable-force-cgi-redirect \
       --libdir=%{_libdir}/php \
       --enable-pcntl \
+      --enable-opcache \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
       --enable-mbregex \
       --with-gd=shared \
+      --with-gmp=shared \
+      --enable-calendar=shared \
       --enable-bcmath=shared \
+      --with-bz2=shared \
+      --enable-ctype=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
                           --with-tcadb=%{_prefix} \
+      --enable-exif=shared \
+      --enable-ftp=shared \
+      --with-gettext=shared \
+      --with-iconv=shared \
+      --enable-sockets=shared \
+      --enable-tokenizer=shared \
       --with-xmlrpc=shared \
       --with-ldap=shared --with-ldap-sasl \
       --enable-mysqlnd=shared \
@@ -899,6 +927,8 @@ build --enable-force-cgi-redirect \
       --with-pdo-firebird=shared,%{_libdir}/firebird \
       --enable-dom=shared \
       --with-pgsql=shared \
+      --enable-simplexml=shared \
+      --enable-xml=shared \
       --enable-wddx=shared \
       --with-snmp=shared,%{_prefix} \
       --enable-soap=shared \
@@ -928,6 +958,7 @@ build --enable-force-cgi-redirect \
       --with-tidy=shared,%{_prefix} \
       --with-mssql=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
+      --enable-shmop=shared \
       --enable-posix=shared \
       --with-unixODBC=shared,%{_prefix} \
       --enable-fileinfo=shared \
@@ -939,10 +970,14 @@ popd
 
 without_shared="--without-gd \
       --disable-dom --disable-dba --without-unixODBC \
+      --disable-opcache \
       --disable-xmlreader --disable-xmlwriter \
       --without-sqlite3 --disable-phar --disable-fileinfo \
       --disable-json --without-pspell --disable-wddx \
-      --without-curl --disable-posix \
+      --without-curl --disable-posix --disable-xml \
+      --disable-simplexml --disable-exif --without-gettext \
+      --without-iconv --disable-ftp --without-bz2 --disable-ctype \
+      --disable-shmop --disable-sockets --disable-tokenizer \
       --disable-sysvmsg --disable-sysvshm --disable-sysvsem"
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
@@ -992,13 +1027,24 @@ build --enable-force-cgi-redirect \
       --enable-maintainer-zts \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d \
       --enable-pcntl \
+      --enable-opcache \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
       --enable-mbregex \
       --with-gd=shared \
+      --with-gmp=shared \
+      --enable-calendar=shared \
       --enable-bcmath=shared \
+      --with-bz2=shared \
+      --enable-ctype=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
                           --with-tcadb=%{_prefix} \
+      --with-gettext=shared \
+      --with-iconv=shared \
+      --enable-sockets=shared \
+      --enable-tokenizer=shared \
+      --enable-exif=shared \
+      --enable-ftp=shared \
       --with-xmlrpc=shared \
       --with-ldap=shared --with-ldap-sasl \
       --enable-mysqlnd=shared \
@@ -1010,6 +1056,8 @@ build --enable-force-cgi-redirect \
       --with-pdo-firebird=shared,%{_libdir}/firebird \
       --enable-dom=shared \
       --with-pgsql=shared \
+      --enable-simplexml=shared \
+      --enable-xml=shared \
       --enable-wddx=shared \
       --with-snmp=shared,%{_prefix} \
       --enable-soap=shared \
@@ -1039,6 +1087,7 @@ build --enable-force-cgi-redirect \
       --with-tidy=shared,%{_prefix} \
       --with-mssql=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
+      --enable-shmop=shared \
       --enable-posix=shared \
       --with-unixODBC=shared,%{_prefix} \
       --enable-fileinfo=shared \
@@ -1075,6 +1124,10 @@ popd
 
 %check
 %if %runselftest
+
+# Double stack size (required by bug54268.phpt)
+ulimit -s 16384
+
 cd build-apache
 # Run tests, using the CLI SAPI
 export NO_INTERACTION=1 REPORT_EXIT_STATUS=1 MALLOC_CHECK_=2
@@ -1082,10 +1135,13 @@ export SKIP_ONLINE_TESTS=1
 unset TZ LANG LC_ALL
 if ! make test; then
   set +x
-  for f in `find .. -name \*.diff -type f -print`; do
-    echo "TEST FAILURE: $f --"
-    cat "$f"
-    echo "-- $f result ends."
+  for f in $(find .. -name \*.diff -type f -print); do
+    if ! grep -q XFAIL "${f/.diff/.phpt}"
+    then
+      echo "TEST FAILURE: $f --"
+      cat "$f"
+      echo -e "\n-- $f result ends."
+    fi
   done
   set -x
   #exit 1
@@ -1220,37 +1276,53 @@ install -m 644 %{SOURCE8} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/php-fpm
 for mod in pgsql odbc ldap snmp xmlrpc imap \
     mysqlnd mysqlnd_mysql mysqlnd_mysqli pdo_mysqlnd \
     mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
+    simplexml bz2 calendar ctype exif ftp gettext gmp iconv \
+    sockets tokenizer opcache \
     pdo pdo_pgsql pdo_odbc pdo_sqlite json %{zipmod} \
     sqlite3  interbase pdo_firebird \
     enchant phar fileinfo intl \
     mcrypt tidy pdo_dblib mssql pspell curl wddx \
-    posix sysvshm sysvsem sysvmsg recode \
+    posix shmop sysvshm sysvsem sysvmsg recode xml \
 %if %{with_libmysql}
     mysql mysqli pdo_mysql \
 %endif
     ; do
-    cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${mod}.ini <<EOF
+    # for extension load order
+    if [ "$mod" = "wddx" ]
+    then   ini=xml_${mod}.ini
+    else   ini=${mod}.ini
+    fi
+    # some extensions have their own config file
+    if [ -f ${ini} ]; then
+      sed -e 's:@EXTPATH@:%{_libdir}/php/modules:' \
+             ${ini} >$RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini}
+      sed -e 's:@EXTPATH@:%{_libdir}/php-zts/modules:' \
+             ${ini} >$RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/${ini}
+    else
+      cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini} <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
 EOF
 %if %{with_zts}
-    cat > $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/${mod}.ini <<EOF
+      cat > $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/${ini} <<EOF
 ; Enable ${mod} extension module
 extension=${mod}.so
 EOF
 %endif
+    fi
     cat > files.${mod} <<EOF
 %attr(755,root,root) %{_libdir}/php/modules/${mod}.so
-%config(noreplace) %attr(644,root,root) %{_sysconfdir}/php.d/${mod}.ini
+%config(noreplace) %attr(644,root,root) %{_sysconfdir}/php.d/${ini}
 %if %{with_zts}
 %attr(755,root,root) %{_libdir}/php-zts/modules/${mod}.so
-%config(noreplace) %attr(644,root,root) %{_sysconfdir}/php-zts.d/${mod}.ini
+%config(noreplace) %attr(644,root,root) %{_sysconfdir}/php-zts.d/${ini}
 %endif
 EOF
 done
 
 # The dom, xsl and xml* modules are all packaged in php-xml
-cat files.dom files.xsl files.xml{reader,writer} files.wddx > files.xml
+cat files.dom files.xsl files.xml{reader,writer} files.wddx \
+    files.simplexml >> files.xml
 
 # The mysql and mysqli modules are both packaged in php-mysql
 %if %{with_libmysql}
@@ -1271,7 +1343,7 @@ cat files.pdo_odbc >> files.odbc
 cat files.pdo_firebird >> files.interbase
 
 # sysv* and posix in packaged in php-process
-cat files.sysv* files.posix > files.process
+cat files.shmop files.sysv* files.posix > files.process
 
 # Package sqlite3 and pdo_sqlite with pdo; isolating the sqlite dependency
 # isn't useful at this time since rpm itself requires sqlite.
@@ -1279,7 +1351,10 @@ cat files.pdo_sqlite >> files.pdo
 cat files.sqlite3 >> files.pdo
 
 # Package json, zip, curl, phar and fileinfo in -common.
-cat files.json files.curl files.phar files.fileinfo > files.common
+cat files.json files.curl files.phar files.fileinfo \
+    files.exif files.gettext files.iconv files.calendar \
+    files.ftp files.bz2 files.ctype files.sockets \
+    files.tokenizer > files.common
 %if %{with_zip}
 cat files.zip >> files.common
 %endif
@@ -1468,6 +1543,7 @@ fi
 %files soap -f files.soap
 %files bcmath -f files.bcmath
 %doc libbcmath_COPYING
+%files gmp -f files.gmp
 %files dba -f files.dba
 %files pdo -f files.pdo
 %files mcrypt -f files.mcrypt
@@ -1480,9 +1556,23 @@ fi
 %files interbase -f files.interbase
 %files enchant -f files.enchant
 %files mysqlnd -f files.mysqlnd
+%files opcache -f files.opcache
 
 
 %changelog
+* Fri Mar 22 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.1.beta1
+- update to 5.5.0beta1
+  http://fedoraproject.org/wiki/Features/Php55
+- new Zend OPcache extension in php-opccache new sub-package
+- don't display XFAIL tests in report
+- use xz compressed tarball
+- build simplexml and xml extensions shared (moved in php-xml)
+- build bz2, calendar, ctype, exif, ftp, gettext, iconv
+  sockets and tokenizer extensions shared (in php-common)
+- build gmp extension shared (in php-gmp new sub-package)
+- build shmop extension shared (moved in php-process)
+- drop some old compatibility provides (php-api, php-zend-abi, php-pecl-*)
+
 * Thu Mar 14 2013 Remi Collet <rcollet@redhat.com> 5.4.13-1
 - update to 5.4.13
 - security fix for CVE-2013-1643
