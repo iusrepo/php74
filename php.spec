@@ -273,13 +273,13 @@ extensions. If you need to compile your own PHP extensions, you will
 need to install this package.
 
 %package opcache
-Summary:   The Zend Optimizer+
+Summary:   The Zend OPcache
 Group:     Development/Languages
 License:   PHP
 Requires:  php-common%{?_isa} = %{version}-%{release}
-Obsoletes: php-pecl-zendoptimizerplus
-Provides:  php-pecl-zendoptimizerplus = %{opcachever}
-Provides:  php-pecl-zendoptimizerplus%{?_isa} = %{opcachever}
+Obsoletes: php-pecl-zendopcache
+Provides:  php-pecl-zendopcache = %{opcachever}
+Provides:  php-pecl-zendopcache%{?_isa} = %{opcachever}
 Provides:  php-pecl(opcache) = %{opcachever}
 Provides:  php-pecl(opcache)%{?_isa} = %{opcachever}
 # Only one opcode cache could be enabled
