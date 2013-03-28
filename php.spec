@@ -93,6 +93,7 @@ Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
 Patch8: php-5.4.7-libdb.patch
+Patch9: php-5.5.0-build.patch
 
 # Fixes for extension modules
 # https://bugs.php.net/63171 no odbc call during timeout
@@ -706,6 +707,7 @@ support for using the enchant library to PHP.
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
 %patch8 -p1 -b .libdb
+%patch9 -p1 -b .build
 
 %patch21 -p1 -b .odbctimer
 
