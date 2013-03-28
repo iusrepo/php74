@@ -3,7 +3,7 @@
 %global zendver     20121212
 %global pdover      20080721
 # Extension version
-%global opcachever  7.0.1-dev
+%global opcachever  7.0.2-dev
 
 # Adds -z now to the linker flags
 %global _hardened_build 1
@@ -61,12 +61,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver beta1
+%global rcver beta2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.1.%{rcver}%{?dist}
+Release: 0.2.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -93,8 +93,6 @@ Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
 Patch8: php-5.4.7-libdb.patch
-# revert to bison 2.4 generated parser
-Patch9: php-5.5.0-build.patch
 
 # Fixes for extension modules
 # https://bugs.php.net/63171 no odbc call during timeout
@@ -708,7 +706,6 @@ support for using the enchant library to PHP.
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
 %patch8 -p1 -b .libdb
-%patch9 -p1 -b .build
 
 %patch21 -p1 -b .odbctimer
 
@@ -1560,6 +1557,11 @@ fi
 
 
 %changelog
+* Thu Mar 28 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.2.beta2
+- update to 5.5.0beta2
+- Zend Optimizer+ renamed to Zend OPcache
+- sync provided configuration with upstream
+
 * Fri Mar 22 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.1.beta1
 - update to 5.5.0beta1
   http://fedoraproject.org/wiki/Features/Php55
