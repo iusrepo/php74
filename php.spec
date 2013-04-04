@@ -66,7 +66,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.2.%{rcver}%{?dist}
+Release: 0.3.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -873,9 +873,7 @@ ln -sf ../configure
 	--with-pcre-regex=%{_prefix} \
 	--with-zlib \
 	--with-layout=GNU \
-	--enable-magic-quotes \
 	--with-kerberos \
-	--enable-ucd-snmp-hack \
 	--with-libxml-dir=%{_prefix} \
 	--with-system-tzdata \
 	--with-mhash \
@@ -895,8 +893,7 @@ make %{?_smp_mflags}
 # Build /usr/bin/php-cgi with the CGI SAPI, and all the shared extensions
 pushd build-cgi
 
-build --enable-force-cgi-redirect \
-      --libdir=%{_libdir}/php \
+build --libdir=%{_libdir}/php \
       --enable-pcntl \
       --enable-opcache \
       --with-imap=shared --with-imap-ssl \
@@ -934,7 +931,6 @@ build --enable-force-cgi-redirect \
       --with-xsl=shared,%{_prefix} \
       --enable-xmlreader=shared --enable-xmlwriter=shared \
       --with-curl=shared,%{_prefix} \
-      --enable-fastcgi \
       --enable-pdo=shared \
       --with-pdo-odbc=shared,unixODBC,%{_prefix} \
       --with-pdo-mysql=shared,mysqlnd \
@@ -1020,8 +1016,7 @@ popd
 pushd build-ztscli
 
 EXTENSION_DIR=%{_libdir}/php-zts/modules
-build --enable-force-cgi-redirect \
-      --includedir=%{_includedir}/php-zts \
+build --includedir=%{_includedir}/php-zts \
       --libdir=%{_libdir}/php-zts \
       --enable-maintainer-zts \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d \
@@ -1063,7 +1058,6 @@ build --enable-force-cgi-redirect \
       --with-xsl=shared,%{_prefix} \
       --enable-xmlreader=shared --enable-xmlwriter=shared \
       --with-curl=shared,%{_prefix} \
-      --enable-fastcgi \
       --enable-pdo=shared \
       --with-pdo-odbc=shared,unixODBC,%{_prefix} \
       --with-pdo-mysql=shared,mysqlnd \
@@ -1559,6 +1553,9 @@ fi
 
 
 %changelog
+* Thu Apr  4 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.3.beta2
+- clean old deprecated options
+
 * Thu Mar 28 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.2.beta2
 - update to 5.5.0beta2
 - Zend Optimizer+ renamed to Zend OPcache
