@@ -61,12 +61,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver beta2
+%global rcver beta3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.3.%{rcver}%{?dist}
+Release: 0.4.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -87,13 +87,13 @@ Source9: php.modconf
 Source10: php.ztsmodconf
 # Configuration files for some extensions
 Source50: opcache.ini
+Source51: opcache-default.blacklist
 
 # Build fixes
 Patch5: php-5.2.0-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
 Patch8: php-5.4.7-libdb.patch
-Patch9: php-5.5.0-build.patch
 
 # Fixes for extension modules
 # https://bugs.php.net/63171 no odbc call during timeout
@@ -112,6 +112,8 @@ Patch45: php-5.4.8-ldap_r.patch
 Patch46: php-5.4.9-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.4.9-phpinfo.patch
+# Allow wildcard il opcache.backlist_filename
+Patch48: php-5.5.0-opcache.patch
 
 
 # Fixes for tests
@@ -287,7 +289,7 @@ Conflicts: php-xcache
 Conflicts: php-pecl-apc < 3.1.15
 
 %description opcache
-The Zend Optimizer+ provides faster PHP execution through opcode caching and
+The Zend OPcache provides faster PHP execution through opcode caching and
 optimization. It improves PHP performance by storing precompiled script
 bytecode in the shared memory. This eliminates the stages of reading code from
 the disk and compiling it on future access. In addition, it applies a few
@@ -465,15 +467,15 @@ The php-soap package contains a dynamic shared object that will add
 support to PHP for using the SOAP web services protocol.
 
 %package interbase
-Summary: 	A module for PHP applications that use Interbase/Firebird databases
-Group: 		Development/Languages
+Summary: A module for PHP applications that use Interbase/Firebird databases
+Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
 BuildRequires:  firebird-devel
-Requires: 	php-pdo%{?_isa} = %{version}-%{release}
-Provides: 	php_database
-Provides: 	php-firebird, php-firebird%{?_isa}
-Provides: 	php-pdo_firebird, php-pdo_firebird%{?_isa}
+Requires: php-pdo%{?_isa} = %{version}-%{release}
+Provides: php_database
+Provides: php-firebird, php-firebird%{?_isa}
+Provides: php-pdo_firebird, php-pdo_firebird%{?_isa}
 
 %description interbase
 The php-interbase package contains a dynamic shared object that will add
@@ -707,7 +709,6 @@ support for using the enchant library to PHP.
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
 %patch8 -p1 -b .libdb
-%patch9 -p1 -b .build
 
 %patch21 -p1 -b .odbctimer
 
@@ -722,6 +723,7 @@ support for using the enchant library to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
+%patch48 -p1 -b .opcache
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -853,34 +855,34 @@ mkdir Zend && cp ../Zend/zend_{language,ini}_{parser,scanner}.[ch] Zend
 
 ln -sf ../configure
 %configure \
-	--cache-file=../config.cache \
-	--with-libdir=%{_lib} \
-	--with-config-file-path=%{_sysconfdir} \
-	--with-config-file-scan-dir=%{_sysconfdir}/php.d \
-	--disable-debug \
-	--with-pic \
-	--disable-rpath \
-	--without-pear \
-	--with-exec-dir=%{_bindir} \
-	--with-freetype-dir=%{_prefix} \
-	--with-png-dir=%{_prefix} \
-	--with-xpm-dir=%{_prefix} \
-	--enable-gd-native-ttf \
-	--with-t1lib=%{_prefix} \
-	--without-gdbm \
-	--with-jpeg-dir=%{_prefix} \
-	--with-openssl \
-	--with-pcre-regex=%{_prefix} \
-	--with-zlib \
-	--with-layout=GNU \
-	--with-kerberos \
-	--with-libxml-dir=%{_prefix} \
-	--with-system-tzdata \
-	--with-mhash \
+    --cache-file=../config.cache \
+    --with-libdir=%{_lib} \
+    --with-config-file-path=%{_sysconfdir} \
+    --with-config-file-scan-dir=%{_sysconfdir}/php.d \
+    --disable-debug \
+    --with-pic \
+    --disable-rpath \
+    --without-pear \
+    --with-exec-dir=%{_bindir} \
+    --with-freetype-dir=%{_prefix} \
+    --with-png-dir=%{_prefix} \
+    --with-xpm-dir=%{_prefix} \
+    --enable-gd-native-ttf \
+    --with-t1lib=%{_prefix} \
+    --without-gdbm \
+    --with-jpeg-dir=%{_prefix} \
+    --with-openssl \
+    --with-pcre-regex=%{_prefix} \
+    --with-zlib \
+    --with-layout=GNU \
+    --with-kerberos \
+    --with-libxml-dir=%{_prefix} \
+    --with-system-tzdata \
+    --with-mhash \
 %if %{with_dtrace}
-	--enable-dtrace \
+    --enable-dtrace \
 %endif
-	$*
+    $*
 if test $? != 0; then 
   tail -500 config.log
   : configure failed
@@ -890,7 +892,7 @@ fi
 make %{?_smp_mflags}
 }
 
-# Build /usr/bin/php-cgi with the CGI SAPI, and all the shared extensions
+# Build /usr/bin/php-cgi with the CGI SAPI, and most shared extensions
 pushd build-cgi
 
 build --libdir=%{_libdir}/php \
@@ -1352,6 +1354,9 @@ cat files.json files.curl files.phar files.fileinfo \
 cat files.zip >> files.common
 %endif
 
+# The default Zend OPcache blacklist file
+install -m 644 %{SOURCE51} $RPM_BUILD_ROOT%{_sysconfdir}/php.d/opcache-default.blacklist
+
 # Install the macros file:
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
 sed -e "s/@PHP_APIVER@/%{apiver}%{isasuffix}/" \
@@ -1550,9 +1555,16 @@ fi
 %files enchant -f files.enchant
 %files mysqlnd -f files.mysqlnd
 %files opcache -f files.opcache
+%config(noreplace) %{_sysconfdir}/php.d/opcache-default.blacklist
 
 
 %changelog
+* Thu Apr 11 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.4.beta3
+- update to 5.5.0beta3
+- allow wildcard in opcache.blacklist_filename and provide
+  default /etc/php.d/opcache-default.blacklist
+- clean spec, use only spaces (no tab)
+
 * Thu Apr  4 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.3.beta2
 - clean old deprecated options
 
