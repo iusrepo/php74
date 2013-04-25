@@ -45,6 +45,9 @@
 
 %global with_dtrace 1
 
+# build with system libgd, not yet ready
+%global  with_libgd 0
+
 %if 0%{?fedora} < 17 && 0%{?rhel} < 7
 %global with_zip     0
 %global with_libzip  0
@@ -61,12 +64,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver beta3
+%global rcver beta4
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.4.%{rcver}%{?dist}
+Release: 0.5.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -105,15 +108,13 @@ Patch42: php-5.3.1-systzdata-v10.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
-Patch44: php-5.4.5-system-libzip.patch
+Patch44: php-5.5.0-system-libzip.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-5.4.8-ldap_r.patch
 # Make php_config.h constant across builds
 Patch46: php-5.4.9-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.4.9-phpinfo.patch
-# Allow wildcard il opcache.backlist_filename
-Patch48: php-5.5.0-opcache.patch
 
 
 # Fixes for tests
@@ -558,9 +559,17 @@ Group: Development/Languages
 # libgd is licensed under BSD
 License: PHP and BSD
 Requires: php-common%{?_isa} = %{version}-%{release}
+BuildRequires: t1lib-devel
+%if %{with_libgd}
+BuildRequires: gd-devel
+%else
 # Required to build the bundled GD library
-BuildRequires: libjpeg-devel, libpng-devel, freetype-devel
-BuildRequires: libXpm-devel, t1lib-devel
+BuildRequires: libjpeg-devel
+BuildRequires: libpng-devel
+BuildRequires: freetype-devel
+BuildRequires: libXpm-devel
+BuildRequires: libvpx-devel
+%endif
 
 %description gd
 The php-gd package contains a dynamic shared object that will add
@@ -723,7 +732,6 @@ support for using the enchant library to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
-%patch48 -p1 -b .opcache
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -867,6 +875,7 @@ ln -sf ../configure
     --with-freetype-dir=%{_prefix} \
     --with-png-dir=%{_prefix} \
     --with-xpm-dir=%{_prefix} \
+    --with-vpx-dir=%{_prefix} \
     --enable-gd-native-ttf \
     --with-t1lib=%{_prefix} \
     --without-gdbm \
@@ -901,7 +910,11 @@ build --libdir=%{_libdir}/php \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
       --enable-mbregex \
+%if %{with_libgd}
+      --with-gd=shared,%{_prefix} \
+%else
       --with-gd=shared \
+%endif
       --with-gmp=shared \
       --enable-calendar=shared \
       --enable-bcmath=shared \
@@ -1027,7 +1040,11 @@ build --includedir=%{_includedir}/php-zts \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
       --enable-mbregex \
+%if %{with_libgd}
+      --with-gd=shared,%{_prefix} \
+%else
       --with-gd=shared \
+%endif
       --with-gmp=shared \
       --enable-calendar=shared \
       --enable-bcmath=shared \
@@ -1289,10 +1306,8 @@ for mod in pgsql odbc ldap snmp xmlrpc imap \
     fi
     # some extensions have their own config file
     if [ -f ${ini} ]; then
-      sed -e 's:@EXTPATH@:%{_libdir}/php/modules:' \
-             ${ini} >$RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini}
-      sed -e 's:@EXTPATH@:%{_libdir}/php-zts/modules:' \
-             ${ini} >$RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/${ini}
+      cp -p ${ini} $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini}
+      cp -p ${ini} $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/${ini}
     else
       cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini} <<EOF
 ; Enable ${mod} extension module
@@ -1499,6 +1514,7 @@ fi
 %attr(770,apache,root) %dir %{_localstatedir}/log/php-fpm
 %dir /run/php-fpm
 %{_mandir}/man8/php-fpm.8*
+%dir %{_datadir}/fpm
 %{_datadir}/fpm/status.html
 %endif
 
@@ -1559,6 +1575,14 @@ fi
 
 
 %changelog
+* Thu Apr 25 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.5.beta4
+- update to 5.5.0beta4
+- zend_extension doesn't requires full path
+- refresh patch for system libzip
+- drop opcache patch merged upstream
+- add BuildRequires libvpx-devel for WebP support in php-gd
+- php-fpm own /usr/share/fpm
+
 * Thu Apr 11 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.4.beta3
 - update to 5.5.0beta3
 - allow wildcard in opcache.blacklist_filename and provide
