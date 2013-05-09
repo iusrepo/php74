@@ -22,6 +22,8 @@
 
 %global with_fpm      1
 
+%global with_json     1
+
 # Build mysql/mysqli/pdo extensions using libmysqlclient or only mysqlnd
 %global with_libmysql 0
 
@@ -51,11 +53,9 @@
 %if 0%{?fedora} < 17 && 0%{?rhel} < 7
 %global with_zip     0
 %global with_libzip  0
-%global zipmod       %nil
 %else
 %global with_zip     1
 %global with_libzip  1
-%global zipmod       zip
 %endif
 
 %if 0%{?fedora} < 18 && 0%{?rhel} < 7
@@ -64,12 +64,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver beta4
+%global rcver RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.5.%{rcver}%{?dist}
+Release: 0.6.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -135,7 +135,6 @@ BuildRequires: libzip-devel >= 0.10
 BuildRequires: systemtap-sdt-devel
 %endif
 
-Obsoletes: php-dbg, php3, phpfi, stronghold-php
 %if %{with_zts}
 Obsoletes: php-zts < 5.3.7
 Provides: php-zts = %{version}-%{release}
@@ -235,7 +234,6 @@ Provides: php-gettext, php-gettext%{?_isa}
 Provides: php-hash, php-hash%{?_isa}
 Provides: php-mhash = %{version}, php-mhash%{?_isa} = %{version}
 Provides: php-iconv, php-iconv%{?_isa}
-Provides: php-json, php-json%{?_isa}
 Provides: php-libxml, php-libxml%{?_isa}
 Provides: php-openssl, php-openssl%{?_isa}
 Provides: php-phar, php-phar%{?_isa}
@@ -246,12 +244,17 @@ Provides: php-sockets, php-sockets%{?_isa}
 Provides: php-spl, php-spl%{?_isa}
 Provides: php-standard = %{version}, php-standard%{?_isa} = %{version}
 Provides: php-tokenizer, php-tokenizer%{?_isa}
+%if %{with_json}
+Provides: php-json, php-json%{?_isa}
+Obsoletes: php-pecl-json < 1.2.2
+%endif
 %if %{with_zip}
 Provides: php-zip, php-zip%{?_isa}
-Obsoletes: php-pecl-zip
+Obsoletes: php-pecl-zip < 1.11
 %endif
 Provides: php-zlib, php-zlib%{?_isa}
-Obsoletes: php-openssl, php-pecl-json, php-json, php-pecl-phar, php-pecl-Fileinfo
+Obsoletes: php-pecl-phar < 1.2.4
+Obsoletes: php-pecl-Fileinfo < 1.0.5
 Obsoletes: php-mhash < 5.3.0
 
 %description common
@@ -263,7 +266,6 @@ Group: Development/Libraries
 Summary: Files needed for building PHP extensions
 Requires: php-cli%{?_isa} = %{version}-%{release}, autoconf, automake
 Requires: pcre-devel%{?_isa}
-Obsoletes: php-pecl-pdo-devel
 %if %{with_zts}
 Provides: php-zts-devel = %{version}-%{release}
 Provides: php-zts-devel%{?_isa} = %{version}-%{release}
@@ -302,17 +304,12 @@ Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
-Obsoletes: mod_php3-imap, stronghold-php-imap
 BuildRequires: krb5-devel, openssl-devel, libc-client-devel
 
 %description imap
-The php-imap package contains a dynamic shared object (DSO) for the
-Apache Web server. When compiled into Apache, the php-imap module will
-add IMAP (Internet Message Access Protocol) support to PHP. IMAP is a
-protocol for retrieving and uploading e-mail messages on mail
-servers. PHP is an HTML-embedded scripting language. If you need IMAP
-support for PHP applications, you will need to install this package
-and the php package.
+The php-imap module will add IMAP (Internet Message Access Protocol)
+support to PHP. IMAP is a protocol for retrieving and uploading e-mail
+messages on mail servers. PHP is an HTML-embedded scripting language.
 
 %package ldap
 Summary: A module for PHP applications that use LDAP
@@ -320,16 +317,13 @@ Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
-Obsoletes: mod_php3-ldap, stronghold-php-ldap
 BuildRequires: cyrus-sasl-devel, openldap-devel, openssl-devel
 
 %description ldap
-The php-ldap package is a dynamic shared object (DSO) for the Apache
-Web server that adds Lightweight Directory Access Protocol (LDAP)
+The php-ldap adds Lightweight Directory Access Protocol (LDAP)
 support to PHP. LDAP is a set of protocols for accessing directory
 services over the Internet. PHP is an HTML-embedded scripting
-language. If you need LDAP support for PHP applications, you will
-need to install this package in addition to the php package.
+language.
 
 %package pdo
 Summary: A database access abstraction module for PHP applications
@@ -337,7 +331,6 @@ Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
-Obsoletes: php-pecl-pdo-sqlite, php-pecl-pdo
 # ABI/API check - Arch specific
 Provides: php-pdo-abi = %{pdover}%{isasuffix}
 Provides: php-sqlite3, php-sqlite3%{?_isa}
@@ -360,7 +353,6 @@ Provides: php_database
 Provides: php-mysqli = %{version}-%{release}
 Provides: php-mysqli%{?_isa} = %{version}-%{release}
 Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
-Obsoletes: mod_php3-mysql, stronghold-php-mysql
 BuildRequires: mysql-devel >= 4.1.0
 Conflicts: php-mysqlnd
 
@@ -405,13 +397,11 @@ License: PHP
 Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-pdo_pgsql, php-pdo_pgsql%{?_isa}
-Obsoletes: mod_php3-pgsql, stronghold-php-pgsql
 BuildRequires: krb5-devel, openssl-devel, postgresql-devel
 
 %description pgsql
-The php-pgsql package includes a dynamic shared object (DSO) that can
-be compiled in to the Apache Web server to add PostgreSQL database
-support to PHP. PostgreSQL is an object-relational database management
+The php-pgsql package add PostgreSQL database support to PHP.
+PostgreSQL is an object-relational database management
 system that supports almost all SQL constructs. PHP is an
 HTML-embedded scripting language. If you need back-end support for
 PostgreSQL, you should install this package in addition to the main
@@ -443,7 +433,6 @@ License: PHP
 Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-pdo_odbc, php-pdo_odbc%{?_isa}
-Obsoletes: stronghold-php-odbc
 BuildRequires: unixODBC-devel
 
 %description odbc
@@ -511,7 +500,6 @@ Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
-Obsoletes: php-domxml, php-dom
 Provides: php-dom, php-dom%{?_isa}
 Provides: php-domxml, php-domxml%{?_isa}
 Provides: php-simplexml, php-simplexml%{?_isa}
@@ -953,7 +941,11 @@ build --libdir=%{_libdir}/php \
       --with-pdo-sqlite=shared,%{_prefix} \
       --with-pdo-dblib=shared,%{_prefix} \
       --with-sqlite3=shared,%{_prefix} \
+%if %{with_json}
       --enable-json=shared \
+%else
+      --disable-json
+%endif
 %if %{with_zip}
       --enable-zip=shared \
 %endif
@@ -1084,7 +1076,11 @@ build --includedir=%{_includedir}/php-zts \
       --with-pdo-sqlite=shared,%{_prefix} \
       --with-pdo-dblib=shared,%{_prefix} \
       --with-sqlite3=shared,%{_prefix} \
+%if %{with_json}
       --enable-json=shared \
+%else
+      --disable-json
+%endif
 %if %{with_zip}
       --enable-zip=shared \
 %endif
@@ -1290,13 +1286,19 @@ for mod in pgsql odbc ldap snmp xmlrpc imap \
     mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
     simplexml bz2 calendar ctype exif ftp gettext gmp iconv \
     sockets tokenizer opcache \
-    pdo pdo_pgsql pdo_odbc pdo_sqlite json %{zipmod} \
+    pdo pdo_pgsql pdo_odbc pdo_sqlite \
     sqlite3  interbase pdo_firebird \
     enchant phar fileinfo intl \
     mcrypt tidy pdo_dblib mssql pspell curl wddx \
     posix shmop sysvshm sysvsem sysvmsg recode xml \
+%if %{with_json}
+    json \
+%endif
 %if %{with_libmysql}
     mysql mysqli pdo_mysql \
+%endif
+%if %{with_zip}
+    zip \
 %endif
     ; do
     # for extension load order
@@ -1361,10 +1363,13 @@ cat files.pdo_sqlite >> files.pdo
 cat files.sqlite3 >> files.pdo
 
 # Package json, zip, curl, phar and fileinfo in -common.
-cat files.json files.curl files.phar files.fileinfo \
+cat files.curl files.phar files.fileinfo \
     files.exif files.gettext files.iconv files.calendar \
     files.ftp files.bz2 files.ctype files.sockets \
     files.tokenizer > files.common
+%if %{with_json}
+cat files.json >> files.common
+%endif
 %if %{with_zip}
 cat files.zip >> files.common
 %endif
@@ -1575,6 +1580,12 @@ fi
 
 
 %changelog
+* Wed May  8 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.6.RC1
+- update to 5.5.0RC1
+- remove reference to apache in some sub-packages description
+- add option to disable json extension
+- drop most (very old) "Obsoletes", add version to others
+
 * Thu Apr 25 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.5.beta4
 - update to 5.5.0beta4
 - zend_extension doesn't requires full path
