@@ -1,8 +1,13 @@
+# It's not recommended to modify this file in-place, because it will be
+# overwritten during package upgrades.  If you want to customize, the
+# best way is to create a file "/etc/systemd/system/php-fpm.service".
+
 [Unit]
 Description=The PHP FastCGI Process Manager
 After=syslog.target network.target
 
 [Service]
+Type=notify
 PIDFile=/run/php-fpm/php-fpm.pid
 EnvironmentFile=/etc/sysconfig/php-fpm
 ExecStart=/usr/sbin/php-fpm --nodaemonize

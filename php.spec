@@ -64,12 +64,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver RC1
+%global rcver RC2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.6.%{rcver}%{?dist}
+Release: 0.7.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -192,6 +192,7 @@ License: PHP and Zend and BSD
 Requires: php-common%{?_isa} = %{version}-%{release}
 Requires(pre): /usr/sbin/useradd
 BuildRequires: systemd-units
+BuildRequires: systemd-devel
 Requires: systemd-units
 Requires(post): systemd-units
 Requires(preun): systemd-units
@@ -1003,6 +1004,7 @@ popd
 # Build php-fpm
 pushd build-fpm
 build --enable-fpm \
+      --with-fpm-systemd \
       --libdir=%{_libdir}/php \
       --without-mysql \
       --disable-pdo \
@@ -1268,6 +1270,7 @@ mv $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.conf.default .
 install -m 755 -d $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d
 install -m 644 php-fpm.tmpfiles $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d/php-fpm.conf
 # install systemd unit files and scripts for handling server startup
+install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/php-fpm.service.d
 install -m 755 -d $RPM_BUILD_ROOT%{_unitdir}
 install -m 644 %{SOURCE6} $RPM_BUILD_ROOT%{_unitdir}/
 # LogRotate
@@ -1514,6 +1517,7 @@ fi
 %{_prefix}/lib/tmpfiles.d/php-fpm.conf
 %{_unitdir}/php-fpm.service
 %{_sbindir}/php-fpm
+%dir %{_sysconfdir}/systemd/system/php-fpm.service.d
 %dir %{_sysconfdir}/php-fpm.d
 # log owned by apache for log
 %attr(770,apache,root) %dir %{_localstatedir}/log/php-fpm
@@ -1580,6 +1584,13 @@ fi
 
 
 %changelog
+* Thu May 23 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.7.RC2
+- update to 5.5.0RC2
+- add missing options in php-fpm.conf
+- run php-fpm in systemd notify mode
+- /etc/syconfig/php-fpm is deprecated (still used)
+- add /systemd/system/php-fpm.service.d
+
 * Wed May  8 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.6.RC1
 - update to 5.5.0RC1
 - remove reference to apache in some sub-packages description
