@@ -64,12 +64,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver RC2
+%global rcver RC3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.7.%{rcver}%{?dist}
+Release: 0.8.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1584,6 +1584,9 @@ fi
 
 
 %changelog
+* Thu Jun  6 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.8.RC3
+- update to 5.5.0RC3
+
 * Thu May 23 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.7.RC2
 - update to 5.5.0RC2
 - add missing options in php-fpm.conf
