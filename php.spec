@@ -47,8 +47,12 @@
 
 %global with_dtrace 1
 
-# build with system libgd, not yet ready
+# build with system libgd
+%if 0%{?fedora} < 20
 %global  with_libgd 0
+%else
+%global  with_libgd 1
+%endif
 
 %if 0%{?fedora} < 17 && 0%{?rhel} < 7
 %global with_zip     0
@@ -69,7 +73,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.8.%{rcver}%{?dist}
+Release: 0.9.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -544,13 +548,17 @@ support for multi-byte string handling to PHP.
 %package gd
 Summary: A module for PHP applications for using the gd graphics library
 Group: Development/Languages
-# All files licensed under PHP version 3.01, except
-# libgd is licensed under BSD
+# All files licensed under PHP version 3.01
+%if %{with_libgd}
+License: PHP
+%else
+# bundled libgd is licensed under BSD
 License: PHP and BSD
+%endif
 Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: t1lib-devel
 %if %{with_libgd}
-BuildRequires: gd-devel
+BuildRequires: gd-devel >= 2.1.0
 %else
 # Required to build the bundled GD library
 BuildRequires: libjpeg-devel
@@ -726,8 +734,10 @@ support for using the enchant library to PHP.
 cp Zend/LICENSE Zend/ZEND_LICENSE
 cp TSRM/LICENSE TSRM_LICENSE
 cp ext/ereg/regex/COPYRIGHT regex_COPYRIGHT
+%if ! %{with_libgd}
 cp ext/gd/libgd/README libgd_README
 cp ext/gd/libgd/COPYING libgd_COPYING
+%endif
 cp sapi/fpm/LICENSE fpm_LICENSE
 cp ext/mbstring/libmbfl/LICENSE libmbfl_LICENSE
 cp ext/mbstring/oniguruma/COPYING oniguruma_COPYING
@@ -1561,8 +1571,10 @@ fi
 %doc oniguruma_COPYING
 %doc ucgendat_LICENSE
 %files gd -f files.gd
+%if ! %{with_libgd}
 %doc libgd_README
 %doc libgd_COPYING
+%endif
 %files soap -f files.soap
 %files bcmath -f files.bcmath
 %doc libbcmath_COPYING
@@ -1584,6 +1596,9 @@ fi
 
 
 %changelog
+* Tue Jun 11 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.9.RC3
+- build with system GD >= 2.1.0
+
 * Thu Jun  6 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.8.RC3
 - update to 5.5.0RC3
 
