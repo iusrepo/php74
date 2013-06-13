@@ -962,7 +962,7 @@ build --libdir=%{_libdir}/php \
 %if %{with_json}
       --enable-json=shared \
 %else
-      --disable-json
+      --disable-json \
 %endif
 %if %{with_zip}
       --enable-zip=shared \
@@ -1098,7 +1098,7 @@ build --includedir=%{_includedir}/php-zts \
 %if %{with_json}
       --enable-json=shared \
 %else
-      --disable-json
+      --disable-json \
 %endif
 %if %{with_zip}
       --enable-zip=shared \
