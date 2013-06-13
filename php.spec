@@ -22,7 +22,7 @@
 
 %global with_fpm      1
 
-%global with_json     1
+%global with_json     0
 
 # Build mysql/mysqli/pdo extensions using libmysqlclient or only mysqlnd
 %global with_libmysql 0
@@ -73,7 +73,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.9.%{rcver}%{?dist}
+Release: 0.10.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -252,6 +252,9 @@ Provides: php-tokenizer, php-tokenizer%{?_isa}
 %if %{with_json}
 Provides: php-json, php-json%{?_isa}
 Obsoletes: php-pecl-json < 1.2.2
+%else
+# Temporary circular dep (to remove for bootstrap)
+Requires: php-pecl-jsonc%{?_isa}
 %endif
 %if %{with_zip}
 Provides: php-zip, php-zip%{?_isa}
@@ -274,6 +277,10 @@ Requires: pcre-devel%{?_isa}
 %if %{with_zts}
 Provides: php-zts-devel = %{version}-%{release}
 Provides: php-zts-devel%{?_isa} = %{version}-%{release}
+%endif
+%if ! %{with_json}
+# Temporary circular dep (to remove for bootstrap)
+Requires: php-pecl-jsonc-devel%{?_isa}
 %endif
 
 %description devel
@@ -1596,6 +1603,9 @@ fi
 
 
 %changelog
+* Thu Jun 13 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.10.RC3
+- drop JSON extension
+
 * Tue Jun 11 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.9.RC3
 - build with system GD >= 2.1.0
 
