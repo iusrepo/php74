@@ -20,10 +20,6 @@
 # arch detection heuristic used by bindir/mysql_config.
 %global mysql_config %{_libdir}/mysql/mysql_config
 
-%global with_fpm      1
-
-%global with_json     0
-
 # Build mysql/mysqli/pdo extensions using libmysqlclient or only mysqlnd
 %global with_libmysql 0
 
@@ -81,7 +77,10 @@ License: PHP and Zend and BSD
 Group: Development/Languages
 URL: http://www.php.net/
 
-Source0: http://www.php.net/distributions/php-%{version}%{?rcver}.tar.xz
+# Need to download official tarball and strip non-free stuff
+# wget http://www.php.net/distributions/php-%{version}%{?rcver}.tar.xz
+# ./strip.sh %{version}
+Source0: php-%{version}%{?rcver}-strip.tar.xz
 Source1: php.conf
 Source2: php.ini
 Source3: macros.php
@@ -92,6 +91,7 @@ Source7: php-fpm.logrotate
 Source8: php-fpm.sysconfig
 Source9: php.modconf
 Source10: php.ztsmodconf
+Source11: strip.sh
 # Configuration files for some extensions
 Source50: opcache.ini
 Source51: opcache-default.blacklist
@@ -185,7 +185,6 @@ The php-cli package contains the command-line interface
 executing PHP scripts, /usr/bin/php, and the CGI interface.
 
 
-%if %{with_fpm}
 %package fpm
 Group: Development/Languages
 Summary: PHP FastCGI Process Manager
@@ -201,16 +200,11 @@ Requires: systemd-units
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
-# This is actually needed for the %%triggerun script but Requires(triggerun)
-# is not valid.  We can use %%post because this particular %%triggerun script
-# should fire just after this package is installed.
-Requires(post): systemd-sysv
 
 %description fpm
 PHP-FPM (FastCGI Process Manager) is an alternative PHP FastCGI
 implementation with some additional features useful for sites of
 any size, especially busier sites.
-%endif
 
 %package common
 Group: Development/Languages
@@ -249,13 +243,8 @@ Provides: php-sockets, php-sockets%{?_isa}
 Provides: php-spl, php-spl%{?_isa}
 Provides: php-standard = %{version}, php-standard%{?_isa} = %{version}
 Provides: php-tokenizer, php-tokenizer%{?_isa}
-%if %{with_json}
-Provides: php-json, php-json%{?_isa}
-Obsoletes: php-pecl-json < 1.2.2
-%else
 # Temporary circular dep (to remove for bootstrap)
 Requires: php-pecl-jsonc%{?_isa}
-%endif
 %if %{with_zip}
 Provides: php-zip, php-zip%{?_isa}
 Obsoletes: php-pecl-zip < 1.11
@@ -278,10 +267,8 @@ Requires: pcre-devel%{?_isa}
 Provides: php-zts-devel = %{version}-%{release}
 Provides: php-zts-devel%{?_isa} = %{version}-%{release}
 %endif
-%if ! %{with_json}
 # Temporary circular dep (to remove for bootstrap)
 Requires: php-pecl-jsonc-devel%{?_isa}
-%endif
 
 %description devel
 The php-devel package contains the files needed for building PHP
@@ -758,9 +745,7 @@ mkdir build-cgi build-apache build-embedded \
 %if %{with_zts}
     build-zts build-ztscli \
 %endif
-%if %{with_fpm}
     build-fpm
-%endif
 
 # ----- Manage known as failed test -------
 # affected by systzdata patch
@@ -959,11 +944,6 @@ build --libdir=%{_libdir}/php \
       --with-pdo-sqlite=shared,%{_prefix} \
       --with-pdo-dblib=shared,%{_prefix} \
       --with-sqlite3=shared,%{_prefix} \
-%if %{with_json}
-      --enable-json=shared \
-%else
-      --disable-json \
-%endif
 %if %{with_zip}
       --enable-zip=shared \
 %endif
@@ -993,7 +973,7 @@ without_shared="--without-gd \
       --disable-opcache \
       --disable-xmlreader --disable-xmlwriter \
       --without-sqlite3 --disable-phar --disable-fileinfo \
-      --disable-json --without-pspell --disable-wddx \
+      --without-pspell --disable-wddx \
       --without-curl --disable-posix --disable-xml \
       --disable-simplexml --disable-exif --without-gettext \
       --without-iconv --disable-ftp --without-bz2 --disable-ctype \
@@ -1017,7 +997,6 @@ build --with-apxs2=%{_httpd_apxs} \
       ${without_shared}
 popd
 
-%if %{with_fpm}
 # Build php-fpm
 pushd build-fpm
 build --enable-fpm \
@@ -1027,7 +1006,6 @@ build --enable-fpm \
       --disable-pdo \
       ${without_shared}
 popd
-%endif
 
 # Build for inclusion as embedded script language into applications,
 # /usr/lib[64]/libphp5.so
@@ -1095,11 +1073,6 @@ build --includedir=%{_includedir}/php-zts \
       --with-pdo-sqlite=shared,%{_prefix} \
       --with-pdo-dblib=shared,%{_prefix} \
       --with-sqlite3=shared,%{_prefix} \
-%if %{with_json}
-      --enable-json=shared \
-%else
-      --disable-json \
-%endif
 %if %{with_zip}
       --enable-zip=shared \
 %endif
@@ -1206,11 +1179,9 @@ mv $RPM_BUILD_ROOT%{_bindir}/php-config $RPM_BUILD_ROOT%{_bindir}/zts-php-config
 make -C build-embedded install-sapi install-headers \
      INSTALL_ROOT=$RPM_BUILD_ROOT
 
-%if %{with_fpm}
 # Install the php-fpm binary
 make -C build-fpm install-fpm \
      INSTALL_ROOT=$RPM_BUILD_ROOT
-%endif
 
 # Install everything from the CGI SAPI build
 make -C build-cgi install \
@@ -1273,7 +1244,6 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d
 install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php
 install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
 
-%if %{with_fpm}
 # PHP-FPM stuff
 # Log
 install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/log/php-fpm
@@ -1296,7 +1266,7 @@ install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
 # Environment file
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
 install -m 644 %{SOURCE8} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/php-fpm
-%endif
+
 # Fix the link
 (cd $RPM_BUILD_ROOT%{_bindir}; ln -sfn phar.phar phar)
 
@@ -1311,9 +1281,6 @@ for mod in pgsql odbc ldap snmp xmlrpc imap \
     enchant phar fileinfo intl \
     mcrypt tidy pdo_dblib mssql pspell curl wddx \
     posix shmop sysvshm sysvsem sysvmsg recode xml \
-%if %{with_json}
-    json \
-%endif
 %if %{with_libmysql}
     mysql mysqli pdo_mysql \
 %endif
@@ -1382,14 +1349,11 @@ cat files.shmop files.sysv* files.posix > files.process
 cat files.pdo_sqlite >> files.pdo
 cat files.sqlite3 >> files.pdo
 
-# Package json, zip, curl, phar and fileinfo in -common.
+# Package zip, curl, phar and fileinfo in -common.
 cat files.curl files.phar files.fileinfo \
     files.exif files.gettext files.iconv files.calendar \
     files.ftp files.bz2 files.ctype files.sockets \
     files.tokenizer > files.common
-%if %{with_json}
-cat files.json >> files.common
-%endif
 %if %{with_zip}
 cat files.zip >> files.common
 %endif
@@ -1421,7 +1385,6 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
 rm -f README.{Zeus,QNX,CVS-RULES}
 
 
-%if %{with_fpm}
 %pre fpm
 # Add the "apache" user as we don't require httpd
 getent group  apache >/dev/null || \
@@ -1432,52 +1395,13 @@ getent passwd apache >/dev/null || \
 exit 0
 
 %post fpm
-%if 0%{?systemd_post:1}
 %systemd_post php-fpm.service
-%else
-if [ $1 = 1 ]; then
-    # Initial installation
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-%endif
 
 %preun fpm
-%if 0%{?systemd_preun:1}
 %systemd_preun php-fpm.service
-%else
-if [ $1 = 0 ]; then
-    # Package removal, not upgrade
-    /bin/systemctl --no-reload disable php-fpm.service >/dev/null 2>&1 || :
-    /bin/systemctl stop php-fpm.service >/dev/null 2>&1 || :
-fi
-%endif
 
 %postun fpm
-%if 0%{?systemd_postun_with_restart:1}
 %systemd_postun_with_restart php-fpm.service
-%else
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ]; then
-    # Package upgrade, not uninstall
-    /bin/systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
-fi
-%endif
-
-# Handle upgrading from SysV initscript to native systemd unit.
-# We can tell if a SysV version of php-fpm was previously installed by
-# checking to see if the initscript is present.
-%triggerun fpm -- php-fpm
-if [ -f /etc/rc.d/init.d/php-fpm ]; then
-    # Save the current service runlevel info
-    # User must manually run systemd-sysv-convert --apply php-fpm
-    # to migrate them to systemd targets
-    /usr/bin/systemd-sysv-convert --save php-fpm >/dev/null 2>&1 || :
-
-    # Run these because the SysV package being removed won't do them
-    /sbin/chkconfig --del php-fpm >/dev/null 2>&1 || :
-    /bin/systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
-fi
-%endif
 
 %post embedded -p /sbin/ldconfig
 %postun embedded -p /sbin/ldconfig
@@ -1523,7 +1447,6 @@ fi
 %{_mandir}/man1/phpize.1*
 %doc sapi/cgi/README* sapi/cli/README
 
-%if %{with_fpm}
 %files fpm
 %doc php-fpm.conf.default
 %doc fpm_LICENSE
@@ -1542,7 +1465,6 @@ fi
 %{_mandir}/man8/php-fpm.8*
 %dir %{_datadir}/fpm
 %{_datadir}/fpm/status.html
-%endif
 
 %files devel
 %{_bindir}/php-config
@@ -1603,6 +1525,11 @@ fi
 
 
 %changelog
+* Fri Jun 14 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.11.RC3
+- also drop JSON from sources
+- clean conditional for JSON (as removed from the sources)
+- clean conditional for FPM (always build)
+
 * Thu Jun 13 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.10.RC3
 - drop JSON extension
 
