@@ -64,12 +64,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver RC3
+#global rcver RC3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.0
-Release: 0.11.%{rcver}%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1525,6 +1525,9 @@ exit 0
 
 
 %changelog
+* Thu Jun 20 2013 Remi Collet <rcollet@redhat.com> 5.5.0-1
+- update to 5.5.0 final
+
 * Fri Jun 14 2013 Remi Collet <rcollet@redhat.com> 5.5.0-0.11.RC3
 - also drop JSON from sources
 - clean conditional for JSON (as removed from the sources)
