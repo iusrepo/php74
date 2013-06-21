@@ -1125,8 +1125,8 @@ popd
 %check
 %if %runselftest
 
-# Double stack size (required by bug54268.phpt)
-ulimit -s 16384
+# Increase stack size (required by bug54268.phpt)
+ulimit -s 32712
 
 cd build-apache
 # Run tests, using the CLI SAPI
