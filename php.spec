@@ -1541,7 +1541,7 @@ exit 0
 - add Provides: php(pdo-abi), for consistency with php(api)
   and php(zend-abi)
 - improved description for mod_php
-- fix ZTS configuration (blacklists in /etc/php-zts.d)
+- fix opcache ZTS configuration (blacklists in /etc/php-zts.d)
 - add missing man pages (phar, php-cgi)
 
 * Fri Jul 12 2013 Remi Collet <rcollet@redhat.com> - 5.5.0-2
