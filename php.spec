@@ -68,8 +68,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.0
-Release: 2%{?dist}
+Version: 5.5.1
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -121,7 +121,6 @@ Patch46: php-5.4.9-fixheader.patch
 Patch47: php-5.4.9-phpinfo.patch
 
 # Security fixes
-Patch60: php-5.5.0-CVE-2013-4013.patch
 
 # Fixes for tests
 
@@ -728,7 +727,6 @@ support for using the enchant library to PHP.
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
 
-%patch60 -p1 -b .cve4113
 
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
@@ -1366,6 +1364,9 @@ cat files.zip >> files.common
 
 # The default Zend OPcache blacklist file
 install -m 644 %{SOURCE51} $RPM_BUILD_ROOT%{_sysconfdir}/php.d/opcache-default.blacklist
+install -m 644 %{SOURCE51} $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/opcache-default.blacklist
+sed -e '/blacklist_filename/s/php.d/php-zts.d/' \
+    -i $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/opcache.ini
 
 # Install the macros file:
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
@@ -1450,6 +1451,9 @@ exit 0
 # provides phpize here (not in -devel) for pecl command
 %{_bindir}/phpize
 %{_mandir}/man1/php.1*
+%{_mandir}/man1/php-cgi.1*
+%{_mandir}/man1/phar.1*
+%{_mandir}/man1/phar.phar.1*
 %{_mandir}/man1/phpize.1*
 %doc sapi/cgi/README* sapi/cli/README
 
@@ -1528,9 +1532,18 @@ exit 0
 %files mysqlnd -f files.mysqlnd
 %files opcache -f files.opcache
 %config(noreplace) %{_sysconfdir}/php.d/opcache-default.blacklist
+%config(noreplace) %{_sysconfdir}/php-zts.d/opcache-default.blacklist
 
 
 %changelog
+* Mon Jul 22 2013 Remi Collet <rcollet@redhat.com> - 5.5.1-1
+- update to 5.5.1
+- add Provides: php(pdo-abi), for consistency with php(api)
+  and php(zend-abi)
+- improved description for mod_php
+- fix ZTS configuration (blacklists in /etc/php-zts.d)
+- add missing man pages (phar, php-cgi)
+
 * Fri Jul 12 2013 Remi Collet <rcollet@redhat.com> - 5.5.0-2
 - add security fix for CVE-2013-4113
 - add missing ASL 1.0 license
@@ -2062,7 +2075,7 @@ exit 0
 - rebuild for libc-client bump
 
 * Wed Dec 05 2007 Release Engineering <rel-eng at fedoraproject dot org> - 5.2.5-3
- - Rebuild for openssl bump
+- Rebuild for openssl bump
 
 * Wed Dec  5 2007 Joe Orton <jorton@redhat.com> 5.2.5-2
 - update to 5.2.5
