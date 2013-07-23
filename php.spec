@@ -693,7 +693,7 @@ The php-intl package contains a dynamic shared object that will add
 support for using the ICU library to PHP.
 
 %package enchant
-Summary: Human Language and Character Encoding Support
+Summary: Enchant spelling extension for PHP applications
 Group: System Environment/Libraries
 # All files licensed under PHP version 3.0
 License: PHP
@@ -701,7 +701,7 @@ Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: enchant-devel >= 1.2.4
 
 %description enchant
-The php-intl package contains a dynamic shared object that will add
+The php-enchant package contains a dynamic shared object that will add
 support for using the enchant library to PHP.
 
 
