@@ -69,7 +69,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1536,6 +1536,9 @@ exit 0
 
 
 %changelog
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.5.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Mon Jul 22 2013 Remi Collet <rcollet@redhat.com> - 5.5.1-1
 - update to 5.5.1
 - add Provides: php(pdo-abi), for consistency with php(api)
