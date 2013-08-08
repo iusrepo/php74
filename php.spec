@@ -69,7 +69,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -135,6 +135,7 @@ BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 BuildRequires: libtool-ltdl-devel
 %if %{with_libzip}
 BuildRequires: libzip-devel >= 0.10
+BuildRequires: libzip-devel <  0.11
 %endif
 %if %{with_dtrace}
 BuildRequires: systemtap-sdt-devel
@@ -1536,6 +1537,9 @@ exit 0
 
 
 %changelog
+* Thu Aug 08 2013 Remi Collet <rcollet@redhat.com> - 5.5.1-3
+- improve system libzip patch
+
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.5.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
