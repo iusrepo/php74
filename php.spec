@@ -3,7 +3,7 @@
 %global zendver     20121212
 %global pdover      20080721
 # Extension version
-%global opcachever  7.0.2-dev
+%global opcachever  7.0.3-dev
 
 # Adds -z now to the linker flags
 %global _hardened_build 1
@@ -68,8 +68,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.1
-Release: 3%{?dist}
+Version: 5.5.2
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -112,7 +112,7 @@ Patch42: php-5.3.1-systzdata-v10.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use system libzip instead of bundled one
-Patch44: php-5.5.0-system-libzip.patch
+Patch44: php-5.5.2-system-libzip.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-5.4.8-ldap_r.patch
 # Make php_config.h constant across builds
@@ -1537,6 +1537,9 @@ exit 0
 
 
 %changelog
+* Mon Aug 19 2013 Remi Collet <rcollet@redhat.com> - 5.5.2-1
+- update to 5.5.1, fixes for CVE-2011-4718 + CVE-2013-4248
+
 * Thu Aug 08 2013 Remi Collet <rcollet@redhat.com> - 5.5.1-3
 - improve system libzip patch
 
