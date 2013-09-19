@@ -68,7 +68,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.3
+Version: 5.5.4
 Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -848,8 +848,7 @@ build() {
 mkdir Zend && cp ../Zend/zend_{language,ini}_{parser,scanner}.[ch] Zend
 
 # Always static:
-# date, filter, libxml, reflection, spl: not supported
-# ereg: build options vary per SAPI
+# date, ereg, filter, libxml, reflection, spl: not supported
 # hash: for PHAR_SIG_SHA256 and PHAR_SIG_SHA512
 # session: dep on hash, used by soap and wddx
 # pcre: used by filter, zip
@@ -1539,6 +1538,12 @@ exit 0
 
 
 %changelog
+* Thu Sep 19 2013 Remi Collet <rcollet@redhat.com> - 5.5.4-1
+- update to 5.5.4
+- improve security, use specific soap.wsdl_cache_dir
+  use /var/lib/php/wsdlcache for mod_php and php-fpm
+- sync short_tag comments in php.ini with upstream
+
 * Wed Aug 21 2013 Remi Collet <rcollet@redhat.com> - 5.5.3-1
 - update to 5.5.3
 - fix typo and add missing entries in php.ini
