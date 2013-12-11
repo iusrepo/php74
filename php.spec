@@ -68,7 +68,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.6
+Version: 5.5.7
 Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -119,6 +119,14 @@ Patch45: php-5.4.8-ldap_r.patch
 Patch46: php-5.4.9-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.4.9-phpinfo.patch
+
+# Upstream fixes
+# 66060 Heap buffer over-read in DateInterval
+Patch100: php-bug66060.patch
+# 66218 zend_register_functions breaks reflection
+Patch101: php-bug66218.patch
+# Zend: fix overflow handling bug in non-x86
+Patch102: php-bugarm.patch
 
 # Security fixes
 
@@ -727,6 +735,10 @@ support for using the enchant library to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
+
+%patch100 -p1 -b .bug66060
+%patch101 -p1 -b .bug66218
+%patch102 -p1 -b .bugarm
 
 
 # Prevent %%doc confusion over LICENSE files
@@ -1538,6 +1550,12 @@ exit 0
 
 
 %changelog
+* Wed Dec 11 2013 Remi Collet <rcollet@redhat.com> 5.5.7-1
+- update to 5.5.7, fix for CVE-2013-6420
+- fix zend_register_functions breaks reflection, php bug 66218
+- fix Heap buffer over-read in DateInterval, php bug 66060
+- fix fix overflow handling bug in non-x86
+
 * Wed Nov 13 2013 Remi Collet <remi@fedoraproject.org> 5.5.6-1
 - update to 5.5.6
 
