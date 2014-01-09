@@ -68,7 +68,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.7
+Version: 5.5.8
 Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -121,12 +121,6 @@ Patch46: php-5.4.9-fixheader.patch
 Patch47: php-5.4.9-phpinfo.patch
 
 # Upstream fixes
-# 66060 Heap buffer over-read in DateInterval
-Patch100: php-bug66060.patch
-# 66218 zend_register_functions breaks reflection
-Patch101: php-bug66218.patch
-# Zend: fix overflow handling bug in non-x86
-Patch102: php-bugarm.patch
 
 # Security fixes
 
@@ -296,10 +290,6 @@ Provides:  php-pecl-zendopcache = %{opcachever}
 Provides:  php-pecl-zendopcache%{?_isa} = %{opcachever}
 Provides:  php-pecl(opcache) = %{opcachever}
 Provides:  php-pecl(opcache)%{?_isa} = %{opcachever}
-# Only one opcode cache could be enabled
-Conflicts: php-xcache
-# APC 3.1.15 offer an option to disable opcache
-Conflicts: php-pecl-apc < 3.1.15
 
 %description opcache
 The Zend OPcache provides faster PHP execution through opcode caching and
@@ -735,10 +725,6 @@ support for using the enchant library to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
-
-%patch100 -p1 -b .bug66060
-%patch101 -p1 -b .bug66218
-%patch102 -p1 -b .bugarm
 
 
 # Prevent %%doc confusion over LICENSE files
@@ -1550,6 +1536,11 @@ exit 0
 
 
 %changelog
+* Wed Jan  8 2014 Remi Collet <rcollet@redhat.com> 5.5.8-1
+- update to 5.5.8
+- drop conflicts with other opcode caches as both can
+  be used only for user data cache
+
 * Wed Dec 11 2013 Remi Collet <rcollet@redhat.com> 5.5.7-1
 - update to 5.5.7, fix for CVE-2013-6420
 - fix zend_register_functions breaks reflection, php bug 66218
