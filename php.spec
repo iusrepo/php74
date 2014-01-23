@@ -34,7 +34,7 @@
 
 # /usr/sbin/apsx with httpd < 2.4 and defined as /usr/bin/apxs with httpd >= 2.4
 %{!?_httpd_apxs:       %{expand: %%global _httpd_apxs       %%{_sbindir}/apxs}}
-%{!?_httpd_mmn:        %{expand: %%global _httpd_mmn        %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo missing-httpd-devel)}}
+%{!?_httpd_mmn:        %{expand: %%global _httpd_mmn        %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo 0-0)}}
 %{!?_httpd_confdir:    %{expand: %%global _httpd_confdir    %%{_sysconfdir}/httpd/conf.d}}
 # /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
 %{!?_httpd_modconfdir: %{expand: %%global _httpd_modconfdir %%{_sysconfdir}/httpd/conf.d}}
@@ -69,7 +69,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1536,6 +1536,9 @@ exit 0
 
 
 %changelog
+* Thu Jan 23 2014 Joe Orton <jorton@redhat.com> - 5.5.8-2
+- fix _httpd_mmn expansion in absence of httpd-devel
+
 * Wed Jan  8 2014 Remi Collet <rcollet@redhat.com> 5.5.8-1
 - update to 5.5.8
 - drop conflicts with other opcode caches as both can
