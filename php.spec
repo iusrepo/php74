@@ -3,7 +3,7 @@
 %global zendver     20121212
 %global pdover      20080721
 # Extension version
-%global opcachever  7.0.3-dev
+%global opcachever  7.0.3
 
 # Adds -z now to the linker flags
 %global _hardened_build 1
@@ -68,8 +68,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.8
-Release: 2%{?dist}
+Version: 5.5.9
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1368,7 +1368,6 @@ sed -e '/blacklist_filename/s/php.d/php-zts.d/' \
     -i $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/opcache.ini
 
 # Install the macros file:
-install -d $RPM_BUILD_ROOT%{_sysconfdir}/rpm
 sed -e "s/@PHP_APIVER@/%{apiver}%{isasuffix}/" \
     -e "s/@PHP_ZENDVER@/%{zendver}%{isasuffix}/" \
     -e "s/@PHP_PDOVER@/%{pdover}%{isasuffix}/" \
@@ -1377,8 +1376,8 @@ sed -e "s/@PHP_APIVER@/%{apiver}%{isasuffix}/" \
     -e "/zts/d" \
 %endif
     < %{SOURCE3} > macros.php
-install -m 644 -c macros.php \
-           $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.php
+install -m 644 -D macros.php \
+           $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d/macros.php
 
 # Remove unpackaged files
 rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
@@ -1489,7 +1488,7 @@ exit 0
 %{_libdir}/php-zts/build
 %endif
 %{_mandir}/man1/php-config.1*
-%{_sysconfdir}/rpm/macros.php
+%{_rpmconfigdir}/macros.d/macros.php
 
 %files embedded
 %{_libdir}/libphp5.so
@@ -1536,6 +1535,11 @@ exit 0
 
 
 %changelog
+* Tue Feb 11 2014 Remi Collet <remi@fedoraproject.org> 5.5.9-1
+- Update to 5.5.9
+  http://www.php.net/ChangeLog-5.php#5.5.9
+- Install macros to /usr/lib/rpm/macros.d
+
 * Thu Jan 23 2014 Joe Orton <jorton@redhat.com> - 5.5.8-2
 - fix _httpd_mmn expansion in absence of httpd-devel
 
