@@ -69,7 +69,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.9
-Release: 1%{?dist}
+Release: 1%{?dist}.1
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1535,6 +1535,9 @@ exit 0
 
 
 %changelog
+* Thu Feb 13 2014 Remi Collet <remi@fedoraproject.org> 5.5.9-1.1
+- rebuild
+
 * Tue Feb 11 2014 Remi Collet <remi@fedoraproject.org> 5.5.9-1
 - Update to 5.5.9
   http://www.php.net/ChangeLog-5.php#5.5.9
