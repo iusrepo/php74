@@ -69,7 +69,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.9
-Release: 1%{?dist}.1
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -121,6 +121,7 @@ Patch46: php-5.4.9-fixheader.patch
 Patch47: php-5.4.9-phpinfo.patch
 
 # Upstream fixes
+Patch100: php-bug66731.patch
 
 # Security fixes
 
@@ -725,6 +726,8 @@ support for using the enchant library to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
+
+%patch100 -p1 -b .bug66731
 
 
 # Prevent %%doc confusion over LICENSE files
@@ -1535,6 +1538,9 @@ exit 0
 
 
 %changelog
+* Tue Feb 18 2014 Remi Collet <rcollet@redhat.com> 5.5.9-2
+- upstream patch for https://bugs.php.net/66731
+
 * Thu Feb 13 2014 Remi Collet <remi@fedoraproject.org> 5.5.9-1.1
 - rebuild
 
