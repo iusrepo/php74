@@ -68,8 +68,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.9
-Release: 2%{?dist}
+Version: 5.5.10
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -120,12 +120,13 @@ Patch46: php-5.4.9-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.4.9-phpinfo.patch
 
-# Upstream fixes
-Patch100: php-bug66731.patch
+# Upstream fixes (100+)
 
-# Security fixes
+# Security fixes (200+)
 
-# Fixes for tests
+# Fixes for tests (300+)
+# Revert changes for pcre 8.34
+Patch301: php-5.5.10-pcre834.patch
 
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9
@@ -727,7 +728,10 @@ support for using the enchant library to PHP.
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
 
-%patch100 -p1 -b .bug66731
+%if 0%{?fedora} < 21
+# Only revert when system libpcre < 8.34
+%patch301 -p1 -R -b .pcre84
+%endif
 
 
 # Prevent %%doc confusion over LICENSE files
@@ -1462,6 +1466,8 @@ exit 0
 %files fpm
 %doc php-fpm.conf.default
 %doc fpm_LICENSE
+%attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
+%attr(0770,root,apache) %dir %{_localstatedir}/lib/php/wsdlcache
 %config(noreplace) %{_sysconfdir}/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/php-fpm.d/www.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/php-fpm
@@ -1538,6 +1544,12 @@ exit 0
 
 
 %changelog
+* Thu Mar  6 2014 Remi Collet <rcollet@redhat.com> 5.5.10-1
+- Update to 5.5.10
+  http://www.php.net/ChangeLog-5.php#5.5.10
+- php-fpm should own /var/lib/php/session and wsdlcache
+- fix pcre test results with libpcre < 8.34
+
 * Tue Feb 18 2014 Remi Collet <rcollet@redhat.com> 5.5.9-2
 - upstream patch for https://bugs.php.net/66731
 
