@@ -3,7 +3,7 @@
 %global zendver     20121212
 %global pdover      20080721
 # Extension version
-%global opcachever  7.0.3
+%global opcachever  7.0.4-dev
 
 # Adds -z now to the linker flags
 %global _hardened_build 1
@@ -68,7 +68,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.10
+Version: 5.5.11
 Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -794,7 +794,7 @@ if test "x${vpdo}" != "x%{pdover}"; then
 fi
 
 # Check for some extension version
-ver=$(sed -n '/#define ACCELERATOR_VERSION /{s/.* "//;s/".*$//;p}' ext/opcache/ZendAccelerator.h)
+ver=$(sed -n '/#define PHP_ZENDOPCACHE_VERSION /{s/.* "//;s/".*$//;p}' ext/opcache/ZendAccelerator.h)
 if test "$ver" != "%{opcachever}"; then
    : Error: Upstream PHAR version is now ${ver}, expecting %{opcachever}.
    : Update the opcachever macro and rebuild.
@@ -1544,6 +1544,10 @@ exit 0
 
 
 %changelog
+* Thu Apr  3 2014 Remi Collet <rcollet@redhat.com> 5.5.11-1
+- Update to 5.5.11
+  http://www.php.net/ChangeLog-5.php#5.5.11
+
 * Thu Mar  6 2014 Remi Collet <rcollet@redhat.com> 5.5.10-1
 - Update to 5.5.10
   http://www.php.net/ChangeLog-5.php#5.5.10
