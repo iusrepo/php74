@@ -69,7 +69,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -820,7 +820,7 @@ chmod 644 README.*
 echo "d /run/php-fpm 755 root root" >php-fpm.tmpfiles
 
 # Some extensions have their own configuration file
-cp %{SOURCE50} .
+cp %{SOURCE50} 10-opcache.ini
 
 
 %build
@@ -1298,11 +1298,17 @@ for mod in pgsql odbc ldap snmp xmlrpc imap \
     zip \
 %endif
     ; do
-    # for extension load order
-    if [ "$mod" = "wddx" ]
-    then   ini=xml_${mod}.ini
-    else   ini=${mod}.ini
-    fi
+    case $mod in
+      opcache)
+        # Zend extensions
+        ini=10-${mod}.ini;;
+      pdo_*|mysqlnd_*|wddx|xmlreader|xmlrpc)
+        # Extensions with dependencies on 20-*
+        ini=30-${mod}.ini;;
+      *)
+        # Extensions with no dependency
+        ini=20-${mod}.ini;;
+    esac
     # some extensions have their own config file
     if [ -f ${ini} ]; then
       cp -p ${ini} $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini}
@@ -1372,7 +1378,7 @@ cat files.zip >> files.common
 install -m 644 %{SOURCE51} $RPM_BUILD_ROOT%{_sysconfdir}/php.d/opcache-default.blacklist
 install -m 644 %{SOURCE51} $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/opcache-default.blacklist
 sed -e '/blacklist_filename/s/php.d/php-zts.d/' \
-    -i $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/opcache.ini
+    -i $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/10-opcache.ini
 
 # Install the macros file:
 sed -e "s/@PHP_APIVER@/%{apiver}%{isasuffix}/" \
@@ -1544,6 +1550,11 @@ exit 0
 
 
 %changelog
+* Wed Apr 23 2014 Remi Collet <rcollet@redhat.com> 5.5.11-2
+- add numerical prefix to extension configuration files
+- prevent .user.ini files from being viewed by Web clients
+- load php directives only when mod_php is active
+
 * Thu Apr  3 2014 Remi Collet <rcollet@redhat.com> 5.5.11-1
 - Update to 5.5.11
   http://www.php.net/ChangeLog-5.php#5.5.11
