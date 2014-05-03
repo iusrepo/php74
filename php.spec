@@ -68,8 +68,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.11
-Release: 2%{?dist}
+Version: 5.5.12
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1550,6 +1550,11 @@ exit 0
 
 
 %changelog
+* Sat May  3 2014 Remi Collet <rcollet@redhat.com> 5.5.12-1
+- Update to 5.5.12
+  http://www.php.net/releases/5_5_12.php
+- php-fpm: change default unix socket permission CVE-2014-0185
+
 * Wed Apr 23 2014 Remi Collet <rcollet@redhat.com> 5.5.11-2
 - add numerical prefix to extension configuration files
 - prevent .user.ini files from being viewed by Web clients
