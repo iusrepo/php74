@@ -1553,6 +1553,7 @@ exit 0
 * Fri May 30 2014 Remi Collet <rcollet@redhat.com> 5.5.13-1
 - Update to 5.5.13
   http://www.php.net/releases/5_5_13.php
+- sync php.ini with upstream php.ini-production
 
 * Sat May  3 2014 Remi Collet <rcollet@redhat.com> 5.5.12-1
 - Update to 5.5.12
