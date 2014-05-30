@@ -68,7 +68,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.12
+Version: 5.5.13
 Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -1550,6 +1550,10 @@ exit 0
 
 
 %changelog
+* Fri May 30 2014 Remi Collet <rcollet@redhat.com> 5.5.13-1
+- Update to 5.5.13
+  http://www.php.net/releases/5_5_13.php
+
 * Sat May  3 2014 Remi Collet <rcollet@redhat.com> 5.5.12-1
 - Update to 5.5.12
   http://www.php.net/releases/5_5_12.php
