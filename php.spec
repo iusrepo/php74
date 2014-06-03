@@ -69,7 +69,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.5.13
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -121,6 +121,8 @@ Patch46: php-5.4.9-fixheader.patch
 Patch47: php-5.4.9-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch100: php-reg67072.patch
+Patch101: php-bug67326.patch
 
 # Security fixes (200+)
 
@@ -727,6 +729,9 @@ support for using the enchant library to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
+
+%patch100 -p1 -b .reg67072
+%patch101 -p1 -b .bug67326
 
 %if 0%{?fedora} < 21
 # Only revert when system libpcre < 8.34
@@ -1550,6 +1555,11 @@ exit 0
 
 
 %changelog
+* Tue Jun  3 2014 Remi Collet <remi@fedoraproject.org> 5.5.13-2
+- fileinfo: fix insufficient boundary check
+- workaround regression introduce in fix for 67072 in
+  serialize/unzerialize functions
+
 * Fri May 30 2014 Remi Collet <rcollet@redhat.com> 5.5.13-1
 - Update to 5.5.13
   http://www.php.net/releases/5_5_13.php
