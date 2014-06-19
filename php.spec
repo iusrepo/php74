@@ -1,20 +1,27 @@
 # API/ABI check
-%global apiver      20121113
-%global zendver     20121212
+%global apiver      20131106
+%global zendver     20131226
 %global pdover      20080721
 # Extension version
 %global opcachever  7.0.4-dev
+
+# Use for first build of PHP (before pecl/zip and pecl/jsonc)
+%global php_bootstrap   1
 
 # Adds -z now to the linker flags
 %global _hardened_build 1
 
 # version used for php embedded library soname
-%global embed_version 5.5
+%global embed_version 5.6
 
 %global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
 # Regression tests take a long time, you can skip 'em with this
-%{!?runselftest: %{expand: %%global runselftest 1}}
+%if %{php_bootstrap}
+%global runselftest 0
+%else
+%{!?runselftest: %global runselftest 1}
+%endif
 
 # Use the arch-specific mysql_config binary to avoid mismatch with the
 # arch detection heuristic used by bindir/mysql_config.
@@ -50,13 +57,8 @@
 %global  with_libgd 1
 %endif
 
-%if 0%{?fedora} == 17 || 0%{?fedora} == 18 || 0%{?fedora} == 19 || 0%{?rhel} == 7
-%global with_zip     1
-%global with_libzip  1
-%else
 %global with_zip     0
 %global with_libzip  0
-%endif
 
 %if 0%{?fedora} < 18 && 0%{?rhel} < 7
 %global db_devel  db4-devel
@@ -64,12 +66,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver RC3
+%global rcver         RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.5.13
-Release: 3%{?dist}
+Version: 5.6.0
+Release: 0.0.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -111,8 +113,6 @@ Patch40: php-5.4.0-dlopen.patch
 Patch42: php-5.3.1-systzdata-v10.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
-# Use system libzip instead of bundled one
-Patch44: php-5.5.2-system-libzip.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-5.4.8-ldap_r.patch
 # Make php_config.h constant across builds
@@ -121,15 +121,14 @@ Patch46: php-5.4.9-fixheader.patch
 Patch47: php-5.4.9-phpinfo.patch
 
 # Upstream fixes (100+)
-Patch100: php-reg67072.patch
-Patch101: php-bug67326.patch
-Patch102: php-reg67118.patch
 
 # Security fixes (200+)
 
 # Fixes for tests (300+)
-# Revert changes for pcre 8.34
-Patch301: php-5.5.10-pcre834.patch
+# Revert changes for pcre < 8.34
+Patch301: php-5.6.0-oldpcre.patch
+# see https://bugzilla.redhat.com/971416
+Patch302: php-5.6.0-noNO.patch
 
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9
@@ -141,8 +140,7 @@ BuildRequires: pcre-devel >= 6.6
 BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
 BuildRequires: libtool-ltdl-devel
 %if %{with_libzip}
-BuildRequires: libzip-devel >= 0.10
-BuildRequires: libzip-devel <  0.11
+BuildRequires: libzip-devel >= 0.11
 %endif
 %if %{with_dtrace}
 BuildRequires: systemtap-sdt-devel
@@ -162,12 +160,13 @@ Requires: php-cli%{?_isa} = %{version}-%{release}
 # To ensure correct /var/lib/php/session ownership:
 Requires(pre): httpd
 
-
+%if 0%{?fedora} < 20
 # Don't provides extensions, which are not shared library, as .so
 %{?filter_provides_in: %filter_provides_in %{_libdir}/php/modules/.*\.so$}
 %{?filter_provides_in: %filter_provides_in %{_libdir}/php-zts/modules/.*\.so$}
 %{?filter_provides_in: %filter_provides_in %{_httpd_moddir}/.*\.so$}
 %{?filter_setup}
+%endif
 
 
 %description
@@ -176,7 +175,7 @@ easy for developers to write dynamically generated web pages. PHP also
 offers built-in database integration for several commercial and
 non-commercial database management systems, so writing a
 database-enabled webpage with PHP is fairly simple. The most common
-use of PHP coding is probably as a replacement for CGI scripts. 
+use of PHP coding is probably as a replacement for CGI scripts.
 
 The php package contains the module (often referred to as mod_php)
 which adds support for the PHP language to Apache HTTP Server.
@@ -190,8 +189,17 @@ Provides: php-pcntl, php-pcntl%{?_isa}
 Provides: php-readline, php-readline%{?_isa}
 
 %description cli
-The php-cli package contains the command-line interface 
+The php-cli package contains the command-line interface
 executing PHP scripts, /usr/bin/php, and the CGI interface.
+
+
+%package dbg
+Group: Development/Languages
+Summary: The interactive PHP debugger
+Requires: php-common%{?_isa} = %{version}-%{release}
+
+%description dbg
+The php-dbg package contains the interactive PHP debugger.
 
 
 %package fpm
@@ -253,8 +261,9 @@ Provides: php-sockets, php-sockets%{?_isa}
 Provides: php-spl, php-spl%{?_isa}
 Provides: php-standard = %{version}, php-standard%{?_isa} = %{version}
 Provides: php-tokenizer, php-tokenizer%{?_isa}
-# Temporary circular dep (to remove for bootstrap)
+%if ! %{php_bootstrap}
 Requires: php-pecl-jsonc%{?_isa}
+%endif
 %if %{with_zip}
 Provides: php-zip, php-zip%{?_isa}
 Obsoletes: php-pecl-zip < 1.11
@@ -277,8 +286,9 @@ Requires: pcre-devel%{?_isa}
 Provides: php-zts-devel = %{version}-%{release}
 Provides: php-zts-devel%{?_isa} = %{version}-%{release}
 %endif
-# Temporary circular dep (to remove for bootstrap)
+%if ! %{php_bootstrap}
 Requires: php-pecl-jsonc-devel%{?_isa}
+%endif
 
 %description devel
 The php-devel package contains the files needed for building PHP
@@ -345,7 +355,7 @@ Provides: php-pdo_sqlite, php-pdo_sqlite%{?_isa}
 %description pdo
 The php-pdo package contains a dynamic shared object that will add
 a database access abstraction layer to PHP.  This module provides
-a common interface for accessing MySQL, PostgreSQL or other 
+a common interface for accessing MySQL, PostgreSQL or other
 databases.
 
 %if %{with_libmysql}
@@ -478,11 +488,11 @@ The php-interbase package contains a dynamic shared object that will add
 database support through Interbase/Firebird to PHP.
 
 InterBase is the name of the closed-source variant of this RDBMS that was
-developed by Borland/Inprise. 
+developed by Borland/Inprise.
 
-Firebird is a commercially independent project of C and C++ programmers, 
-technical advisors and supporters developing and enhancing a multi-platform 
-relational database management system based on the source code released by 
+Firebird is a commercially independent project of C and C++ programmers,
+technical advisors and supporters developing and enhancing a multi-platform
+relational database management system based on the source code released by
 Inprise Corp (now known as Borland Software Corp) under the InterBase Public
 License.
 
@@ -712,6 +722,9 @@ support for using the enchant library to PHP.
 %prep
 %setup -q -n php-%{version}%{?rcver}
 
+# ensure than current httpd use prefork MPM.
+httpd -V  | grep -q 'threaded:.*yes' && exit 1
+
 %patch5 -p1 -b .includedir
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
@@ -722,23 +735,22 @@ support for using the enchant library to PHP.
 %patch40 -p1 -b .dlopen
 %patch42 -p1 -b .systzdata
 %patch43 -p1 -b .headers
-%if %{with_libzip}
-%patch44 -p1 -b .systzip
-%endif
 %if 0%{?fedora} >= 18 || 0%{?rhel} >= 7
 %patch45 -p1 -b .ldap_r
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
 
-%patch100 -p1 -b .reg67072
-%patch101 -p1 -b .bug67326
-%patch102 -p1 -b .reg67118
+# upstream patches
 
+# security patches
+
+# Fixes for tests
 %if 0%{?fedora} < 21
-# Only revert when system libpcre < 8.34
-%patch301 -p1 -R -b .pcre84
+# Only apply when system libpcre < 8.34
+%patch301 -p1 -b .pcre834
 %endif
+%patch302 -p0 -b .971416
 
 
 # Prevent %%doc confusion over LICENSE files
@@ -766,9 +778,11 @@ mkdir build-cgi build-apache build-embedded \
 
 # ----- Manage known as failed test -------
 # affected by systzdata patch
-rm -f ext/date/tests/timezone_location_get.phpt
+rm ext/date/tests/timezone_location_get.phpt
 # fails sometime
-rm -f ext/sockets/tests/mcast_ipv?_recv.phpt
+rm ext/sockets/tests/mcast_ipv?_recv.phpt
+# cause stack exhausion
+rm Zend/tests/bug54268.phpt
 
 # Safety check for API version change.
 pver=$(sed -n '/#define PHP_VERSION /{s/.* "//;s/".*$//;p}' main/php_version.h)
@@ -803,7 +817,7 @@ fi
 # Check for some extension version
 ver=$(sed -n '/#define PHP_ZENDOPCACHE_VERSION /{s/.* "//;s/".*$//;p}' ext/opcache/ZendAccelerator.h)
 if test "$ver" != "%{opcachever}"; then
-   : Error: Upstream PHAR version is now ${ver}, expecting %{opcachever}.
+   : Error: Upstream OPCACHE version is now ${ver}, expecting %{opcachever}.
    : Update the opcachever macro and rebuild.
    exit 1
 fi
@@ -899,7 +913,7 @@ ln -sf ../configure
     --enable-dtrace \
 %endif
     $*
-if test $? != 0; then 
+if test $? != 0; then
   tail -500 config.log
   : configure failed
   exit 1
@@ -914,6 +928,7 @@ pushd build-cgi
 build --libdir=%{_libdir}/php \
       --enable-pcntl \
       --enable-opcache \
+      --enable-phpdbg \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
       --enable-mbregex \
@@ -1140,11 +1155,8 @@ popd
 
 %check
 %if %runselftest
-
-# Increase stack size (required by bug54268.phpt)
-ulimit -s 32712
-
 cd build-apache
+
 # Run tests, using the CLI SAPI
 export NO_INTERACTION=1 REPORT_EXIT_STATUS=1 MALLOC_CHECK_=2
 export SKIP_ONLINE_TESTS=1
@@ -1249,7 +1261,6 @@ install -D -m 644 %{SOURCE9} $RPM_BUILD_ROOT%{_httpd_modconfdir}/10-php.conf
 %if %{with_zts}
 cat %{SOURCE10} >>$RPM_BUILD_ROOT%{_httpd_modconfdir}/10-php.conf
 %endif
-
 install -D -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
 %endif
 
@@ -1294,15 +1305,16 @@ for mod in pgsql odbc ldap snmp xmlrpc imap \
     simplexml bz2 calendar ctype exif ftp gettext gmp iconv \
     sockets tokenizer opcache \
     pdo pdo_pgsql pdo_odbc pdo_sqlite \
-    sqlite3  interbase pdo_firebird \
+%if %{with_zip}
+    zip \
+%endif
+    interbase pdo_firebird \
+    sqlite3 \
     enchant phar fileinfo intl \
     mcrypt tidy pdo_dblib mssql pspell curl wddx \
     posix shmop sysvshm sysvsem sysvmsg recode xml \
 %if %{with_libmysql}
     mysql mysqli pdo_mysql \
-%endif
-%if %{with_zip}
-    zip \
 %endif
     ; do
     case $mod in
@@ -1464,6 +1476,9 @@ exit 0
 
 %files cli
 %{_bindir}/php
+%if %{with_zts}
+%{_bindir}/zts-php
+%endif
 %{_bindir}/php-cgi
 %{_bindir}/phar.phar
 %{_bindir}/phar
@@ -1475,6 +1490,10 @@ exit 0
 %{_mandir}/man1/phar.phar.1*
 %{_mandir}/man1/phpize.1*
 %doc sapi/cgi/README* sapi/cli/README
+
+%files dbg
+%{_bindir}/phpdbg
+%doc sapi/phpdbg/{README.md,CREDITS}
 
 %files fpm
 %doc php-fpm.conf.default
@@ -1505,8 +1524,6 @@ exit 0
 %{_bindir}/zts-php-config
 %{_includedir}/php-zts
 %{_bindir}/zts-phpize
-# usefull only to test other module during build
-%{_bindir}/zts-php
 %{_libdir}/php-zts/build
 %endif
 %{_mandir}/man1/php-config.1*
@@ -1557,6 +1574,13 @@ exit 0
 
 
 %changelog
+* Thu Jun 19 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.1.RC1
+- php 5.6.0RC1
+  https://fedoraproject.org/wiki/Changes/Php56
+- add php-dbg subpackage
+- update php.ini and opcache.ini from upstream production template
+- move zts-php to php-cli
+
 * Thu Jun  5 2014 Remi Collet <rcollet@redhat.com> 5.5.13-3
 - fix regression introduce in fix for #67118
 
