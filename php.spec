@@ -71,7 +71,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.0
-Release: 0.1.%{rcver}%{?dist}
+Release: 0.2.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -119,8 +119,11 @@ Patch45: php-5.4.8-ldap_r.patch
 Patch46: php-5.4.9-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.4.9-phpinfo.patch
+# temporary fix (from 5.4/5.5) for unserialize/mock
+Patch48: php-5.6.0-mock.patch
 
 # Upstream fixes (100+)
+Patch100: php-phpdbg.patch
 
 # Security fixes (200+)
 
@@ -740,8 +743,10 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
+%patch48 -p1 -b .mock
 
 # upstream patches
+%patch100 -p0 -b .libedit
 
 # security patches
 
@@ -1574,6 +1579,10 @@ exit 0
 
 
 %changelog
+* Mon Jun 23 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.2.RC1
+- fix phpdbg with libedit https://bugs.php.net/67499
+- add workaround for unserialize/mock issue from 5.4/5.5
+
 * Thu Jun 19 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.1.RC1
 - php 5.6.0RC1
   https://fedoraproject.org/wiki/Changes/Php56
