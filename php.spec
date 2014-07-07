@@ -66,12 +66,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver         RC1
+%global rcver         RC2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.0
-Release: 0.2.%{rcver}%{?dist}
+Release: 0.3.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -123,7 +123,8 @@ Patch47: php-5.4.9-phpinfo.patch
 Patch48: php-5.6.0-mock.patch
 
 # Upstream fixes (100+)
-Patch100: php-phpdbg.patch
+Patch100: php-man.patch
+Patch101: php-syslog.patch
 
 # Security fixes (200+)
 
@@ -746,7 +747,8 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch48 -p1 -b .mock
 
 # upstream patches
-%patch100 -p0 -b .libedit
+%patch100 -p1 -b .manpath
+%patch101 -p1 -b .syslog
 
 # security patches
 
@@ -1499,6 +1501,7 @@ exit 0
 %files dbg
 %{_bindir}/phpdbg
 %doc sapi/phpdbg/{README.md,CREDITS}
+%{_mandir}/man1/phpdbg.1*
 
 %files fpm
 %doc php-fpm.conf.default
@@ -1579,6 +1582,9 @@ exit 0
 
 
 %changelog
+* Mon Jul  7 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.3.RC2
+- php 5.6.0RC2
+
 * Mon Jun 23 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.2.RC1
 - fix phpdbg with libedit https://bugs.php.net/67499
 - add workaround for unserialize/mock issue from 5.4/5.5
