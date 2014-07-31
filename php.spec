@@ -66,12 +66,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver         RC2
+%global rcver         RC3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.0
-Release: 0.3.%{rcver}%{?dist}
+Release: 0.4.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1582,6 +1582,9 @@ exit 0
 
 
 %changelog
+* Thu Jul 31 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.4.RC3
+- php 5.6.0RC3
+
 * Mon Jul  7 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.3.RC2
 - php 5.6.0RC2
 
