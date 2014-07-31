@@ -62,7 +62,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.0
-Release: 0.4.%{rcver}%{?dist}
+Release: 0.5.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -207,7 +207,8 @@ Requires(postun): systemd-units
 # To ensure correct /var/lib/php/session ownership:
 Requires(pre): httpd-filesystem
 # For php.conf in /etc/httpd/conf.d
-Requires: httpd-filesystem
+# and version 2.4.10 for proxy support in SetHandler
+Requires: httpd-filesystem >= 2.4.10
 
 %description fpm
 PHP-FPM (FastCGI Process Manager) is an alternative PHP FastCGI
@@ -1468,6 +1469,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Jul 31 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.5.RC3
+- fpm requires httpd >= 2.4.10 for proxy support in SetHandler
+
 * Thu Jul 31 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.4.RC3
 - php 5.6.0RC3
 - cleanup with_libmysql
