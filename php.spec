@@ -123,8 +123,6 @@ Patch47: php-5.4.9-phpinfo.patch
 Patch48: php-5.6.0-mock.patch
 
 # Upstream fixes (100+)
-Patch100: php-man.patch
-Patch101: php-syslog.patch
 
 # Security fixes (200+)
 
@@ -747,8 +745,6 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch48 -p1 -b .mock
 
 # upstream patches
-%patch100 -p1 -b .manpath
-%patch101 -p1 -b .syslog
 
 # security patches
 
