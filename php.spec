@@ -1022,6 +1022,8 @@ EXTENSION_DIR=%{_libdir}/php-zts/modules
 build --includedir=%{_includedir}/php-zts \
       --libdir=%{_libdir}/php-zts \
       --enable-maintainer-zts \
+      --program-prefix=zts- \
+      --disable-cgi \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d \
       --enable-pcntl \
       --enable-opcache \
@@ -1142,11 +1144,6 @@ unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 # Install the extensions for the ZTS version
 make -C build-ztscli install \
      INSTALL_ROOT=$RPM_BUILD_ROOT
-
-# rename ZTS binary
-mv $RPM_BUILD_ROOT%{_bindir}/php        $RPM_BUILD_ROOT%{_bindir}/zts-php
-mv $RPM_BUILD_ROOT%{_bindir}/phpize     $RPM_BUILD_ROOT%{_bindir}/zts-phpize
-mv $RPM_BUILD_ROOT%{_bindir}/php-config $RPM_BUILD_ROOT%{_bindir}/zts-php-config
 %endif
 
 # Install the version for embedded script language in applications + php_embed.h
@@ -1408,6 +1405,7 @@ exit 0
 # provides phpize here (not in -devel) for pecl command
 %{_bindir}/phpize
 %{_mandir}/man1/php.1*
+%{_mandir}/man1/zts-php.1*
 %{_mandir}/man1/php-cgi.1*
 %{_mandir}/man1/phar.1*
 %{_mandir}/man1/phar.phar.1*
@@ -1446,9 +1444,11 @@ exit 0
 %{_libdir}/php/build
 %if %{with_zts}
 %{_bindir}/zts-php-config
-%{_includedir}/php-zts
 %{_bindir}/zts-phpize
+%{_includedir}/php-zts
 %{_libdir}/php-zts/build
+%{_mandir}/man1/zts-php-config.1*
+%{_mandir}/man1/zts-phpize.1*
 %endif
 %{_mandir}/man1/php-config.1*
 %{_rpmconfigdir}/macros.d/macros.php
@@ -1499,6 +1499,7 @@ exit 0
 - php 5.6.0RC3
 - cleanup with_libmysql
 - fix licenses handling
+- fix zts-php-config --php-binary output #1124605
 
 * Mon Jul  7 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.3.RC2
 - php 5.6.0RC2
