@@ -27,9 +27,6 @@
 # arch detection heuristic used by bindir/mysql_config.
 %global mysql_config %{_libdir}/mysql/mysql_config
 
-# Build mysql/mysqli/pdo extensions using libmysqlclient or only mysqlnd
-%global with_libmysql 0
-
 # Build ZTS extension or only NTS
 %global with_zts      1
 
@@ -360,28 +357,6 @@ a database access abstraction layer to PHP.  This module provides
 a common interface for accessing MySQL, PostgreSQL or other
 databases.
 
-%if %{with_libmysql}
-%package mysql
-Summary: A module for PHP applications that use MySQL databases
-Group: Development/Languages
-# All files licensed under PHP version 3.01
-License: PHP
-Requires: php-pdo%{?_isa} = %{version}-%{release}
-Provides: php_database
-Provides: php-mysqli = %{version}-%{release}
-Provides: php-mysqli%{?_isa} = %{version}-%{release}
-Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
-BuildRequires: mysql-devel >= 4.1.0
-Conflicts: php-mysqlnd
-
-%description mysql
-The php-mysql package contains a dynamic shared object that will add
-MySQL database support to PHP. MySQL is an object-relational database
-management system. PHP is an HTML-embeddable scripting language. If
-you need MySQL support for PHP applications, you will need to install
-this package and the php package.
-%endif
-
 %package mysqlnd
 Summary: A module for PHP applications that use MySQL databases
 Group: Development/Languages
@@ -394,9 +369,7 @@ Provides: php-mysql%{?_isa} = %{version}-%{release}
 Provides: php-mysqli = %{version}-%{release}
 Provides: php-mysqli%{?_isa} = %{version}-%{release}
 Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
-%if ! %{with_libmysql}
 Obsoletes: php-mysql < %{version}-%{release}
-%endif
 
 %description mysqlnd
 The php-mysqlnd package contains a dynamic shared object that will add
@@ -1018,16 +991,8 @@ without_shared="--without-gd \
 pushd build-apache
 build --with-apxs2=%{_httpd_apxs} \
       --libdir=%{_libdir}/php \
-%if %{with_libmysql}
-      --enable-pdo=shared \
-      --with-mysql=shared,%{_prefix} \
-      --with-mysqli=shared,%{mysql_config} \
-      --with-pdo-mysql=shared,%{mysql_config} \
-      --without-pdo-sqlite \
-%else
       --without-mysql \
       --disable-pdo \
-%endif
       ${without_shared}
 popd
 
@@ -1138,16 +1103,8 @@ build --with-apxs2=%{_httpd_apxs} \
       --libdir=%{_libdir}/php-zts \
       --enable-maintainer-zts \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d \
-%if %{with_libmysql}
-      --enable-pdo=shared \
-      --with-mysql=shared,%{_prefix} \
-      --with-mysqli=shared,%{mysql_config} \
-      --with-pdo-mysql=shared,%{mysql_config} \
-      --without-pdo-sqlite \
-%else
       --without-mysql \
       --disable-pdo \
-%endif
       ${without_shared}
 popd
 
@@ -1186,20 +1143,6 @@ unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
 make -C build-ztscli install \
      INSTALL_ROOT=$RPM_BUILD_ROOT
 
-# rename extensions build with mysqlnd
-mv $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/mysql.so \
-   $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/mysqlnd_mysql.so
-mv $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/mysqli.so \
-   $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/mysqlnd_mysqli.so
-mv $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/pdo_mysql.so \
-   $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/pdo_mysqlnd.so
-
-%if %{with_libmysql}
-# Install the extensions for the ZTS version modules for libmysql
-make -C build-zts install-modules \
-     INSTALL_ROOT=$RPM_BUILD_ROOT
-%endif
-
 # rename ZTS binary
 mv $RPM_BUILD_ROOT%{_bindir}/php        $RPM_BUILD_ROOT%{_bindir}/zts-php
 mv $RPM_BUILD_ROOT%{_bindir}/phpize     $RPM_BUILD_ROOT%{_bindir}/zts-phpize
@@ -1217,20 +1160,6 @@ make -C build-fpm install-fpm \
 # Install everything from the CGI SAPI build
 make -C build-cgi install \
      INSTALL_ROOT=$RPM_BUILD_ROOT
-
-# rename extensions build with mysqlnd
-mv $RPM_BUILD_ROOT%{_libdir}/php/modules/mysql.so \
-   $RPM_BUILD_ROOT%{_libdir}/php/modules/mysqlnd_mysql.so
-mv $RPM_BUILD_ROOT%{_libdir}/php/modules/mysqli.so \
-   $RPM_BUILD_ROOT%{_libdir}/php/modules/mysqlnd_mysqli.so
-mv $RPM_BUILD_ROOT%{_libdir}/php/modules/pdo_mysql.so \
-   $RPM_BUILD_ROOT%{_libdir}/php/modules/pdo_mysqlnd.so
-
-%if %{with_libmysql}
-# Install the mysql extension build with libmysql
-make -C build-apache install-modules \
-     INSTALL_ROOT=$RPM_BUILD_ROOT
-%endif
 
 # Install the default configuration file and icons
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
@@ -1303,7 +1232,7 @@ install -m 644 %{SOURCE8} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/php-fpm
 
 # Generate files lists and stub .ini files for each subpackage
 for mod in pgsql odbc ldap snmp xmlrpc imap \
-    mysqlnd mysqlnd_mysql mysqlnd_mysqli pdo_mysqlnd \
+    mysqlnd mysql mysqli pdo_mysql \
     mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
     simplexml bz2 calendar ctype exif ftp gettext gmp iconv \
     sockets tokenizer opcache \
@@ -1316,15 +1245,12 @@ for mod in pgsql odbc ldap snmp xmlrpc imap \
     enchant phar fileinfo intl \
     mcrypt tidy pdo_dblib mssql pspell curl wddx \
     posix shmop sysvshm sysvsem sysvmsg recode xml \
-%if %{with_libmysql}
-    mysql mysqli pdo_mysql \
-%endif
     ; do
     case $mod in
       opcache)
         # Zend extensions
         ini=10-${mod}.ini;;
-      pdo_*|mysqlnd_*|wddx|xmlreader|xmlrpc)
+      pdo_*|mysql|mysqli|wddx|xmlreader|xmlrpc)
         # Extensions with dependencies on 20-*
         ini=30-${mod}.ini;;
       *)
@@ -1361,16 +1287,10 @@ done
 cat files.dom files.xsl files.xml{reader,writer} files.wddx \
     files.simplexml >> files.xml
 
-# The mysql and mysqli modules are both packaged in php-mysql
-%if %{with_libmysql}
-cat files.mysqli >> files.mysql
-cat files.pdo_mysql >> files.mysql
-%endif
-
 # mysqlnd
-cat files.mysqlnd_mysql \
-    files.mysqlnd_mysqli \
-    files.pdo_mysqlnd \
+cat files.mysql \
+    files.mysqli \
+    files.pdo_mysql \
     >> files.mysqlnd
 
 # Split out the PDO modules
@@ -1538,9 +1458,6 @@ exit 0
 %{_libdir}/libphp5-%{embed_version}.so
 
 %files pgsql -f files.pgsql
-%if %{with_libmysql}
-%files mysql -f files.mysql
-%endif
 %files odbc -f files.odbc
 %files imap -f files.imap
 %files ldap -f files.ldap
@@ -1580,6 +1497,7 @@ exit 0
 %changelog
 * Thu Jul 31 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.4.RC3
 - php 5.6.0RC3
+- cleanup with_libmysql
 
 * Mon Jul  7 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.3.RC2
 - php 5.6.0RC2
