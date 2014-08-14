@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver         RC3
+%global rcver         RC4
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.0
-Release: 0.5.%{rcver}%{?dist}
+Release: 0.6.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -110,8 +110,6 @@ Patch45: php-5.4.8-ldap_r.patch
 Patch46: php-5.4.9-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.4.9-phpinfo.patch
-# temporary fix (from 5.4/5.5) for unserialize/mock
-Patch48: php-5.6.0-mock.patch
 
 # Upstream fixes (100+)
 
@@ -708,7 +706,6 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
-%patch48 -p1 -b .mock
 
 # upstream patches
 
@@ -1469,6 +1466,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Aug 14 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.6.RC4
+- php 5.6.0RC4
+
 * Thu Jul 31 2014 Remi Collet <rcollet@redhat.com> 5.6.0-0.5.RC3
 - fpm requires httpd >= 2.4.10 for proxy support in SetHandler
 
