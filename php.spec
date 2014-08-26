@@ -62,7 +62,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.0
-Release: 0.7.%{rcver}%{?dist}
+Release: 0.8.%{rcver}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1466,6 +1466,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Aug 26 2014 David Tardon <dtardon@redhat.com> - 5.6.0-0.8.RC4
+- rebuild for ICU 53.1
+
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.6.0-0.7.RC4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
