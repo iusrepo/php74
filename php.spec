@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver         RC4
+#global rcver         RC4
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.0
-Release: 0.8.%{rcver}%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -112,6 +112,7 @@ Patch46: php-5.4.9-fixheader.patch
 Patch47: php-5.4.9-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch100: php-bug67878.patch
 
 # Security fixes (200+)
 
@@ -152,6 +153,8 @@ Requires: php-common%{?_isa} = %{version}-%{release}
 Requires: php-cli%{?_isa} = %{version}-%{release}
 # To ensure correct /var/lib/php/session ownership:
 Requires(pre): httpd-filesystem
+# php engine for Apache httpd webserver
+Provides: php(httpd)
 
 
 %description
@@ -207,6 +210,8 @@ Requires(pre): httpd-filesystem
 # For php.conf in /etc/httpd/conf.d
 # and version 2.4.10 for proxy support in SetHandler
 Requires: httpd-filesystem >= 2.4.10
+# php engine for Apache httpd webserver
+Provides: php(httpd)
 
 %description fpm
 PHP-FPM (FastCGI Process Manager) is an alternative PHP FastCGI
@@ -708,6 +713,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch100 -p1 -b .b67878
 
 # security patches
 
@@ -1466,8 +1472,11 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
-* Tue Aug 26 2014 David Tardon <dtardon@redhat.com> - 5.6.0-0.8.RC4
-- rebuild for ICU 53.1
+* Thu Aug 28 2014 Remi Collet <remi@fedoraproject.org> 5.6.0-1
+- PHP 5.6.0 is GA
+  http://php.net/releases/5_6_0.php
+- fix ZTS man pages, upstream patch for 67878
+- provides php(httpd)
 
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.6.0-0.7.RC4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
