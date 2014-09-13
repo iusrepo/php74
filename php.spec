@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver         RC4
+%global rcver         RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.6.0
-Release: 1%{?dist}
+Version: 5.6.1
+Release: 0.1.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -112,7 +112,6 @@ Patch46: php-5.4.9-fixheader.patch
 Patch47: php-5.4.9-phpinfo.patch
 
 # Upstream fixes (100+)
-Patch100: php-bug67878.patch
 
 # Security fixes (200+)
 
@@ -713,7 +712,6 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
-%patch100 -p1 -b .b67878
 
 # security patches
 
@@ -1472,6 +1470,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Sat Sep 13 2014 Remi Collet <rcollet@redhat.com> 5.6.1-0.1.RC1
+- php 5.6.1RC1
+
 * Thu Aug 28 2014 Remi Collet <remi@fedoraproject.org> 5.6.0-1
 - PHP 5.6.0 is GA
   http://php.net/releases/5_6_0.php
