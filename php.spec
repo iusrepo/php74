@@ -62,7 +62,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.1
-Release: 0.1.RC1%{?dist}
+Release: 0.2.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -85,6 +85,8 @@ Source8: php-fpm.sysconfig
 Source9: php.modconf
 Source10: php.ztsmodconf
 Source11: strip.sh
+Source13: nginx-fpm.conf
+Source14: nginx-php.conf
 # Configuration files for some extensions
 Source50: opcache.ini
 Source51: opcache-default.blacklist
@@ -126,6 +128,8 @@ BuildRequires: bzip2-devel, curl-devel >= 7.9
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 # to ensure we are using httpd with filesystem feature (see #1081453)
 BuildRequires: httpd-filesystem
+# to ensure we are using nginx with filesystem feature (see #1142298)
+BuildRequires: nginx-filesystem
 BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: sqlite-devel >= 3.6.0
 BuildRequires: zlib-devel, smtpdaemon, libedit-devel
@@ -211,6 +215,8 @@ Requires(pre): httpd-filesystem
 Requires: httpd-filesystem >= 2.4.10
 # php engine for Apache httpd webserver
 Provides: php(httpd)
+# for /etc/nginx ownership
+Requires: nginx-filesystem
 
 %description fpm
 PHP-FPM (FastCGI Process Manager) is an alternative PHP FastCGI
@@ -1208,6 +1214,9 @@ install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
 # Environment file
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
 install -m 644 %{SOURCE8} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/php-fpm
+# Nginx configuration
+install -D -m 644 %{SOURCE13} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/conf.d/php-fpm.conf
+install -D -m 644 %{SOURCE14} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/default.d/php.conf
 
 # Fix the link
 (cd $RPM_BUILD_ROOT%{_bindir}; ln -sfn phar.phar phar)
@@ -1401,6 +1410,8 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %config(noreplace) %{_sysconfdir}/php-fpm.d/www.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/php-fpm
 %config(noreplace) %{_sysconfdir}/sysconfig/php-fpm
+%config(noreplace) %{_sysconfdir}/nginx/conf.d/php-fpm.conf
+%config(noreplace) %{_sysconfdir}/nginx/default.d/php.conf
 %{_prefix}/lib/tmpfiles.d/php-fpm.conf
 %{_unitdir}/php-fpm.service
 %{_sbindir}/php-fpm
@@ -1470,6 +1481,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Sep 24 2014 Remi Collet <rcollet@redhat.com> 5.6.1-0.2.RC1
+- provides nginx configuration (see #1142298)
+
 * Sat Sep 13 2014 Remi Collet <rcollet@redhat.com> 5.6.1-0.1.RC1
 - php 5.6.1RC1
 
