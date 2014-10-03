@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver         RC1
+#global rcver         RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.1
-Release: 0.2.RC1%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -114,6 +114,7 @@ Patch46: php-5.4.9-fixheader.patch
 Patch47: php-5.4.9-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch100: php-bug68074.patch
 
 # Security fixes (200+)
 
@@ -718,6 +719,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch100 -p1 -b .bug68074
 
 # security patches
 
@@ -878,6 +880,7 @@ ln -sf ../configure
     --without-gdbm \
     --with-jpeg-dir=%{_prefix} \
     --with-openssl \
+    --with-system-ciphers \
     --with-pcre-regex=%{_prefix} \
     --with-zlib \
     --with-layout=GNU \
@@ -1481,7 +1484,13 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
-* Tue Sep 24 2014 Remi Collet <rcollet@redhat.com> 5.6.1-0.2.RC1
+* Fri Oct  3 2014 Remi Collet <remi@fedoraproject.org> 5.6.1-1
+- Update to PHP 5.6.1
+  http://php.net/releases/5_6_1.php
+- use default system cipher list by Fedora policy
+  http://fedoraproject.org/wiki/Changes/CryptoPolicy
+
+* Wed Sep 24 2014 Remi Collet <rcollet@redhat.com> 5.6.1-0.2.RC1
 - provides nginx configuration (see #1142298)
 
 * Sat Sep 13 2014 Remi Collet <rcollet@redhat.com> 5.6.1-0.1.RC1
