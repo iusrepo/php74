@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver         RC1
+%global rcver         RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.6.2
-Release: 1%{?dist}
+Version: 5.6.3
+Release: 0.1.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -90,6 +90,7 @@ Source14: nginx-php.conf
 # Configuration files for some extensions
 Source50: opcache.ini
 Source51: opcache-default.blacklist
+Source52: phpdbg_webhelper.ini
 
 # Build fixes
 Patch5: php-5.2.0-includedir.patch
@@ -114,15 +115,10 @@ Patch46: php-5.4.9-fixheader.patch
 Patch47: php-5.4.9-phpinfo.patch
 
 # Upstream fixes (100+)
-Patch100: php-bug68074.patch
 
 # Security fixes (200+)
 
 # Fixes for tests (300+)
-# Revert changes for pcre < 8.34
-Patch301: php-5.6.0-oldpcre.patch
-# see https://bugzilla.redhat.com/971416
-Patch302: php-5.6.0-noNO.patch
 
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9
@@ -189,6 +185,7 @@ executing PHP scripts, /usr/bin/php, and the CGI interface.
 Group: Development/Languages
 Summary: The interactive PHP debugger
 Requires: php-common%{?_isa} = %{version}-%{release}
+Provides: php-phpdbg_webhelper, php-phpdbg_webhelper%{?_isa}
 
 %description dbg
 The php-dbg package contains the interactive PHP debugger.
@@ -719,16 +716,10 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
-%patch100 -p1 -b .bug68074
 
 # security patches
 
 # Fixes for tests
-%if 0%{?fedora} < 21
-# Only apply when system libpcre < 8.34
-%patch301 -p1 -b .pcre834
-%endif
-%patch302 -p0 -b .971416
 
 
 # Prevent %%doc confusion over LICENSE files
@@ -820,6 +811,7 @@ echo "d /run/php-fpm 755 root root" >php-fpm.tmpfiles
 
 # Some extensions have their own configuration file
 cp %{SOURCE50} 10-opcache.ini
+cp %{SOURCE52} 20-phpdbg_webhelper.ini
 
 
 %build
@@ -908,6 +900,7 @@ build --libdir=%{_libdir}/php \
       --enable-pcntl \
       --enable-opcache \
       --enable-phpdbg \
+      --enable-phpdbg-webhelper=shared \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
       --enable-mbregex \
@@ -1277,6 +1270,9 @@ EOF
 EOF
 done
 
+# This extension is NTS only, for use with phpdbg
+cp -p 20-phpdbg_webhelper.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.d/20-phpdbg_webhelper.ini
+
 # The dom, xsl and xml* modules are all packaged in php-xml
 cat files.dom files.xsl files.xml{reader,writer} files.wddx \
     files.simplexml >> files.xml
@@ -1402,6 +1398,8 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %{_bindir}/phpdbg
 %doc sapi/phpdbg/{README.md,CREDITS}
 %{_mandir}/man1/phpdbg.1*
+%attr(755,root,root) %{_libdir}/php/modules/phpdbg_webhelper.so
+%config(noreplace) %attr(644,root,root) %{_sysconfdir}/php.d/20-phpdbg_webhelper.ini
 
 %files fpm
 %doc php-fpm.conf.default
@@ -1484,6 +1482,11 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Oct 29 2014 Remi Collet <rcollet@redhat.com> 5.6.3-0.1.RC1
+- php 5.6.3RC1
+- disable opcache.fast_shutdown in default config
+- enable phpdbg_webhelper new extension (in php-dbg)
+
 * Thu Oct 16 2014 Remi Collet <remi@fedoraproject.org> 5.6.1-1
 - Update to PHP 5.6.2
   http://php.net/releases/5_6_2.php
