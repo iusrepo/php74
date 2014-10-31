@@ -62,7 +62,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.3
-Release: 0.1.RC1%{?dist}
+Release: 0.2.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -90,13 +90,12 @@ Source14: nginx-php.conf
 # Configuration files for some extensions
 Source50: opcache.ini
 Source51: opcache-default.blacklist
-Source52: phpdbg_webhelper.ini
 
 # Build fixes
-Patch5: php-5.2.0-includedir.patch
+Patch5: php-5.6.3-includedir.patch
 Patch6: php-5.2.4-embed.patch
 Patch7: php-5.3.0-recode.patch
-Patch8: php-5.4.7-libdb.patch
+Patch8: php-5.6.3-libdb.patch
 
 # Fixes for extension modules
 # https://bugs.php.net/63171 no odbc call during timeout
@@ -104,21 +103,23 @@ Patch21: php-5.4.7-odbctimer.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
-Patch42: php-5.3.1-systzdata-v10.patch
+Patch42: php-5.6.3-systzdata-v10.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
-Patch45: php-5.4.8-ldap_r.patch
+Patch45: php-5.6.3-ldap_r.patch
 # Make php_config.h constant across builds
-Patch46: php-5.4.9-fixheader.patch
+Patch46: php-5.6.3-fixheader.patch
 # drop "Configure command" from phpinfo output
-Patch47: php-5.4.9-phpinfo.patch
+Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
 
 # Security fixes (200+)
 
 # Fixes for tests (300+)
+# Factory is droped from system tzdata
+Patch300: php-5.6.3-datetests.patch
 
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9
@@ -185,7 +186,6 @@ executing PHP scripts, /usr/bin/php, and the CGI interface.
 Group: Development/Languages
 Summary: The interactive PHP debugger
 Requires: php-common%{?_isa} = %{version}-%{release}
-Provides: php-phpdbg_webhelper, php-phpdbg_webhelper%{?_isa}
 
 %description dbg
 The php-dbg package contains the interactive PHP debugger.
@@ -720,6 +720,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 # security patches
 
 # Fixes for tests
+%patch300 -p1 -b .datetests
 
 
 # Prevent %%doc confusion over LICENSE files
@@ -811,7 +812,6 @@ echo "d /run/php-fpm 755 root root" >php-fpm.tmpfiles
 
 # Some extensions have their own configuration file
 cp %{SOURCE50} 10-opcache.ini
-cp %{SOURCE52} 20-phpdbg_webhelper.ini
 
 
 %build
@@ -900,7 +900,6 @@ build --libdir=%{_libdir}/php \
       --enable-pcntl \
       --enable-opcache \
       --enable-phpdbg \
-      --enable-phpdbg-webhelper=shared \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
       --enable-mbregex \
@@ -1270,9 +1269,6 @@ EOF
 EOF
 done
 
-# This extension is NTS only, for use with phpdbg
-cp -p 20-phpdbg_webhelper.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.d/20-phpdbg_webhelper.ini
-
 # The dom, xsl and xml* modules are all packaged in php-xml
 cat files.dom files.xsl files.xml{reader,writer} files.wddx \
     files.simplexml >> files.xml
@@ -1398,8 +1394,6 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %{_bindir}/phpdbg
 %doc sapi/phpdbg/{README.md,CREDITS}
 %{_mandir}/man1/phpdbg.1*
-%attr(755,root,root) %{_libdir}/php/modules/phpdbg_webhelper.so
-%config(noreplace) %attr(644,root,root) %{_sysconfdir}/php.d/20-phpdbg_webhelper.ini
 
 %files fpm
 %doc php-fpm.conf.default
@@ -1482,6 +1476,11 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri Oct 31 2014 Remi Collet <rcollet@redhat.com> 5.6.3-0.2.RC1
+- php 5.6.3RC1 (refreshed, phpdbg changes reverted)
+- new version of systzdata patch, fix case sensitivity
+- ignore Factory in date tests
+
 * Wed Oct 29 2014 Remi Collet <rcollet@redhat.com> 5.6.3-0.1.RC1
 - php 5.6.3RC1
 - disable opcache.fast_shutdown in default config
