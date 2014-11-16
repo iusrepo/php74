@@ -62,7 +62,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -114,6 +114,9 @@ Patch46: php-5.6.3-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch101: php-bug68423.patch
+Patch102: php-bug68421.patch
+Patch103: php-bug68420.patch
 
 # Security fixes (200+)
 
@@ -716,6 +719,9 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch101 -p1 -b .bug68423
+%patch102 -p1 -b .bug68421
+%patch103 -p1 -b .bug68420
 
 # security patches
 
@@ -1476,6 +1482,14 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Sun Nov 16 2014 Remi Collet <remi@fedoraproject.org> 5.6.3-2
+- FPM: add upstream patch for https://bugs.php.net/68421
+  access.format=R doesn't log ipv6 address
+- FPM: add upstream patch for https://bugs.php.net/68420
+  listen=9000 listens to ipv6 localhost instead of all addresses
+- FPM: add upstream patch for https://bugs.php.net/68423
+  will no longer load all pools
+
 * Thu Nov 13 2014 Remi Collet <remi@fedoraproject.org> 5.6.3-1
 - Update to PHP 5.6.3
   http://php.net/releases/5_6_3.php
