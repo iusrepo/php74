@@ -62,7 +62,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1482,6 +1482,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Mon Nov 17 2014 Remi Collet <remi@fedoraproject.org> 5.6.3-3
+- sync php-fpm configuration with upstream
+- refresh upstream patch for 68421
+
 * Sun Nov 16 2014 Remi Collet <remi@fedoraproject.org> 5.6.3-2
 - FPM: add upstream patch for https://bugs.php.net/68421
   access.format=R doesn't log ipv6 address

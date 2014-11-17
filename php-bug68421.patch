@@ -70,3 +70,49 @@ index 4e1a057..c71281b 100644
 -- 
 2.1.0
 
+From 4657289e87e18bb8967d5a8b0163c772d410e2b8 Mon Sep 17 00:00:00 2001
+From: Remi Collet <remi@php.net>
+Date: Mon, 17 Nov 2014 06:53:38 +0100
+Subject: [PATCH] Improve fix bug #68421 access.format='%R' doesn't log ipv6
+ address
+
+Log IPv4-Mapped-Ipv6 address as IPv4 (not as IPv6)
+---
+ sapi/fpm/fpm/fastcgi.c | 18 ++++++++++++++----
+ 1 file changed, 14 insertions(+), 4 deletions(-)
+
+diff --git a/sapi/fpm/fpm/fastcgi.c b/sapi/fpm/fpm/fastcgi.c
+index 86fca17..d1db0ec 100644
+--- a/sapi/fpm/fpm/fastcgi.c
++++ b/sapi/fpm/fpm/fastcgi.c
+@@ -1099,13 +1099,23 @@ const char *fcgi_get_last_client_ip() /* {{{ */
+ {
+ 	static char str[INET6_ADDRSTRLEN];
+ 
+-	if (client_sa.sa.sa_family == AF_UNIX) {
+-		return NULL;
+-	}
++	/* Ipv4 */
+ 	if (client_sa.sa.sa_family == AF_INET) {
+ 		return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet.sin_addr, str, INET6_ADDRSTRLEN);
+ 	}
+-	return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet6.sin6_addr, str, INET6_ADDRSTRLEN);
++#ifdef IN6_IS_ADDR_V4MAPPED
++	/* Ipv4-Mapped-Ipv6 */
++	if (client_sa.sa.sa_family == AF_INET6
++		&& IN6_IS_ADDR_V4MAPPED(&client_sa.sa_inet6.sin6_addr)) {
++		return inet_ntop(AF_INET, ((char *)&client_sa.sa_inet6.sin6_addr)+12, str, INET6_ADDRSTRLEN);
++	}
++#endif
++	/* Ipv6 */
++	if (client_sa.sa.sa_family == AF_INET6) {
++		return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet6.sin6_addr, str, INET6_ADDRSTRLEN);
++	}
++	/* Unix socket */
++	return NULL;
+ }
+ /* }}} */
+ /*
+-- 
+2.1.0
+
