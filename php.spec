@@ -62,7 +62,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.3
-Release: 3%{?dist}
+Release: 4%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -117,6 +117,7 @@ Patch47: php-5.6.3-phpinfo.patch
 Patch101: php-bug68423.patch
 Patch102: php-bug68421.patch
 Patch103: php-bug68420.patch
+Patch104: php-bug68428.patch
 
 # Security fixes (200+)
 
@@ -722,6 +723,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch101 -p1 -b .bug68423
 %patch102 -p1 -b .bug68421
 %patch103 -p1 -b .bug68420
+%patch104 -p1 -b .bug68428
 
 # security patches
 
@@ -1482,6 +1484,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Mon Nov 17 2014 Remi Collet <remi@fedoraproject.org> 5.6.3-4
+- FPM: add upstream patch for https://bugs.php.net/68428
+  listen.allowed_clients is IPv4 only
+
 * Mon Nov 17 2014 Remi Collet <remi@fedoraproject.org> 5.6.3-3
 - sync php-fpm configuration with upstream
 - refresh upstream patch for 68421
