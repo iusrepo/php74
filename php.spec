@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver         RC1
+%global rcver         RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.6.3
-Release: 4%{?dist}
+Version: 5.6.4
+Release: 0.1.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -114,10 +114,6 @@ Patch46: php-5.6.3-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
-Patch101: php-bug68423.patch
-Patch102: php-bug68421.patch
-Patch103: php-bug68420.patch
-Patch104: php-bug68428.patch
 
 # Security fixes (200+)
 
@@ -720,10 +716,6 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
-%patch101 -p1 -b .bug68423
-%patch102 -p1 -b .bug68421
-%patch103 -p1 -b .bug68420
-%patch104 -p1 -b .bug68428
 
 # security patches
 
@@ -1484,6 +1476,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri Nov 28 2014 Remi Collet <rcollet@redhat.com> 5.6.4-0.1.RC1
+- php 5.6.4RC1
+
 * Mon Nov 17 2014 Remi Collet <remi@fedoraproject.org> 5.6.3-4
 - FPM: add upstream patch for https://bugs.php.net/68428
   listen.allowed_clients is IPv4 only
