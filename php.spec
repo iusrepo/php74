@@ -62,7 +62,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -510,7 +510,7 @@ Group: Development/Languages
 # All files licensed under PHP version 3.01, except
 # libXMLRPC is licensed under BSD
 License: PHP and BSD
-Requires: php-common%{?_isa} = %{version}-%{release}
+Requires: php-xml%{?_isa} = %{version}-%{release}
 
 %description xmlrpc
 The php-xmlrpc package contains a dynamic shared object that will add
@@ -1476,6 +1476,11 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Dec 17 2014 Remi Collet <remi@fedoraproject.org> 5.6.4-2
+- Update to 5.6.4 (real)
+  http://www.php.net/releases/5_6_4.php
+- php-xmlrpc requires php-xml
+
 * Wed Dec 10 2014 Remi Collet <remi@fedoraproject.org> 5.6.4-1
 - Update to 5.6.4
   http://www.php.net/releases/5_6_4.php
