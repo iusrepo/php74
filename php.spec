@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver         RC1
+#global rcver         RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.5
-Release: 0.1.RC1%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -81,7 +81,6 @@ Source4: php-fpm.conf
 Source5: php-fpm-www.conf
 Source6: php-fpm.service
 Source7: php-fpm.logrotate
-Source8: php-fpm.sysconfig
 Source9: php.modconf
 Source10: php.ztsmodconf
 Source11: strip.sh
@@ -1208,9 +1207,6 @@ install -m 644 %{SOURCE6} $RPM_BUILD_ROOT%{_unitdir}/
 # LogRotate
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
 install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
-# Environment file
-install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
-install -m 644 %{SOURCE8} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/php-fpm
 # Nginx configuration
 install -D -m 644 %{SOURCE13} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/conf.d/php-fpm.conf
 install -D -m 644 %{SOURCE14} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/default.d/php.conf
@@ -1406,7 +1402,6 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %config(noreplace) %{_sysconfdir}/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/php-fpm.d/www.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/php-fpm
-%config(noreplace) %{_sysconfdir}/sysconfig/php-fpm
 %config(noreplace) %{_sysconfdir}/nginx/conf.d/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/nginx/default.d/php.conf
 %{_prefix}/lib/tmpfiles.d/php-fpm.conf
@@ -1478,7 +1473,12 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
-* Fri Jan 9 2015 Remi Collet <remi@fedoraproject.org> 5.6.5-0.1.RC1
+* Thu Jan 22 2015 Remi Collet <remi@fedoraproject.org> 5.6.5-1
+- Update to 5.6.5
+  http://www.php.net/releases/5_6_5.php
+- drop deprecated php-fpm EnvironmentFile
+
+* Fri Jan  9 2015 Remi Collet <remi@fedoraproject.org> 5.6.5-0.1.RC1
 - update to 5.6.5RC1
 - FPM: enable ACL support for Unix Domain Socket
 - FPM: switch default configuration to use UDS
