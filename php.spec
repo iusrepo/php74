@@ -62,7 +62,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1473,6 +1473,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Mon Jan 26 2015 David Tardon <dtardon@redhat.com> - 5.6.5-2
+- rebuild for ICU 54.1
+
 * Thu Jan 22 2015 Remi Collet <remi@fedoraproject.org> 5.6.5-1
 - Update to 5.6.5
   http://www.php.net/releases/5_6_5.php
