@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver         RC1
+%global rcver         RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.6.5
-Release: 2%{?dist}
+Version: 5.6.6
+Release: 0.1.RC1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -113,6 +113,8 @@ Patch46: php-5.6.3-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
+# BC break reverted for release, but after RC
+Patch100: php-datetime.patch
 
 # Security fixes (200+)
 
@@ -716,6 +718,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch100 -p1 -b .datetime
 
 # security patches
 
@@ -1473,6 +1476,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Feb  5 2015 Remi Collet <rcollet@redhat.com> 5.6.6-0.1.RC1
+- php 5.6.6RC1 for Koschei
+
 * Mon Jan 26 2015 David Tardon <dtardon@redhat.com> - 5.6.5-2
 - rebuild for ICU 54.1
 
