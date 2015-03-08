@@ -57,11 +57,11 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver         RC1
+%global rcver         RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.6.6
+Version: 5.6.7
 Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -113,6 +113,7 @@ Patch46: php-5.6.3-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch100: php-odbc.patch
 
 # Security fixes (200+)
 
@@ -716,6 +717,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch100 -p1 -b .odbc
 
 # security patches
 
@@ -1184,9 +1186,9 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 %if %{with_zts}
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d
 %endif
-install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php
-install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/session
-install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/php/wsdlcache
+install -m 755 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/session
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/wsdlcache
 
 # PHP-FPM stuff
 # Log
@@ -1346,8 +1348,8 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %if %{with_zts}
 %{_httpd_moddir}/libphp5-zts.so
 %endif
-%attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
-%attr(0770,root,apache) %dir %{_localstatedir}/lib/php/wsdlcache
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/session
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/wsdlcache
 %config(noreplace) %{_httpd_confdir}/php.conf
 %config(noreplace) %{_httpd_modconfdir}/10-php.conf
 %{_httpd_contentdir}/icons/php.gif
@@ -1367,7 +1369,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %dir %{_libdir}/php-zts
 %dir %{_libdir}/php-zts/modules
 %endif
-%dir %{_localstatedir}/lib/php
+%dir %{_sharedstatedir}/php
 %dir %{_datadir}/php
 
 %files cli
@@ -1396,8 +1398,8 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %files fpm
 %doc php-fpm.conf.default
 %license fpm_LICENSE
-%attr(0770,root,apache) %dir %{_localstatedir}/lib/php/session
-%attr(0770,root,apache) %dir %{_localstatedir}/lib/php/wsdlcache
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/session
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/wsdlcache
 %config(noreplace) %{_httpd_confdir}/php.conf
 %config(noreplace) %{_sysconfdir}/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/php-fpm.d/www.conf
@@ -1473,6 +1475,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Sun Mar  8 2015 Remi Collet <remi@fedoraproject.org> 5.6.7-0.1.RC1
+- update to 5.6.7RC1
+
 * Thu Feb 19 2015 Remi Collet <remi@fedoraproject.org> 5.6.6-1
 - Update to 5.6.6
   http://www.php.net/releases/5_6_6.php
