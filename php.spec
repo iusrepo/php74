@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver         RC1
+#global rcver         RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -113,7 +113,6 @@ Patch46: php-5.6.3-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
-Patch100: php-odbc.patch
 
 # Security fixes (200+)
 
@@ -717,7 +716,6 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
-%patch100 -p1 -b .odbc
 
 # security patches
 
@@ -1475,7 +1473,11 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
-* Sun Mar  8 2015 Remi Collet <remi@fedoraproject.org> 5.6.7-0.1.RC1
+* Fri Mar 20 2015 Remi Collet <remi@fedoraproject.org> 5.6.7-2
+- Update to 5.6.7
+  http://www.php.net/releases/5_6_7.php
+
+* Sun Mar  8 2015 Remi Collet <remi@fedoraproject.org> 5.6.7-1
 - update to 5.6.7RC1
 
 * Thu Feb 19 2015 Remi Collet <remi@fedoraproject.org> 5.6.6-1
