@@ -58,7 +58,7 @@
 %endif
 
 %global rcver  RC1
-%global rpmrel 2
+%global rpmrel 3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -124,6 +124,8 @@ Patch47: php-5.6.3-phpinfo.patch
 # Fixes for tests (300+)
 # Factory is droped from system tzdata
 Patch300: php-5.6.3-datetests.patch
+# Backported from 7.0
+Patch302: php-5.6.8-openssltests.patch
 
 
 BuildRequires: bzip2-devel, curl-devel >= 7.9
@@ -726,6 +728,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 
 # Fixes for tests
 %patch300 -p1 -b .datetests
+%patch302 -p1 -b .sslv3
 
 
 # Prevent %%doc confusion over LICENSE files
@@ -1478,6 +1481,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri Apr 10 2015 Remi Collet <remi@fedoraproject.org> 5.6.8-0.3.RC1
+- add upstream patch to drop SSLv3 tests
+
 * Mon Apr  6 2015 Tom Callaway <spot@fedoraproject.org> - 5.6.8-0.2.RC1
 - rebuild for libvpx 1.4.0
 
