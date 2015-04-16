@@ -57,8 +57,8 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC1
-%global rpmrel 3
+#global rcver  RC1
+%global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1481,6 +1481,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Apr 16 2015 Remi Collet <remi@fedoraproject.org> 5.6.8-1
+- Update to 5.6.8
+  http://www.php.net/releases/5_6_8.php
+
 * Fri Apr 10 2015 Remi Collet <remi@fedoraproject.org> 5.6.8-0.3.RC1
 - add upstream patch to drop SSLv3 tests
 
