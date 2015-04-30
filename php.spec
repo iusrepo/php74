@@ -57,12 +57,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver  RC1
+%global rcver  RC1
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.6.8
+Version: 5.6.9
 %if 0%{?rcver:1}
 Release: 0.%{rpmrel}.%{rcver}%{?dist}
 %else
@@ -107,7 +107,7 @@ Patch21: php-5.4.7-odbctimer.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
-Patch42: php-5.6.3-systzdata-v11.patch
+Patch42: php-5.6.9-systzdata-v12.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
@@ -1481,6 +1481,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Apr 30 2015 Remi Collet <remi@fedoraproject.org> 5.6.9-0.1.RC1
+- update to 5.6.9RC1
+- adapt systzdata patch for upstream changes for new zic
+
 * Thu Apr 16 2015 Remi Collet <remi@fedoraproject.org> 5.6.8-1
 - Update to 5.6.8
   http://www.php.net/releases/5_6_8.php
