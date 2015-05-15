@@ -57,7 +57,7 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC1
+#global rcver  RC1
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
@@ -1483,6 +1483,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri May 15 2015 Remi Collet <remi@fedoraproject.org> 5.6.9-1
+- Update to 5.6.9
+  http://www.php.net/releases/5_6_9.php
+
 * Thu Apr 30 2015 Remi Collet <remi@fedoraproject.org> 5.6.9-0.1.RC1
 - update to 5.6.9RC1
 - adapt systzdata patch for upstream changes for new zic
