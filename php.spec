@@ -65,15 +65,15 @@
 %endif
 
 #global rcver  RC1
-%global rpmrel 1
+%global rpmrel 2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.11
 %if 0%{?rcver:1}
-Release: 0.%{rpmrel}.%{rcver}%{?dist}.1
+Release: 0.%{rpmrel}.%{rcver}%{?dist}
 %else
-Release: %{rpmrel}%{?dist}.1
+Release: %{rpmrel}%{?dist}
 %endif
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -1484,6 +1484,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri Jul 17 2015 Remi Collet <remi@fedoraproject.org> 5.6.11-2
+- fix typo in php.conf #1244104
+
 * Sun Jul 12 2015 Remi Collet <remi@fedoraproject.org> 5.6.11-1
 - Update to 5.6.11
   http://www.php.net/releases/5_6_11.php
