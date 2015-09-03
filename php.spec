@@ -69,7 +69,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.6.12
+Version: 5.6.13
 %if 0%{?rcver:1}
 Release: 0.%{rpmrel}.%{rcver}%{?dist}
 %else
@@ -114,7 +114,7 @@ Patch21: php-5.4.7-odbctimer.patch
 
 # Functional changes
 Patch40: php-5.4.0-dlopen.patch
-Patch42: php-5.6.9-systzdata-v12.patch
+Patch42: php-5.6.13-systzdata-v12.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
@@ -1484,6 +1484,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Sep  3 2015 Remi Collet <remi@fedoraproject.org> 5.6.13-1
+- Update to 5.6.13
+  http://www.php.net/releases/5_6_13.php
+
 * Thu Aug  6 2015 Remi Collet <remi@fedoraproject.org> 5.6.12-1
 - Update to 5.6.12
   http://www.php.net/releases/5_6_12.php
