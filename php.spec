@@ -1483,6 +1483,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %config(noreplace) %{_sysconfdir}/php-zts.d/opcache-default.blacklist
 
 
+
 %changelog
 * Wed Sep 30 2015 Remi Collet <remi@fedoraproject.org> 5.6.14-1
 - Update to 5.6.14
