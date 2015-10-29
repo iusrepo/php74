@@ -64,16 +64,16 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC1
+#global rcver  RC1
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.15
 %if 0%{?rcver:1}
-Release: 0.%{rpmrel}.%{rcver}%{?dist}.1
+Release: 0.%{rpmrel}.%{rcver}%{?dist}
 %else
-Release: %{rpmrel}%{?dist}.1
+Release: %{rpmrel}%{?dist}
 %endif
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -104,7 +104,7 @@ Source51: opcache-default.blacklist
 
 # Build fixes
 Patch5: php-5.6.3-includedir.patch
-Patch6: php-5.2.4-embed.patch
+Patch6: php-5.6.3-embed.patch
 Patch7: php-5.3.0-recode.patch
 Patch8: php-5.6.3-libdb.patch
 
@@ -1483,10 +1483,11 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %config(noreplace) %{_sysconfdir}/php-zts.d/opcache-default.blacklist
 
 
-
 %changelog
-* Wed Oct 28 2015 David Tardon <dtardon@redhat.com> - 5.6.15-0.1.RC1.1
-- rebuild for ICU 56.1
+* Thu Oct 29 2015 Remi Collet <remi@fedoraproject.org> 5.6.15-1
+- Update to 5.6.15
+  http://www.php.net/releases/5_6_15.php
+- php-config: reports all built sapis
 
 * Thu Oct 15 2015 Remi Collet <remi@fedoraproject.org> 5.6.15-0.1.RC1
 - update to 5.6.15RC1
