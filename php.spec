@@ -64,7 +64,7 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC1
+#global rcver  RC1
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
@@ -83,8 +83,8 @@ Group: Development/Languages
 URL: http://www.php.net/
 
 # Need to download official tarball and strip non-free stuff
-# wget http://www.php.net/distributions/php-%{version}%{?rcver}.tar.xz
-# ./strip.sh %{version}
+# wget http://www.php.net/distributions/php-%%{version}%%{?rcver}.tar.xz
+# ./strip.sh %%{version}
 Source0: php-%{version}%{?rcver}-strip.tar.xz
 Source1: php.conf
 Source2: php.ini
@@ -1484,6 +1484,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Jan  7 2016 Remi Collet <remi@fedoraproject.org> 5.6.17-1
+- Update to 5.6.17
+  http://www.php.net/releases/5_6_17.php
+
 * Thu Dec 10 2015 Remi Collet <remi@fedoraproject.org> 5.6.17-0.1.RC1
 - update to 5.6.17RC1
 
