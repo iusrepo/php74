@@ -71,9 +71,9 @@ Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 5.6.20
 %if 0%{?rcver:1}
-Release: 0.%{rpmrel}.%{rcver}%{?dist}
+Release: 0.%{rpmrel}.%{rcver}%{?dist}.1
 %else
-Release: %{rpmrel}%{?dist}
+Release: %{rpmrel}%{?dist}.1
 %endif
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -1486,6 +1486,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri Apr 15 2016 David Tardon <dtardon@redhat.com> - 5.6.20-1.1
+- rebuild for ICU 57.1
+
 * Thu Mar 31 2016 Remi Collet <remi@fedoraproject.org> 5.6.20-1
 - Update to 5.6.20
   http://www.php.net/releases/5_6_20.php
