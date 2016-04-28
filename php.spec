@@ -64,8 +64,8 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC1
-%global rpmrel 2
+#global rcver  RC1
+%global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1480,6 +1480,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Apr 28 2016 Remi Collet <remi@fedoraproject.org> 5.6.21-1
+- Update to 5.6.21
+  http://www.php.net/releases/5_6_21.php
+
 * Mon Apr 18 2016 Remi Collet <remi@fedoraproject.org> 5.6.21-0.2.RC1
 - rebuild for ICU 57.1
 
