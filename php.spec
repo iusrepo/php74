@@ -65,7 +65,7 @@
 %endif
 
 #global rcver  RC1
-%global rpmrel 1
+%global rpmrel 2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -874,7 +874,6 @@ ln -sf ../configure
     --with-freetype-dir=%{_prefix} \
     --with-png-dir=%{_prefix} \
     --with-xpm-dir=%{_prefix} \
-    --with-vpx-dir=%{_prefix} \
     --enable-gd-native-ttf \
     --with-t1lib=%{_prefix} \
     --without-gdbm \
@@ -1480,6 +1479,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri May 27 2016 Remi Collet <remi@fedoraproject.org> 5.6.22-2
+- drop unneeded option --with-vpx-dir, fix FTBFS, thanks Koschei
+
 * Thu May 26 2016 Remi Collet <remi@fedoraproject.org> 5.6.22-1
 - Update to 5.6.22 - http://www.php.net/releases/5_6_22.php
 
