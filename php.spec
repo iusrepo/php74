@@ -6,29 +6,23 @@
 # Please preserve changelog entries
 #
 # API/ABI check
-%global apiver      20131106
-%global zendver     20131226
-%global pdover      20080721
+%global apiver      20151012
+%global zendver     20151012
+%global pdover      20150127
 # Extension version
-%global opcachever  7.0.6-dev
-
-# Use for first build of PHP (before pecl/zip and pecl/jsonc)
-%global php_bootstrap   0
+%global jsonver     1.4.0
 
 # Adds -z now to the linker flags
 %global _hardened_build 1
 
 # version used for php embedded library soname
-%global embed_version 5.6
+%global embed_version 7.0
 
 %global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
 # Regression tests take a long time, you can skip 'em with this
-%if %{php_bootstrap}
-%global runselftest 0
-%else
+#global runselftest 0
 %{!?runselftest: %global runselftest 1}
-%endif
 
 # Use the arch-specific mysql_config binary to avoid mismatch with the
 # arch detection heuristic used by bindir/mysql_config.
@@ -69,7 +63,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.6.23
+Version: 7.0.8
 %if 0%{?rcver:1}
 Release: 0.%{rpmrel}.%{rcver}%{?dist}
 %else
@@ -82,10 +76,7 @@ License: PHP and Zend and BSD
 Group: Development/Languages
 URL: http://www.php.net/
 
-# Need to download official tarball and strip non-free stuff
-# wget http://www.php.net/distributions/php-%%{version}%%{?rcver}.tar.xz
-# ./strip.sh %%{version}
-Source0: php-%{version}%{?rcver}-strip.tar.xz
+Source0: http://www.php.net/distributions/php-%{version}%{?rcver}.tar.xz
 Source1: php.conf
 Source2: php.ini
 Source3: macros.php
@@ -95,28 +86,27 @@ Source6: php-fpm.service
 Source7: php-fpm.logrotate
 Source9: php.modconf
 Source10: php.ztsmodconf
-Source11: strip.sh
 Source13: nginx-fpm.conf
 Source14: nginx-php.conf
 # Configuration files for some extensions
-Source50: opcache.ini
+Source50: 10-opcache.ini
 Source51: opcache-default.blacklist
 
 # Build fixes
-Patch5: php-5.6.3-includedir.patch
+Patch5: php-7.0.0-includedir.patch
 Patch6: php-5.6.3-embed.patch
 Patch7: php-5.3.0-recode.patch
-Patch8: php-5.6.17-libdb.patch
+Patch8: php-7.0.2-libdb.patch
 
 # Functional changes
-Patch40: php-5.4.0-dlopen.patch
-Patch42: php-5.6.13-systzdata-v12.patch
+Patch40: php-7.0.0-dlopen.patch
+Patch42: php-7.0.0-systzdata-v13.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-5.6.3-ldap_r.patch
 # Make php_config.h constant across builds
-Patch46: php-5.6.3-fixheader.patch
+Patch46: php-7.0.0-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
 
@@ -248,7 +238,6 @@ Provides: php-core = %{version}, php-core%{?_isa} = %{version}
 Provides: php-ctype, php-ctype%{?_isa}
 Provides: php-curl, php-curl%{?_isa}
 Provides: php-date, php-date%{?_isa}
-Provides: php-ereg, php-ereg%{?_isa}
 Provides: php-exif, php-exif%{?_isa}
 Provides: php-fileinfo, php-fileinfo%{?_isa}
 Provides: php-filter, php-filter%{?_isa}
@@ -267,9 +256,8 @@ Provides: php-sockets, php-sockets%{?_isa}
 Provides: php-spl, php-spl%{?_isa}
 Provides: php-standard = %{version}, php-standard%{?_isa} = %{version}
 Provides: php-tokenizer, php-tokenizer%{?_isa}
-%if ! %{php_bootstrap}
-Requires: php-pecl-jsonc%{?_isa}
-%endif
+# For user experience, those extensions were part of php-common
+Requires: php-json%{?_isa} = %{version}-%{release}
 %if %{with_zip}
 Provides: php-zip, php-zip%{?_isa}
 Obsoletes: php-pecl-zip < 1.11
@@ -288,12 +276,11 @@ Group: Development/Libraries
 Summary: Files needed for building PHP extensions
 Requires: php-cli%{?_isa} = %{version}-%{release}, autoconf, automake
 Requires: pcre-devel%{?_isa}
+Obsoletes: php-pecl-json-devel  < %{jsonver}
+Obsoletes: php-pecl-jsonc-devel < %{jsonver}
 %if %{with_zts}
 Provides: php-zts-devel = %{version}-%{release}
 Provides: php-zts-devel%{?_isa} = %{version}-%{release}
-%endif
-%if ! %{php_bootstrap}
-Requires: php-pecl-jsonc-devel%{?_isa}
 %endif
 
 %description devel
@@ -307,10 +294,10 @@ Group:     Development/Languages
 License:   PHP
 Requires:  php-common%{?_isa} = %{version}-%{release}
 Obsoletes: php-pecl-zendopcache
-Provides:  php-pecl-zendopcache = %{opcachever}
-Provides:  php-pecl-zendopcache%{?_isa} = %{opcachever}
-Provides:  php-pecl(opcache) = %{opcachever}
-Provides:  php-pecl(opcache)%{?_isa} = %{opcachever}
+Provides:  php-pecl-zendopcache = %{version}
+Provides:  php-pecl-zendopcache%{?_isa} = %{version}
+Provides:  php-pecl(opcache) = %{version}
+Provides:  php-pecl(opcache)%{?_isa} = %{version}
 
 %description opcache
 The Zend OPcache provides faster PHP execution through opcode caching and
@@ -371,8 +358,6 @@ Group: Development/Languages
 License: PHP
 Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
-Provides: php-mysql = %{version}-%{release}
-Provides: php-mysql%{?_isa} = %{version}-%{release}
 Provides: php-mysqli = %{version}-%{release}
 Provides: php-mysqli%{?_isa} = %{version}-%{release}
 Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
@@ -549,7 +534,6 @@ License: PHP
 License: PHP and BSD
 %endif
 Requires: php-common%{?_isa} = %{version}-%{release}
-BuildRequires: t1lib-devel
 %if %{with_libgd}
 BuildRequires: gd-devel >= 2.1.0
 %else
@@ -558,7 +542,7 @@ BuildRequires: libjpeg-devel
 BuildRequires: libpng-devel
 BuildRequires: freetype-devel
 BuildRequires: libXpm-devel
-BuildRequires: libvpx-devel
+BuildRequires: libwebp-devel
 %endif
 
 %description gd
@@ -625,8 +609,8 @@ BuildRequires: libtidy-devel
 The php-tidy package contains a dynamic shared object that will add
 support for using the tidy library to PHP.
 
-%package mssql
-Summary: MSSQL database module for PHP
+%package pdo-dblib
+Summary: PDO driver Microsoft SQL Server and Sybase databases
 Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
@@ -634,11 +618,10 @@ Requires: php-pdo%{?_isa} = %{version}-%{release}
 BuildRequires: freetds-devel
 Provides: php-pdo_dblib, php-pdo_dblib%{?_isa}
 
-%description mssql
-The php-mssql package contains a dynamic shared object that will
-add MSSQL database support to PHP.  It uses the TDS (Tabular
-DataStream) protocol through the freetds library, hence any
-database server which supports TDS can be accessed.
+%description pdo-dblib
+The php-pdo-dblib package contains a dynamic shared object
+that implements the PHP Data Objects (PDO) interface to enable access from
+PHP to Microsoft SQL Server and Sybase databases through the FreeTDS libary.
 
 %package embedded
 Summary: PHP library for embedding in applications
@@ -700,6 +683,24 @@ BuildRequires: enchant-devel >= 1.2.4
 The php-enchant package contains a dynamic shared object that will add
 support for using the enchant library to PHP.
 
+%package json
+Summary: JavaScript Object Notation extension for PHP
+# All files licensed under PHP version 3.0.1
+License: PHP
+Group: System Environment/Libraries
+Requires: php-common%{?_isa} = %{version}-%{release}
+Obsoletes: php-pecl-json          < %{jsonver}
+Obsoletes: php-pecl-jsonc         < %{jsonver}
+Provides:  php-pecl(json)         = %{jsonver}
+Provides:  php-pecl(json)%{?_isa} = %{jsonver}
+Provides:  php-pecl-json          = %{jsonver}
+Provides:  php-pecl-json%{?_isa}  = %{jsonver}
+
+%description json
+The php-json package provides an extension that will add
+support for JavaScript Object Notation (JSON) to PHP.
+
+
 
 %prep
 %setup -q -n php-%{version}%{?rcver}
@@ -732,7 +733,6 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
 cp TSRM/LICENSE TSRM_LICENSE
-cp ext/ereg/regex/COPYRIGHT regex_COPYRIGHT
 %if ! %{with_libgd}
 cp ext/gd/libgd/README libgd_README
 cp ext/gd/libgd/COPYING libgd_COPYING
@@ -761,6 +761,7 @@ rm ext/date/tests/timezone_version_get_basic1.phpt
 rm ext/sockets/tests/mcast_ipv?_recv.phpt
 # cause stack exhausion
 rm Zend/tests/bug54268.phpt
+rm Zend/tests/bug68412.phpt
 
 # Safety check for API version change.
 pver=$(sed -n '/#define PHP_VERSION /{s/.* "//;s/".*$//;p}' main/php_version.h)
@@ -792,11 +793,10 @@ if test "x${vpdo}" != "x%{pdover}"; then
    exit 1
 fi
 
-# Check for some extension version
-ver=$(sed -n '/#define PHP_ZENDOPCACHE_VERSION /{s/.* "//;s/".*$//;p}' ext/opcache/ZendAccelerator.h)
-if test "$ver" != "%{opcachever}"; then
-   : Error: Upstream OPCACHE version is now ${ver}, expecting %{opcachever}.
-   : Update the opcachever macro and rebuild.
+ver=$(sed -n '/#define PHP_JSON_VERSION /{s/.* "//;s/".*$//;p}' ext/json/php_json.h)
+if test "$ver" != "%{jsonver}"; then
+   : Error: Upstream JSON version is now ${ver}, expecting %{jsonver}.
+   : Update the %{jsonver} macro and rebuild.
    exit 1
 fi
 
@@ -820,6 +820,10 @@ echo "d /run/php-fpm 755 root root" >php-fpm.tmpfiles
 
 # Some extensions have their own configuration file
 cp %{SOURCE50} 10-opcache.ini
+
+%ifarch x86_64
+sed -e '/opcache.huge_code_pages/s/0/1/' -i 10-opcache.ini
+%endif
 
 
 %build
@@ -875,7 +879,6 @@ ln -sf ../configure
     --with-png-dir=%{_prefix} \
     --with-xpm-dir=%{_prefix} \
     --enable-gd-native-ttf \
-    --with-t1lib=%{_prefix} \
     --without-gdbm \
     --with-jpeg-dir=%{_prefix} \
     --with-openssl \
@@ -906,6 +909,7 @@ pushd build-cgi
 build --libdir=%{_libdir}/php \
       --enable-pcntl \
       --enable-opcache \
+      --enable-opcache-file \
       --enable-phpdbg \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
@@ -931,7 +935,6 @@ build --libdir=%{_libdir}/php \
       --with-xmlrpc=shared \
       --with-ldap=shared --with-ldap-sasl \
       --enable-mysqlnd=shared \
-      --with-mysql=shared,mysqlnd \
       --with-mysqli=shared,mysqlnd \
       --with-mysql-sock=%{mysql_sock} \
       --with-interbase=shared,%{_libdir}/firebird \
@@ -953,6 +956,7 @@ build --libdir=%{_libdir}/php \
       --with-pdo-sqlite=shared,%{_prefix} \
       --with-pdo-dblib=shared,%{_prefix} \
       --with-sqlite3=shared,%{_prefix} \
+      --enable-json=shared \
 %if %{with_zip}
       --enable-zip=shared \
 %if %{with_libzip}
@@ -965,7 +969,6 @@ build --libdir=%{_libdir}/php \
       --enable-phar=shared \
       --with-mcrypt=shared,%{_prefix} \
       --with-tidy=shared,%{_prefix} \
-      --with-mssql=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
       --enable-shmop=shared \
       --enable-posix=shared \
@@ -980,6 +983,7 @@ popd
 without_shared="--without-gd \
       --disable-dom --disable-dba --without-unixODBC \
       --disable-opcache \
+      --disable-json \
       --disable-xmlreader --disable-xmlwriter \
       --without-sqlite3 --disable-phar --disable-fileinfo \
       --without-pspell --disable-wddx \
@@ -993,7 +997,7 @@ without_shared="--without-gd \
 pushd build-apache
 build --with-apxs2=%{_httpd_apxs} \
       --libdir=%{_libdir}/php \
-      --without-mysql \
+      --without-mysqli \
       --disable-pdo \
       ${without_shared}
 popd
@@ -1004,16 +1008,16 @@ build --enable-fpm \
       --with-fpm-acl \
       --with-fpm-systemd \
       --libdir=%{_libdir}/php \
-      --without-mysql \
+      --without-mysqli \
       --disable-pdo \
       ${without_shared}
 popd
 
 # Build for inclusion as embedded script language into applications,
-# /usr/lib[64]/libphp5.so
+# /usr/lib[64]/libphp7.so
 pushd build-embedded
 build --enable-embed \
-      --without-mysql --disable-pdo \
+      --without-mysqli --disable-pdo \
       ${without_shared}
 popd
 
@@ -1030,6 +1034,7 @@ build --includedir=%{_includedir}/php-zts \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d \
       --enable-pcntl \
       --enable-opcache \
+      --enable-opcache-file \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
       --enable-mbregex \
@@ -1054,7 +1059,6 @@ build --includedir=%{_includedir}/php-zts \
       --with-xmlrpc=shared \
       --with-ldap=shared --with-ldap-sasl \
       --enable-mysqlnd=shared \
-      --with-mysql=shared,mysqlnd \
       --with-mysqli=shared,mysqlnd \
       --with-mysql-sock=%{mysql_sock} \
       --enable-mysqlnd-threading \
@@ -1077,6 +1081,7 @@ build --includedir=%{_includedir}/php-zts \
       --with-pdo-sqlite=shared,%{_prefix} \
       --with-pdo-dblib=shared,%{_prefix} \
       --with-sqlite3=shared,%{_prefix} \
+      --enable-json=shared \
 %if %{with_zip}
       --enable-zip=shared \
 %if %{with_libzip}
@@ -1089,7 +1094,6 @@ build --includedir=%{_includedir}/php-zts \
       --enable-phar=shared \
       --with-mcrypt=shared,%{_prefix} \
       --with-tidy=shared,%{_prefix} \
-      --with-mssql=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
       --enable-shmop=shared \
       --enable-posix=shared \
@@ -1108,7 +1112,7 @@ build --with-apxs2=%{_httpd_apxs} \
       --libdir=%{_libdir}/php-zts \
       --enable-maintainer-zts \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d \
-      --without-mysql \
+      --without-mysqli \
       --disable-pdo \
       ${without_shared}
 popd
@@ -1172,18 +1176,18 @@ install -m 755 -d $RPM_BUILD_ROOT%{_datadir}/php
 
 # install the DSO
 install -m 755 -d $RPM_BUILD_ROOT%{_httpd_moddir}
-install -m 755 build-apache/libs/libphp5.so $RPM_BUILD_ROOT%{_httpd_moddir}
+install -m 755 build-apache/libs/libphp7.so $RPM_BUILD_ROOT%{_httpd_moddir}
 
 %if %{with_zts}
 # install the ZTS DSO
-install -m 755 build-zts/libs/libphp5.so $RPM_BUILD_ROOT%{_httpd_moddir}/libphp5-zts.so
+install -m 755 build-zts/libs/libphp7.so $RPM_BUILD_ROOT%{_httpd_moddir}/libphp7-zts.so
 %endif
 
 # Apache config fragment
 # Dual config file with httpd >= 2.4 (fedora >= 18)
-install -D -m 644 %{SOURCE9} $RPM_BUILD_ROOT%{_httpd_modconfdir}/10-php.conf
+install -D -m 644 %{SOURCE9} $RPM_BUILD_ROOT%{_httpd_modconfdir}/15-php.conf
 %if %{with_zts}
-cat %{SOURCE10} >>$RPM_BUILD_ROOT%{_httpd_modconfdir}/10-php.conf
+cat %{SOURCE10} >>$RPM_BUILD_ROOT%{_httpd_modconfdir}/15-php.conf
 %endif
 install -D -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
 
@@ -1195,6 +1199,7 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php
 install -m 755 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/peclxml
 install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/session
 install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/wsdlcache
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/opcache
 
 # PHP-FPM stuff
 # Log
@@ -1205,6 +1210,7 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d
 install -m 644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.conf
 install -m 644 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d/www.conf
 mv $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.conf.default .
+mv $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d/www.conf.default .
 # tmpfiles.d
 install -m 755 -d $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d
 install -m 644 php-fpm.tmpfiles $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d/php-fpm.conf
@@ -1220,8 +1226,8 @@ install -D -m 644 %{SOURCE13} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/conf.d/php-fpm
 install -D -m 644 %{SOURCE14} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/default.d/php.conf
 
 # Generate files lists and stub .ini files for each subpackage
-for mod in pgsql odbc ldap snmp xmlrpc imap \
-    mysqlnd mysql mysqli pdo_mysql \
+for mod in pgsql odbc ldap snmp xmlrpc imap json \
+    mysqlnd mysqli pdo_mysql \
     mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
     simplexml bz2 calendar ctype exif ftp gettext gmp iconv \
     sockets tokenizer opcache \
@@ -1232,14 +1238,14 @@ for mod in pgsql odbc ldap snmp xmlrpc imap \
     interbase pdo_firebird \
     sqlite3 \
     enchant phar fileinfo intl \
-    mcrypt tidy pdo_dblib mssql pspell curl wddx \
+    mcrypt tidy pdo_dblib pspell curl wddx \
     posix shmop sysvshm sysvsem sysvmsg recode xml \
     ; do
     case $mod in
       opcache)
         # Zend extensions
         ini=10-${mod}.ini;;
-      pdo_*|mysql|mysqli|wddx|xmlreader|xmlrpc)
+      pdo_*|mysqli|wddx|xmlreader|xmlrpc)
         # Extensions with dependencies on 20-*
         ini=30-${mod}.ini;;
       *)
@@ -1277,13 +1283,11 @@ cat files.dom files.xsl files.xml{reader,writer} files.wddx \
     files.simplexml >> files.xml
 
 # mysqlnd
-cat files.mysql \
-    files.mysqli \
+cat files.mysqli \
     files.pdo_mysql \
     >> files.mysqlnd
 
 # Split out the PDO modules
-cat files.pdo_dblib >> files.mssql
 cat files.pdo_pgsql >> files.pgsql
 cat files.pdo_odbc >> files.odbc
 cat files.pdo_firebird >> files.interbase
@@ -1328,7 +1332,7 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
        $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/*.a \
        $RPM_BUILD_ROOT%{_bindir}/{phptar} \
        $RPM_BUILD_ROOT%{_datadir}/pear \
-       $RPM_BUILD_ROOT%{_libdir}/libphp5.la
+       $RPM_BUILD_ROOT%{_libdir}/libphp7.la
 
 # Remove irrelevant docs
 rm -f README.{Zeus,QNX,CVS-RULES}
@@ -1347,19 +1351,20 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %postun embedded -p /sbin/ldconfig
 
 %files
-%{_httpd_moddir}/libphp5.so
+%{_httpd_moddir}/libphp7.so
 %if %{with_zts}
-%{_httpd_moddir}/libphp5-zts.so
+%{_httpd_moddir}/libphp7-zts.so
 %endif
 %attr(0770,root,apache) %dir %{_sharedstatedir}/php/session
 %attr(0770,root,apache) %dir %{_sharedstatedir}/php/wsdlcache
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/opcache
 %config(noreplace) %{_httpd_confdir}/php.conf
-%config(noreplace) %{_httpd_modconfdir}/10-php.conf
+%config(noreplace) %{_httpd_modconfdir}/15-php.conf
 %{_httpd_contentdir}/icons/php.gif
 
 %files common -f files.common
 %doc CODING_STANDARDS CREDITS EXTENSIONS NEWS README*
-%license LICENSE Zend/ZEND_* TSRM_LICENSE regex_COPYRIGHT
+%license LICENSE Zend/ZEND_* TSRM_LICENSE
 %license libmagic_LICENSE
 %license phar_LICENSE
 %doc php.ini-*
@@ -1395,15 +1400,20 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %doc sapi/cgi/README* sapi/cli/README
 
 %files dbg
-%{_bindir}/phpdbg
 %doc sapi/phpdbg/{README.md,CREDITS}
+%{_bindir}/phpdbg
 %{_mandir}/man1/phpdbg.1*
+%if %{with_zts}
+%{_bindir}/zts-phpdbg
+%{_mandir}/man1/zts-phpdbg.1*
+%endif
 
 %files fpm
-%doc php-fpm.conf.default
+%doc php-fpm.conf.default www.conf.default
 %license fpm_LICENSE
 %attr(0770,root,apache) %dir %{_sharedstatedir}/php/session
 %attr(0770,root,apache) %dir %{_sharedstatedir}/php/wsdlcache
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/opcache
 %config(noreplace) %{_httpd_confdir}/php.conf
 %config(noreplace) %{_sysconfdir}/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/php-fpm.d/www.conf
@@ -1438,8 +1448,8 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %{_rpmconfigdir}/macros.d/macros.php
 
 %files embedded
-%{_libdir}/libphp5.so
-%{_libdir}/libphp5-%{embed_version}.so
+%{_libdir}/libphp7.so
+%{_libdir}/libphp7-%{embed_version}.so
 
 %files pgsql -f files.pgsql
 %files odbc -f files.odbc
@@ -1465,7 +1475,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %files pdo -f files.pdo
 %files mcrypt -f files.mcrypt
 %files tidy -f files.tidy
-%files mssql -f files.mssql
+%files pdo-dblib -f files.pdo_dblib
 %files pspell -f files.pspell
 %files intl -f files.intl
 %files process -f files.process
@@ -1476,9 +1486,16 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %files opcache -f files.opcache
 %config(noreplace) %{_sysconfdir}/php.d/opcache-default.blacklist
 %config(noreplace) %{_sysconfdir}/php-zts.d/opcache-default.blacklist
+%files json -f files.json
 
 
 %changelog
+* Wed Jun 22 2016 Remi Collet <remi@fedoraproject.org> 7.0.8-1
+- Update to 7.0.8 - http://www.php.net/releases/7_0_8.php
+- https://fedoraproject.org/wiki/Changes/php70
+- drop ereg, mysql, mssql extensions
+- add json extension
+
 * Wed Jun 22 2016 Remi Collet <remi@fedoraproject.org> 5.6.23-1
 - Update to 5.6.23 - http://www.php.net/releases/5_6_23.php
 

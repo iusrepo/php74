@@ -1,6 +1,6 @@
-diff -up php-5.6.17RC1/ext/dba/config.m4.libdb php-5.6.17RC1/ext/dba/config.m4
---- php-5.6.17RC1/ext/dba/config.m4.libdb	2015-12-10 10:42:34.643252975 +0100
-+++ php-5.6.17RC1/ext/dba/config.m4	2015-12-10 10:44:27.924729361 +0100
+diff -up php-7.0.2RC1/ext/dba/config.m4.libdb php-7.0.2RC1/ext/dba/config.m4
+--- php-7.0.2RC1/ext/dba/config.m4.libdb	2015-12-27 07:54:48.669923462 +0100
++++ php-7.0.2RC1/ext/dba/config.m4	2015-12-27 07:55:03.607947034 +0100
 @@ -312,61 +312,13 @@ if test "$PHP_DB4" != "no"; then
    dbdp4="/usr/local/BerkeleyDB.4."
    dbdp5="/usr/local/BerkeleyDB.5."
@@ -65,9 +65,9 @@ diff -up php-5.6.17RC1/ext/dba/config.m4.libdb php-5.6.17RC1/ext/dba/config.m4
  fi
  PHP_DBA_STD_RESULT(db4,Berkeley DB4)
  
-diff -up php-5.6.17RC1/ext/dba/dba.c.libdb php-5.6.17RC1/ext/dba/dba.c
---- php-5.6.17RC1/ext/dba/dba.c.libdb	2015-12-10 01:36:02.000000000 +0100
-+++ php-5.6.17RC1/ext/dba/dba.c	2015-12-10 10:42:34.644252979 +0100
+diff -up php-7.0.2RC1/ext/dba/dba.c.libdb php-7.0.2RC1/ext/dba/dba.c
+--- php-7.0.2RC1/ext/dba/dba.c.libdb	2015-12-22 16:19:29.000000000 +0100
++++ php-7.0.2RC1/ext/dba/dba.c	2015-12-27 07:52:30.381638216 +0100
 @@ -52,6 +52,10 @@
  #include "php_qdbm.h"
  #include "php_tcadb.h"
@@ -79,7 +79,7 @@ diff -up php-5.6.17RC1/ext/dba/dba.c.libdb php-5.6.17RC1/ext/dba/dba.c
  /* {{{ arginfo */
  ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
  	ZEND_ARG_INFO(0, path)
-@@ -535,6 +539,10 @@ PHP_MINFO_FUNCTION(dba)
+@@ -552,6 +556,10 @@ PHP_MINFO_FUNCTION(dba)
  
  	php_info_print_table_start();
   	php_info_print_table_row(2, "DBA support", "enabled");
@@ -87,6 +87,6 @@ diff -up php-5.6.17RC1/ext/dba/dba.c.libdb php-5.6.17RC1/ext/dba/dba.c
 + 	php_info_print_table_row(2, "libdb header version", DB_VERSION_STRING);
 + 	php_info_print_table_row(2, "libdb library version", db_version(NULL, NULL, NULL));
 +#endif
- 	if (handlers.c) {
+ 	if (handlers.s) {
  		smart_str_0(&handlers);
- 		php_info_print_table_row(2, "Supported handlers", handlers.c);
+ 		php_info_print_table_row(2, "Supported handlers", ZSTR_VAL(handlers.s));

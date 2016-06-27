@@ -2,6 +2,7 @@ Add support for use of the system timezone database, rather
 than embedding a copy.  Discussed upstream but was not desired.
 
 History:
+r13: adapt for upstream changes to use PHP allocator
 r12: adapt for upstream changes for new zic
 r11: use canonical names to avoid more case sensitivity issues
      round lat/long from zone.tab towards zero per builtin db
@@ -20,9 +21,9 @@ r3: fix a crash if /usr/share/zoneinfo doesn't exist (Raphael Geissert)
 r2: add filesystem trawl to set up name alias index
 r1: initial revision
 
-diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/parse_tz.c
---- php-5.6.13/ext/date/lib/parse_tz.c.systzdata	2015-09-03 02:02:45.000000000 +0200
-+++ php-5.6.13/ext/date/lib/parse_tz.c	2015-09-03 12:50:52.555576944 +0200
+diff -up php-7.0.0RC1/ext/date/lib/parse_tz.c.systzdata php-7.0.0RC1/ext/date/lib/parse_tz.c
+--- php-7.0.0RC1/ext/date/lib/parse_tz.c.systzdata	2015-08-18 23:39:24.000000000 +0200
++++ php-7.0.0RC1/ext/date/lib/parse_tz.c	2015-08-22 07:54:38.097258458 +0200
 @@ -20,6 +20,16 @@
  
  #include "timelib.h"
@@ -40,11 +41,12 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
  #include <stdio.h>
  
  #ifdef HAVE_LOCALE_H
-@@ -33,7 +43,11 @@
+@@ -32,8 +42,12 @@
+ #include <strings.h>
  #endif
  
- #define TIMELIB_SUPPORTS_V2DATA
 +#ifndef HAVE_SYSTEM_TZDATA
+ #define TIMELIB_SUPPORTS_V2DATA
  #include "timezonedb.h"
 +#endif
 +
@@ -52,7 +54,7 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
  
  #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
  # if defined(__LITTLE_ENDIAN__)
-@@ -55,6 +69,10 @@ static int read_preamble(const unsigned
+@@ -55,6 +69,11 @@ static int read_preamble(const unsigned
  {
  	uint32_t version;
  
@@ -60,10 +62,11 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
 +		*tzf += 20;
 +		return 0;
 +	}
++
  	/* read ID */
  	version = (*tzf)[3] - '0';
  	*tzf += 4;
-@@ -298,7 +316,418 @@ void timelib_dump_tzinfo(timelib_tzinfo
+@@ -298,7 +317,418 @@ void timelib_dump_tzinfo(timelib_tzinfo
  	}
  }
  
@@ -101,11 +104,11 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
 +    const unsigned char *p = (const unsigned char *)str;
 +    uint32_t hash = 5381;
 +    int c;
-+    
++
 +    while ((c = tolower(*p++)) != '\0') {
 +        hash = (hash << 5) ^ hash ^ c;
 +    }
-+    
++
 +    return hash % LOCINFO_HASH_SIZE;
 +}
 +
@@ -433,9 +436,9 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
 +{
 +    if (timezonedb_system) {
 +        timelib_tzdb_index_entry *ent, lookup;
-+        
++
 +        lookup.id = (char *)timezone;
-+        
++
 +        ent = bsearch(&lookup, timezonedb_system->index,
 +                      timezonedb_system->index_size, sizeof lookup,
 +                      sysdbcmp);
@@ -483,7 +486,7 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
  {
  	int left = 0, right = tzdb->index_size - 1;
  #ifdef HAVE_SETLOCALE
-@@ -337,21 +766,87 @@ static int seek_to_tz_position(const uns
+@@ -337,21 +767,88 @@ static int seek_to_tz_position(const uns
  	return 0;
  }
  
@@ -500,9 +503,9 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
 +			return 0;
 +		}
 +
-+		(*tzf) = (unsigned char *)orig ;
++		(*tzf) = (unsigned char *)orig;
 +		*map = orig;
-+		return 1;
++        return 1;
 +	}
 +	else
 +#endif
@@ -568,11 +571,12 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
 +		return stat(fname, &st) == 0 && is_valid_tzfile(&st);
 +	}
 +#endif
++
 +	return (inmem_seek_to_tz_position(&tzf, timezone, tzdb));
  }
  
  static void skip_64bit_preamble(const unsigned char **tzf, timelib_tzinfo *tz)
-@@ -376,24 +871,54 @@ static void read_64bit_header(const unsi
+@@ -376,24 +873,54 @@ static void read_64bit_header(const unsi
  timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb)
  {
  	const unsigned char *tzf;
@@ -606,8 +610,8 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
 +			 * if possible. */
 +
 +			if ((li = find_zone_info(system_location_table, timezone)) != NULL) {
-+				tmp->location.comments = strdup(li->comment);
-+                                strncpy(tmp->location.country_code, li->code, 2);
++				tmp->location.comments = timelib_strdup(li->comment);
++				strncpy(tmp->location.country_code, li->code, 2);
 +				tmp->location.longitude = li->longitude;
 +				tmp->location.latitude = li->latitude;
 +				tmp->bc = 1;
@@ -615,7 +619,7 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
 +			else {
 +				strcpy(tmp->location.country_code, "??");
 +				tmp->bc = 0;
-+				tmp->location.comments = strdup("");
++				tmp->location.comments = timelib_strdup("");
 +			}
 +
 +			/* Now done with the mmap segment - discard it. */
@@ -623,6 +627,7 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
 +		} else
 +#endif
 +		{
++			/* PHP-style - use the embedded info. */
 +			if (version == 2) {
 +				skip_64bit_preamble(&tzf, tmp);
 +				read_64bit_header(&tzf, tmp);
@@ -630,15 +635,14 @@ diff -up php-5.6.13/ext/date/lib/parse_tz.c.systzdata php-5.6.13/ext/date/lib/pa
 +				skip_64bit_types(&tzf, tmp);
 +				skip_posix_string(&tzf, tmp);
 +			}
-+			/* PHP-style - use the embedded info. */
 +			read_location(&tzf, tmp);
 + 		}
  	} else {
  		tmp = NULL;
  	}
-diff -up php-5.6.13/ext/date/lib/timelib.m4.systzdata php-5.6.13/ext/date/lib/timelib.m4
---- php-5.6.13/ext/date/lib/timelib.m4.systzdata	2015-09-03 02:02:45.000000000 +0200
-+++ php-5.6.13/ext/date/lib/timelib.m4	2015-09-03 12:49:43.247226154 +0200
+diff -up php-7.0.0RC1/ext/date/lib/timelib.m4.systzdata php-7.0.0RC1/ext/date/lib/timelib.m4
+--- php-7.0.0RC1/ext/date/lib/timelib.m4.systzdata	2015-08-18 23:39:24.000000000 +0200
++++ php-7.0.0RC1/ext/date/lib/timelib.m4	2015-08-22 07:47:34.854055364 +0200
 @@ -78,3 +78,17 @@ stdlib.h
  
  dnl Check for strtoll, atoll
