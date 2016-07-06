@@ -58,12 +58,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver  RC1
-%global rpmrel 2
+%global rcver  RC1
+%global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 7.0.8
+Version: 7.0.9
 %if 0%{?rcver:1}
 Release: 0.%{rpmrel}.%{rcver}%{?dist}
 %else
@@ -1496,6 +1496,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Jul  6 2016 Remi Collet <remi@fedoraproject.org> 7.0.9-0.1.RC1
+- Update to 7.0.9RC1
+
 * Thu Jun 30 2016 Remi Collet <remi@fedoraproject.org> 7.0.8-2
 - own tests/doc directories for pecl packages #1351345
 
