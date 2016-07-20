@@ -58,7 +58,7 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC1
+#global rcver  RC1
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
@@ -111,6 +111,7 @@ Patch46: php-7.0.0-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch100: bug72564.patch
 
 # Security fixes (200+)
 
@@ -723,6 +724,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch100 -p1 -b .bug72564
 
 # security patches
 
@@ -1496,6 +1498,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Jul 20 2016 Remi Collet <remi@fedoraproject.org> 7.0.9-1
+- Update to 7.0.9 - http://www.php.net/releases/7_0_9.php
+- wddx: add upstream patch for https://bugs.php.net/72564
+
 * Wed Jul  6 2016 Remi Collet <remi@fedoraproject.org> 7.0.9-0.1.RC1
 - Update to 7.0.9RC1
 
