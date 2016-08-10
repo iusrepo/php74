@@ -139,7 +139,6 @@ BuildRequires: systemtap-sdt-devel
 %endif
 
 %if %{with_zts}
-Obsoletes: php-zts < 5.3.7
 Provides: php-zts = %{version}-%{release}
 Provides: php-zts%{?_isa} = %{version}-%{release}
 %endif
@@ -263,9 +262,6 @@ Provides: php-zip, php-zip%{?_isa}
 Obsoletes: php-pecl-zip < 1.11
 %endif
 Provides: php-zlib, php-zlib%{?_isa}
-Obsoletes: php-pecl-phar < 1.2.4
-Obsoletes: php-pecl-Fileinfo < 1.0.5
-Obsoletes: php-mhash < 5.3.0
 
 %description common
 The php-common package contains files used by both the php
@@ -293,7 +289,6 @@ Summary:   The Zend OPcache
 Group:     Development/Languages
 License:   PHP
 Requires:  php-common%{?_isa} = %{version}-%{release}
-Obsoletes: php-pecl-zendopcache
 Provides:  php-pecl-zendopcache = %{version}
 Provides:  php-pecl-zendopcache%{?_isa} = %{version}
 Provides:  php-pecl(opcache) = %{version}
@@ -361,7 +356,6 @@ Provides: php_database
 Provides: php-mysqli = %{version}-%{release}
 Provides: php-mysqli%{?_isa} = %{version}-%{release}
 Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
-Obsoletes: php-mysql < %{version}-%{release}
 
 %description mysqlnd
 The php-mysqlnd package contains a dynamic shared object that will add
