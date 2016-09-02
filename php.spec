@@ -58,12 +58,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver  RC1
+%global rcver  RC1
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 7.0.10
+Version: 7.0.11
 %if 0%{?rcver:1}
 Release: 0.%{rpmrel}.%{rcver}%{?dist}
 %else
@@ -1490,6 +1490,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri Sep  2 2016 Remi Collet <remi@fedoraproject.org> 7.0.11-0.1.RC1
+- Update to 7.0.11RC1
+
 * Thu Sep  1 2016 Remi Collet <remi@fedoraproject.org> 7.0.10-1
 - Update to 7.0.10 - http://www.php.net/releases/7_0_10.php
 
