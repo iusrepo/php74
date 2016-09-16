@@ -8,11 +8,12 @@ $text = file_get_contents($_SERVER['argv'][1]);
 if (!$text) {
 	die("Can't read {$_SERVER['argv'][1]}\n");
 }
+$debug = (isset($_SERVER['argv'][2]) && $_SERVER['argv'][2]==-'d');
 
 $text = explode("\n", $text);
 $in=false;
 foreach ($text as $line) {
-	if (preg_match('/(^[0-9][0-9] ... 20[0-9][0-9]) PHP (.*)$/', $line, $reg)) {
+	if (preg_match('/(^[0-9][0-9] ... 20[0-9][0-9])[,]* PHP (.*)$/', $line, $reg)) {
 		if ($in) {
 			break;
 		}
@@ -20,6 +21,7 @@ foreach ($text as $line) {
 		$in = true;
 		continue;
 	} else if (!$in) {
+		if ($debug) echo "+ Ignore $line\n";
 		continue;
 	}
 	$line = preg_replace('/(#[0-9])+/', 'php\1', $line);
