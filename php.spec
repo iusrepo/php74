@@ -6,17 +6,17 @@
 # Please preserve changelog entries
 #
 # API/ABI check
-%global apiver      20151012
-%global zendver     20151012
+%global apiver      20160303
+%global zendver     20160303
 %global pdover      20150127
 # Extension version
-%global jsonver     1.4.0
+%global jsonver     1.5.0
 
 # Adds -z now to the linker flags
 %global _hardened_build 1
 
 # version used for php embedded library soname
-%global embed_version 7.0
+%global embed_version 7.1
 
 %global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
@@ -58,12 +58,12 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC1
+%global rcver  RC3
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 7.0.12
+Version: 7.1.0
 %if 0%{?rcver:1}
 Release: 0.%{rpmrel}.%{rcver}%{?dist}
 %else
@@ -1490,6 +1490,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Oct 11 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC3
+- Update to 7.1.0RC3
+
 * Wed Sep 28 2016 Remi Collet <remi@fedoraproject.org> 7.0.12-0.1.RC1
 - Update to 7.0.12RC1
 
