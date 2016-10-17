@@ -58,7 +58,7 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC3
+%global rcver  RC4
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
@@ -100,7 +100,7 @@ Patch8: php-7.0.2-libdb.patch
 
 # Functional changes
 Patch40: php-7.0.0-dlopen.patch
-Patch42: php-7.0.0-systzdata-v13.patch
+Patch42: php-7.1.0-systzdata-v14.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
@@ -1490,6 +1490,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Mon Oct 17 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC4
+- Update to 7.1.0RC4
+- update tzdata patch to v14, improve check for valid tz file
+
 * Tue Oct 11 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC3
 - Update to 7.1.0RC3
 
