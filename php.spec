@@ -58,7 +58,7 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC4
+%global rcver  RC6
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
@@ -1490,8 +1490,8 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
-* Mon Oct 17 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC4
-- Update to 7.1.0RC4
+* Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC6
+- Update to 7.1.0RC6
 - update tzdata patch to v14, improve check for valid tz file
 
 * Tue Oct 11 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC3
