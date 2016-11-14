@@ -100,6 +100,7 @@ Patch5: php-7.0.0-includedir.patch
 Patch6: php-5.6.3-embed.patch
 Patch7: php-5.3.0-recode.patch
 Patch8: php-7.0.2-libdb.patch
+Patch9: php-7.1.0-firebird.patch
 
 # Functional changes
 Patch40: php-7.0.0-dlopen.patch
@@ -442,6 +443,7 @@ Summary: A module for PHP applications that use Interbase/Firebird databases
 Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
+# for fb_config command
 BuildRequires:  firebird-devel
 # Workaround for https://bugzilla.redhat.com/1394750
 BuildRequires:  libfbclient2-devel
@@ -713,6 +715,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
 %patch8 -p1 -b .libdb
+%patch9 -p1 -b .firebird
 
 %patch40 -p1 -b .dlopen
 %patch42 -p1 -b .systzdata
@@ -939,8 +942,8 @@ build --libdir=%{_libdir}/php \
       --with-mysqli=shared,mysqlnd \
       --with-mysql-sock=%{mysql_sock} \
 %if %{with_firebird}
-      --with-interbase=shared,%{_libdir}/firebird \
-      --with-pdo-firebird=shared,%{_libdir}/firebird \
+      --with-interbase=shared \
+      --with-pdo-firebird=shared \
 %endif
       --enable-dom=shared \
       --with-pgsql=shared \
@@ -1066,8 +1069,8 @@ build --includedir=%{_includedir}/php-zts \
       --with-mysql-sock=%{mysql_sock} \
       --enable-mysqlnd-threading \
 %if %{with_firebird}
-      --with-interbase=shared,%{_libdir}/firebird \
-      --with-pdo-firebird=shared,%{_libdir}/firebird \
+      --with-interbase=shared \
+      --with-pdo-firebird=shared \
 %endif
       --enable-dom=shared \
       --with-pgsql=shared \
@@ -1510,6 +1513,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 * Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.2.RC6
 - re-enable interbase sub package
   see http://bugzilla.redhat.com/1394750 sub package inconsistency
+- add patch to fix firebird include path (using fb_config)
 
 * Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC6
 - Update to 7.1.0RC6
