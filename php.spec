@@ -51,6 +51,9 @@
 
 %global with_zip     0
 %global with_libzip  0
+# Not yet compatible with firebird 3
+# https://bugs.php.net/bug.php?id=73512
+%global with_firebird 0
 
 %if 0%{?fedora} < 18 && 0%{?rhel} < 7
 %global db_devel  db4-devel
@@ -433,6 +436,7 @@ BuildRequires: libxml2-devel
 The php-soap package contains a dynamic shared object that will add
 support to PHP for using the SOAP web services protocol.
 
+%if %{with_firebird}
 %package interbase
 Summary: A module for PHP applications that use Interbase/Firebird databases
 Group: Development/Languages
@@ -456,6 +460,7 @@ technical advisors and supporters developing and enhancing a multi-platform
 relational database management system based on the source code released by
 Inprise Corp (now known as Borland Software Corp) under the InterBase Public
 License.
+%endif
 
 %package snmp
 Summary: A module for PHP applications that query SNMP-managed devices
@@ -931,8 +936,10 @@ build --libdir=%{_libdir}/php \
       --enable-mysqlnd=shared \
       --with-mysqli=shared,mysqlnd \
       --with-mysql-sock=%{mysql_sock} \
+%if %{with_firebird}
       --with-interbase=shared,%{_libdir}/firebird \
       --with-pdo-firebird=shared,%{_libdir}/firebird \
+%endif
       --enable-dom=shared \
       --with-pgsql=shared \
       --enable-simplexml=shared \
@@ -1056,8 +1063,10 @@ build --includedir=%{_includedir}/php-zts \
       --with-mysqli=shared,mysqlnd \
       --with-mysql-sock=%{mysql_sock} \
       --enable-mysqlnd-threading \
+%if %{with_firebird}
       --with-interbase=shared,%{_libdir}/firebird \
       --with-pdo-firebird=shared,%{_libdir}/firebird \
+%endif
       --enable-dom=shared \
       --with-pgsql=shared \
       --enable-simplexml=shared \
@@ -1232,7 +1241,9 @@ for mod in pgsql odbc ldap snmp xmlrpc imap json \
 %if %{with_zip}
     zip \
 %endif
+%if %{with_firebird}
     interbase pdo_firebird \
+%endif
     sqlite3 \
     enchant phar fileinfo intl \
     mcrypt tidy pdo_dblib pspell curl wddx \
@@ -1287,7 +1298,9 @@ cat files.mysqli \
 # Split out the PDO modules
 cat files.pdo_pgsql >> files.pgsql
 cat files.pdo_odbc >> files.odbc
+%if %{with_firebird}
 cat files.pdo_firebird >> files.interbase
+%endif
 
 # sysv* and posix in packaged in php-process
 cat files.shmop files.sysv* files.posix > files.process
@@ -1480,7 +1493,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %files intl -f files.intl
 %files process -f files.process
 %files recode -f files.recode
+%if %{with_firebird}
 %files interbase -f files.interbase
+%endif
 %files enchant -f files.enchant
 %files mysqlnd -f files.mysqlnd
 %files opcache -f files.opcache
@@ -1493,6 +1508,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 * Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC6
 - Update to 7.1.0RC6
 - update tzdata patch to v14, improve check for valid tz file
+- disable interbase sub package (interbase and pdo_firebird)
 
 * Tue Oct 11 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC3
 - Update to 7.1.0RC3
