@@ -53,7 +53,7 @@
 %global with_libzip  0
 # Not yet compatible with firebird 3
 # https://bugs.php.net/bug.php?id=73512
-%global with_firebird 0
+%global with_firebird 1
 
 %if 0%{?fedora} < 18 && 0%{?rhel} < 7
 %global db_devel  db4-devel
@@ -62,7 +62,7 @@
 %endif
 
 %global rcver  RC6
-%global rpmrel 1
+%global rpmrel 2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -443,6 +443,8 @@ Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
 BuildRequires:  firebird-devel
+# Workaround for https://bugzilla.redhat.com/1394750
+BuildRequires:  libfbclient2-devel
 Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-firebird, php-firebird%{?_isa}
@@ -1505,6 +1507,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.2.RC6
+- re-enable interbase sub package
+  see http://bugzilla.redhat.com/1394750 sub package inconsistency
+
 * Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.1.RC6
 - Update to 7.1.0RC6
 - update tzdata patch to v14, improve check for valid tz file
