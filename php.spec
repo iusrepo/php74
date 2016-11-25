@@ -62,7 +62,7 @@
 %endif
 
 %global rcver  RC6
-%global rpmrel 2
+%global rpmrel 3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1510,6 +1510,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri Nov 24 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.3.RC6
+- disable pcre.jit everywhere as it raise AVC #1398474
+- sync provided configuration with upstream production defaults
+
 * Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.2.RC6
 - re-enable interbase sub package
   see http://bugzilla.redhat.com/1394750 sub package inconsistency
