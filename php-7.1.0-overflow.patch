@@ -1,0 +1,72 @@
+From c2173c16d038cf99c5eff12ddc76f99d46a35c57 Mon Sep 17 00:00:00 2001
+From: Dmitry Stogov <dmitry@zend.com>
+Date: Thu, 17 Nov 2016 14:05:22 +0300
+Subject: [PATCH] Fixed 64-bit build
+
+---
+ ext/opcache/zend_accelerator_module.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/ext/opcache/zend_accelerator_module.c b/ext/opcache/zend_accelerator_module.c
+index 481660c..b6c8e13 100644
+--- a/ext/opcache/zend_accelerator_module.c
++++ b/ext/opcache/zend_accelerator_module.c
+@@ -107,7 +107,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
+ #else
+ 	char *base = (char *) ts_resource(*((int *) mh_arg2));
+ #endif
+-	zend_long overflow;
++	zend_long megabyte, overflow;
+ 	double dummy;
+ 
+ 	/* keep the compiler happy */
+@@ -132,7 +132,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
+ 
+ 		ini_entry->value = zend_string_init(new_new_value, 1, 1);
+ 	}
+-	ZEND_SIGNED_MULTIPLY_LONG(memsize, 1024 * 1024, *p, dummy, overflow);
++	megabyte = 1024 * 1024;
++	ZEND_SIGNED_MULTIPLY_LONG(memsize, megabyte, *p, dummy, overflow);
+ 	if (UNEXPECTED(overflow)) {
+ 		*p = ZEND_ULONG_MAX;
+ 	}
+-- 
+2.1.4
+
+From d4b3f89c53f8812cbaede013d7e4000917cf27e1 Mon Sep 17 00:00:00 2001
+From: Dmitry Stogov <dmitry@zend.com>
+Date: Thu, 17 Nov 2016 13:17:34 +0300
+Subject: [PATCH] Overflow check
+
+---
+ ext/opcache/zend_accelerator_module.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/ext/opcache/zend_accelerator_module.c b/ext/opcache/zend_accelerator_module.c
+index a7cf5c3..481660c 100644
+--- a/ext/opcache/zend_accelerator_module.c
++++ b/ext/opcache/zend_accelerator_module.c
+@@ -107,6 +107,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
+ #else
+ 	char *base = (char *) ts_resource(*((int *) mh_arg2));
+ #endif
++	zend_long overflow;
++	double dummy;
+ 
+ 	/* keep the compiler happy */
+ 	(void)entry; (void)mh_arg2; (void)mh_arg3; (void)stage;
+@@ -130,7 +132,10 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
+ 
+ 		ini_entry->value = zend_string_init(new_new_value, 1, 1);
+ 	}
+-	*p = memsize * (1024 * 1024);
++	ZEND_SIGNED_MULTIPLY_LONG(memsize, 1024 * 1024, *p, dummy, overflow);
++	if (UNEXPECTED(overflow)) {
++		*p = ZEND_ULONG_MAX;
++	}
+ 	return SUCCESS;
+ }
+ 
+-- 
+2.1.4
+

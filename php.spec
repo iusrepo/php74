@@ -100,6 +100,8 @@ Patch5: php-7.0.0-includedir.patch
 Patch6: php-5.6.3-embed.patch
 Patch7: php-5.3.0-recode.patch
 Patch8: php-7.0.2-libdb.patch
+# Temporary revert for aarch64
+Patch9: php-7.1.0-overflow.patch
 
 # Functional changes
 Patch40: php-7.0.0-dlopen.patch
@@ -712,6 +714,9 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 %patch6 -p1 -b .embed
 %patch7 -p1 -b .recode
 %patch8 -p1 -b .libdb
+%ifarch aarch64
+%patch9 -p1 -R -b .overflow
+%endif
 
 %patch40 -p1 -b .dlopen
 %patch42 -p1 -b .systzdata
