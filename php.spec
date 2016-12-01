@@ -61,8 +61,8 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC6
-%global rpmrel 3
+#global rcver  RC6
+%global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -445,8 +445,6 @@ Group: Development/Languages
 License: PHP
 # for fb_config command
 BuildRequires:  firebird-devel
-# Workaround for https://bugzilla.redhat.com/1394750
-BuildRequires:  libfbclient2-devel
 Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-firebird, php-firebird%{?_isa}
@@ -1510,7 +1508,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
-* Fri Nov 24 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.3.RC6
+* Thu Dec  1 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-1
+- Update to 7.1.0 - http://www.php.net/releases/7_1_0.php
+
+* Fri Nov 25 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-0.3.RC6
 - disable pcre.jit everywhere as it raise AVC #1398474
 - sync provided configuration with upstream production defaults
 
