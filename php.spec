@@ -1512,7 +1512,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 %changelog
 * Fri Jan  6 2017 Remi Collet <remi@fedoraproject.org> 7.1.1-0.1.RC1
-- Update to 7.1.0RC1
+- Update to 7.1.1RC1
 
 * Thu Dec  1 2016 Remi Collet <remi@fedoraproject.org> 7.1.0-1
 - Update to 7.1.0 - http://www.php.net/releases/7_1_0.php
