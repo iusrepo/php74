@@ -17,7 +17,7 @@ foreach ($text as $line) {
 		if ($in) {
 			break;
 		}
-		printf("%s **PHP version %s**", $reg[1], $reg[2]);
+		printf("**PHP version %s** (%s)", $reg[2], $reg[1]);
 		$in = true;
 		continue;
 	} else if (!$in) {
