@@ -62,7 +62,7 @@
 %endif
 
 %global rcver  RC1
-%global rpmrel 1
+%global rpmrel 2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1506,6 +1506,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Feb  2 2017 Remi Collet <remi@fedoraproject.org> - 7.1.2-0.2.RC1
+- Update to 7.1.2RC1 (new sources)
+
 * Wed Feb  1 2017 Remi Collet <remi@fedoraproject.org> 7.1.2-0.1.RC1
 - Update to 7.1.2RC1
 
