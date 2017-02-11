@@ -68,9 +68,9 @@ Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: 7.1.2
 %if 0%{?rcver:1}
-Release: 0.%{rpmrel}.%{rcver}%{?dist}
+Release: 0.%{rpmrel}.%{rcver}%{?dist}.1
 %else
-Release: %{rpmrel}%{?dist}
+Release: %{rpmrel}%{?dist}.1
 %endif
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -1506,6 +1506,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 7.1.2-0.2.RC1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Thu Feb  2 2017 Remi Collet <remi@fedoraproject.org> - 7.1.2-0.2.RC1
 - Update to 7.1.2RC1 (new sources)
 
