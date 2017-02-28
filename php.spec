@@ -61,17 +61,13 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver  RC1
+%global rcver  RC1
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 7.1.2
-%if 0%{?rcver:1}
-Release: 0.%{rpmrel}.%{rcver}%{?dist}.1
-%else
-Release: %{rpmrel}%{?dist}.1
-%endif
+Version: 7.1.3
+Release: %{?rcver:0.}%{rpmrel}%{?rcver:.%{rcver}}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -102,7 +98,7 @@ Patch7: php-5.3.0-recode.patch
 Patch8: php-7.0.2-libdb.patch
 
 # Functional changes
-Patch40: php-7.0.0-dlopen.patch
+Patch40: php-7.1.3-dlopen.patch
 Patch42: php-7.1.0-systzdata-v14.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
@@ -1506,6 +1502,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Feb 28 2017 Remi Collet <remi@fedoraproject.org> 7.1.3-0.1.RC1
+- Update to 7.1.3RC1
+
 * Wed Feb 15 2017 Remi Collet <remi@fedoraproject.org> - 7.1.2-1
 - Update to 7.1.2 - http://www.php.net/releases/7_1_2.php
 
