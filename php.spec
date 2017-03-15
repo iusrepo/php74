@@ -61,7 +61,7 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC1
+#global rcver  RC1
 %global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
@@ -1502,6 +1502,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Mar 15 2017 Remi Collet <remi@fedoraproject.org> - 7.1.3-1
+- Update to 7.1.3 - http://www.php.net/releases/7_1_3.php
+
 * Tue Feb 28 2017 Remi Collet <remi@fedoraproject.org> 7.1.3-0.1.RC1
 - Update to 7.1.3RC1
 
