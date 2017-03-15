@@ -21,7 +21,7 @@
 %global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
 # Regression tests take a long time, you can skip 'em with this
-#global runselftest 0
+%global runselftest 0
 %{!?runselftest: %global runselftest 1}
 
 # Use the arch-specific mysql_config binary to avoid mismatch with the
@@ -62,7 +62,7 @@
 %endif
 
 #global rcver  RC1
-%global rpmrel 1
+%global rpmrel 2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1274,11 +1274,11 @@ EOF
 %endif
     fi
     cat > files.${mod} <<EOF
-%attr(755,root,root) %{_libdir}/php/modules/${mod}.so
-%config(noreplace) %attr(644,root,root) %{_sysconfdir}/php.d/${ini}
+%{_libdir}/php/modules/${mod}.so
+%config(noreplace) %{_sysconfdir}/php.d/${ini}
 %if %{with_zts}
-%attr(755,root,root) %{_libdir}/php-zts/modules/${mod}.so
-%config(noreplace) %attr(644,root,root) %{_sysconfdir}/php-zts.d/${ini}
+%{_libdir}/php-zts/modules/${mod}.so
+%config(noreplace) %{_sysconfdir}/php-zts.d/${ini}
 %endif
 EOF
 done
@@ -1502,6 +1502,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Mar 15 2017 Remi Collet <remi@fedoraproject.org> - 7.1.3-2
+- remove %%attr, see #1432372
+
 * Wed Mar 15 2017 Remi Collet <remi@fedoraproject.org> - 7.1.3-1
 - Update to 7.1.3 - http://www.php.net/releases/7_1_3.php
 
