@@ -21,7 +21,7 @@
 %global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
 # Regression tests take a long time, you can skip 'em with this
-%global runselftest 0
+#global runselftest 0
 %{!?runselftest: %global runselftest 1}
 
 # Use the arch-specific mysql_config binary to avoid mismatch with the
