@@ -62,7 +62,7 @@
 %endif
 
 #global rcver  RC1
-%global rpmrel 2
+%global rpmrel 3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1501,6 +1501,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Mar 22 2017 Remi Collet <remi@fedoraproject.org> - 7.1.3-3
+- timelib is MIT license
+
 * Wed Mar 15 2017 Remi Collet <remi@fedoraproject.org> - 7.1.3-2
 - remove %%attr, see #1432372
 
