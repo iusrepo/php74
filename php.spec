@@ -61,12 +61,12 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver  RC1
-%global rpmrel 3
+%global rcver  RC1
+%global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 7.1.3
+Version: 7.1.4
 Release: %{?rcver:0.}%{rpmrel}%{?rcver:.%{rcver}}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -1501,6 +1501,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Mar 29 2017 Remi Collet <remi@fedoraproject.org> 7.1.4-0.1.RC1
+- Update to 7.1.4RC1
+
 * Wed Mar 22 2017 Remi Collet <remi@fedoraproject.org> - 7.1.3-3
 - timelib is MIT license
 
