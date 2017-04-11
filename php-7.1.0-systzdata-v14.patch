@@ -1,3 +1,6 @@
+# License: MIT
+# http://opensource.org/licenses/MIT
+
 Add support for use of the system timezone database, rather
 than embedding a copy.  Discussed upstream but was not desired.
 
@@ -21,6 +24,7 @@ r4: added "System/Localtime" tzname which uses /etc/localtime
 r3: fix a crash if /usr/share/zoneinfo doesn't exist (Raphael Geissert)
 r2: add filesystem trawl to set up name alias index
 r1: initial revision
+
 
 diff -up php-7.1.0RC4/ext/date/lib/parse_tz.c.systzdata php-7.1.0RC4/ext/date/lib/parse_tz.c
 --- php-7.1.0RC4/ext/date/lib/parse_tz.c.systzdata	2016-10-17 13:35:11.000000000 +0200
