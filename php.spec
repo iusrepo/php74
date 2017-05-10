@@ -61,8 +61,8 @@
 %global db_devel  libdb-devel
 %endif
 
-%global rcver  RC1
-%global rpmrel 3
+#global rcver  RC1
+%global rpmrel 1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1501,6 +1501,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue May  9 2017 Remi Collet <remi@fedoraproject.org> - 7.1.5-1
+- Update to 7.1.5 - http://www.php.net/releases/7_1_5.php
+
 * Sat May  6 2017 Remi Collet <remi@fedoraproject.org> - 7.1.5-0.3.RC1
 - enable PHP execution of .phar files, see #1117140
 
