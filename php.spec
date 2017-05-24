@@ -61,13 +61,13 @@
 %global db_devel  libdb-devel
 %endif
 
-#global rcver  RC1
-%global rpmrel 1
+%global upver        7.1.6
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 7.1.5
-Release: %{?rcver:0.}%{rpmrel}%{?rcver:.%{rcver}}%{?dist}
+Version: %{upver}%{?rcver:~%{rcver}}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -77,7 +77,7 @@ License: PHP and Zend and BSD and MIT and ASL 1.0
 Group: Development/Languages
 URL: http://www.php.net/
 
-Source0: http://www.php.net/distributions/php-%{version}%{?rcver}.tar.xz
+Source0: http://www.php.net/distributions/php-%{upver}%{?rcver}.tar.xz
 Source1: php.conf
 Source2: php.ini
 Source3: macros.php
@@ -696,7 +696,7 @@ support for JavaScript Object Notation (JSON) to PHP.
 
 
 %prep
-%setup -q -n php-%{version}%{?rcver}
+%setup -q -n php-%{upver}%{?rcver}
 
 # ensure than current httpd use prefork MPM.
 httpd -V  | grep -q 'threaded:.*yes' && exit 1
@@ -759,8 +759,8 @@ rm Zend/tests/bug68412.phpt
 
 # Safety check for API version change.
 pver=$(sed -n '/#define PHP_VERSION /{s/.* "//;s/".*$//;p}' main/php_version.h)
-if test "x${pver}" != "x%{version}%{?rcver}"; then
-   : Error: Upstream PHP version is now ${pver}, expecting %{version}%{?rcver}.
+if test "x${pver}" != "x%{upver}%{?rcver}"; then
+   : Error: Upstream PHP version is now ${pver}, expecting %{upver}%{?rcver}.
    : Update the version/rcver macros and rebuild.
    exit 1
 fi
@@ -1324,7 +1324,7 @@ sed -e '/blacklist_filename/s/php.d/php-zts.d/' \
 sed -e "s/@PHP_APIVER@/%{apiver}%{isasuffix}/" \
     -e "s/@PHP_ZENDVER@/%{zendver}%{isasuffix}/" \
     -e "s/@PHP_PDOVER@/%{pdover}%{isasuffix}/" \
-    -e "s/@PHP_VERSION@/%{version}/" \
+    -e "s/@PHP_VERSION@/%{upver}/" \
 %if ! %{with_zts}
     -e "/zts/d" \
 %endif
@@ -1501,6 +1501,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed May 24 2017 Remi Collet <remi@fedoraproject.org> - 7.1.6~RC1-1
+- Update to 7.1.6RC1
+
 * Tue May  9 2017 Remi Collet <remi@fedoraproject.org> - 7.1.5-1
 - Update to 7.1.5 - http://www.php.net/releases/7_1_5.php
 
