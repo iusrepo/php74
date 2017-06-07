@@ -62,7 +62,7 @@
 %endif
 
 %global upver        7.1.6
-%global rcver        RC1
+#global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -114,6 +114,7 @@ Patch47: php-5.6.3-phpinfo.patch
 # Upstream fixes (100+)
 
 # Security fixes (200+)
+Patch200: php-onigurama.patch
 
 # Fixes for tests (300+)
 # Factory is droped from system tzdata
@@ -723,6 +724,7 @@ httpd -V  | grep -q 'threaded:.*yes' && exit 1
 # upstream patches
 
 # security patches
+%patch200 -p1 -b .onig
 
 # Fixes for tests
 %patch300 -p1 -b .datetests
@@ -1506,6 +1508,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Jun  7 2017 Remi Collet <remi@fedoraproject.org> - 7.1.6-1
+- Update to 7.1.6 - http://www.php.net/releases/7_1_6.php
+- add upstream security patches for oniguruma
+
 * Wed May 24 2017 Remi Collet <remi@fedoraproject.org> - 7.1.6~RC1-1
 - Update to 7.1.6RC1
 
