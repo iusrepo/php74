@@ -130,7 +130,7 @@ BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: sqlite-devel >= 3.6.0
 BuildRequires: zlib-devel, smtpdaemon, libedit-devel
 BuildRequires: pcre-devel >= 6.6
-BuildRequires: bzip2, perl, libtool >= 1.4.3, gcc-c++
+BuildRequires: bzip2, perl-interpreter, libtool >= 1.4.3, gcc-c++
 BuildRequires: libtool-ltdl-devel
 %if %{with_libzip}
 BuildRequires: libzip-devel >= 0.11
