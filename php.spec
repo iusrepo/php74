@@ -61,8 +61,8 @@
 %global db_devel  libdb-devel
 %endif
 
-%global upver        7.1.7
-#global rcver        RC1
+%global upver        7.1.8
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1505,6 +1505,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Jul 19 2017 Remi Collet <remi@fedoraproject.org> - 7.1.8~RC1-1
+- Update to 7.1.8RC1
+
 * Tue Jul 18 2017 Remi Collet <remi@fedoraproject.org> - 7.1.7-2
 - disable httpd MPM check
 
