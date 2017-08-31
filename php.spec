@@ -62,7 +62,7 @@
 %endif
 
 %global upver        7.1.9
-%global rcver        RC1
+#global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1505,6 +1505,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Aug 30 2017 Remi Collet <remi@fedoraproject.org> - 7.1.9-1
+- Update to 7.1.9 - http://www.php.net/releases/7_1_9.php
+
 * Wed Aug 16 2017 Remi Collet <remi@fedoraproject.org> - 7.1.9~RC1-1
 - Update to 7.1.9RC1
 - php-fpm: drop unneeded "pid" from default configuration
