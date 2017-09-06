@@ -1,0 +1,52 @@
+Backported from PHP 7.2
+
+
+From 58df6a3b61f5cb914d899fbb44eecadad8098700 Mon Sep 17 00:00:00 2001
+From: Jakub Zelenka <bukka@php.net>
+Date: Mon, 28 Aug 2017 18:48:25 +0100
+Subject: [PATCH] Do not explicitly initialize and clean up OpenSSL for OpenSSL
+ 1.1
+
+From 1f843a8fb50de77a3f53a6b892a46d9e0afdfdd7 Mon Sep 17 00:00:00 2001
+From: Jakub Zelenka <bukka@php.net>
+Date: Mon, 28 Aug 2017 19:25:18 +0100
+Subject: [PATCH] Automatically load OpenSSL configuration file
+
+diff -up ./ext/openssl/openssl.c.loadconf ./ext/openssl/openssl.c
+--- ./ext/openssl/openssl.c.loadconf	2017-08-30 18:13:18.000000000 +0200
++++ ./ext/openssl/openssl.c	2017-09-06 13:11:47.212803443 +0200
+@@ -1409,6 +1409,8 @@ PHP_MINIT_FUNCTION(openssl)
+ 	le_x509 = zend_register_list_destructors_ex(php_x509_free, NULL, "OpenSSL X.509", module_number);
+ 	le_csr = zend_register_list_destructors_ex(php_csr_free, NULL, "OpenSSL X.509 CSR", module_number);
+ 
++#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
++	OPENSSL_config(NULL);
+ 	SSL_library_init();
+ 	OpenSSL_add_all_ciphers();
+ 	OpenSSL_add_all_digests();
+@@ -1421,6 +1423,9 @@ PHP_MINIT_FUNCTION(openssl)
+ #endif
+ 
+ 	SSL_load_error_strings();
++#else
++	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
++#endif
+ 
+ 	/* register a resource id number with OpenSSL so that we can map SSL -> stream structures in
+ 	 * OpenSSL callbacks */
+@@ -1585,12 +1590,15 @@ PHP_MINFO_FUNCTION(openssl)
+  */
+ PHP_MSHUTDOWN_FUNCTION(openssl)
+ {
++#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+ 	EVP_cleanup();
+ 
+ 	/* prevent accessing locking callback from unloaded extension */
+ 	CRYPTO_set_locking_callback(NULL);
+ 	/* free allocated error strings */
+ 	ERR_free_strings();
++	CONF_modules_free();
++#endif
+ 
+ 	php_unregister_url_stream_wrapper("https");
+ 	php_unregister_url_stream_wrapper("ftps");

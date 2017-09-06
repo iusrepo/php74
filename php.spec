@@ -67,7 +67,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -111,6 +111,8 @@ Patch45: php-5.6.3-ldap_r.patch
 Patch46: php-7.0.0-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
+# Automatically load OpenSSL configuration file
+Patch48: php-7.1.9-openssl-load-config.patch
 
 # Upstream fixes (100+)
 
@@ -718,6 +720,7 @@ support for JavaScript Object Notation (JSON) to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
+%patch48 -p1 -b .loadconf
 
 # upstream patches
 
@@ -1505,6 +1508,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Sep  6 2017 Remi Collet <remi@fedoraproject.org> - 7.1.9-2
+- Automatically load OpenSSL configuration file, from PHP 7.2
+
 * Wed Aug 30 2017 Remi Collet <remi@fedoraproject.org> - 7.1.9-1
 - Update to 7.1.9 - http://www.php.net/releases/7_1_9.php
 
