@@ -61,13 +61,13 @@
 %global db_devel  libdb-devel
 %endif
 
-%global upver        7.1.9
-#global rcver        RC1
+%global upver        7.1.10
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1508,6 +1508,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Sep 13 2017 Remi Collet <remi@fedoraproject.org> - 7.1.10~RC1-1
+- Update to 7.1.10RC1
+
 * Wed Sep  6 2017 Remi Collet <remi@fedoraproject.org> - 7.1.9-2
 - Automatically load OpenSSL configuration file, from PHP 7.2
 
