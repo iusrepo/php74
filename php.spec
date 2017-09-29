@@ -6,17 +6,17 @@
 # Please preserve changelog entries
 #
 # API/ABI check
-%global apiver      20160303
-%global zendver     20160303
-%global pdover      20150127
+%global apiver      20170718
+%global zendver     20170718
+%global pdover      20170320
 # Extension version
-%global jsonver     1.5.0
+%global jsonver     1.6.0
 
 # Adds -z now to the linker flags
 %global _hardened_build 1
 
 # version used for php embedded library soname
-%global embed_version 7.1
+%global embed_version 7.2
 
 %global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
@@ -61,8 +61,8 @@
 %global db_devel  libdb-devel
 %endif
 
-%global upver        7.1.10
-#global rcver        RC1
+%global upver        7.2.0
+%global rcver        RC3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -96,24 +96,22 @@ Source51: opcache-default.blacklist
 
 # Build fixes
 Patch1: php-7.1.7-httpd.patch
-Patch5: php-7.0.0-includedir.patch
+Patch5: php-7.2.0-includedir.patch
 Patch6: php-5.6.3-embed.patch
 Patch7: php-5.3.0-recode.patch
-Patch8: php-7.0.2-libdb.patch
+Patch8: php-7.2.0-libdb.patch
 
 # Functional changes
 Patch40: php-7.1.3-dlopen.patch
-Patch42: php-7.1.0-systzdata-v14.patch
+Patch42: php-7.2.0-systzdata-v15.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-5.6.3-ldap_r.patch
 # Make php_config.h constant across builds
-Patch46: php-7.0.0-fixheader.patch
+Patch46: php-7.2.0-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
-# Automatically load OpenSSL configuration file
-Patch48: php-7.1.9-openssl-load-config.patch
 
 # Upstream fixes (100+)
 
@@ -514,10 +512,9 @@ Summary: A module for PHP applications which need multi-byte string handling
 Group: Development/Languages
 # All files licensed under PHP version 3.01, except
 # libmbfl is licensed under LGPLv2
-# onigurama is licensed under BSD
 # ucgendat is licensed under OpenLDAP
-License: PHP and LGPLv2 and BSD and OpenLDAP
-Provides: bundled(oniguruma) = 5.9.6
+License: PHP and LGPLv2 and OpenLDAP
+BuildRequires: oniguruma-devel
 Provides: bundled(libmbfl) = 1.3.2
 Requires: php-common%{?_isa} = %{version}-%{release}
 
@@ -581,24 +578,14 @@ Summary: A database abstraction layer module for PHP applications
 Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
-BuildRequires: %{db_devel}, tokyocabinet-devel
+BuildRequires: %{db_devel}
+BuildRequires: tokyocabinet-devel
+BuildRequires: lmdb-devel
 Requires: php-common%{?_isa} = %{version}-%{release}
 
 %description dba
 The php-dba package contains a dynamic shared object that will add
 support for using the DBA database abstraction layer to PHP.
-
-%package mcrypt
-Summary: Standard PHP module provides mcrypt library support
-Group: Development/Languages
-# All files licensed under PHP version 3.01
-License: PHP
-Requires: php-common%{?_isa} = %{version}-%{release}
-BuildRequires: libmcrypt-devel
-
-%description mcrypt
-The php-mcrypt package contains a dynamic shared object that will add
-support for using the mcrypt library to PHP.
 
 %package tidy
 Summary: Standard PHP module provides tidy library support
@@ -703,6 +690,21 @@ Provides:  php-pecl-json%{?_isa}  = %{jsonver}
 The php-json package provides an extension that will add
 support for JavaScript Object Notation (JSON) to PHP.
 
+%package sodium
+Summary: Wrapper for the Sodium cryptographic library
+# All files licensed under PHP version 3.0.1
+License: PHP
+Group: System Environment/Libraries
+BuildRequires:  pkgconfig(libsodium) >= 1.0.9
+
+Requires: php-common%{?_isa} = %{version}-%{release}
+Obsoletes: php-pecl-libsodium2 < 7
+Provides:  php-pecl(libsodium)         = %{version}
+Provides:  php-pecl(libsodium)%{?_isa} = %{version}
+
+%description sodium
+The php-sodium package provides a simple,
+low-level PHP extension for the libsodium cryptographic library.
 
 
 %prep
@@ -722,7 +724,6 @@ support for JavaScript Object Notation (JSON) to PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
-%patch48 -p1 -b .loadconf
 
 # upstream patches
 
@@ -741,7 +742,6 @@ cp ext/gd/libgd/COPYING libgd_COPYING
 %endif
 cp sapi/fpm/LICENSE fpm_LICENSE
 cp ext/mbstring/libmbfl/LICENSE libmbfl_LICENSE
-cp ext/mbstring/oniguruma/COPYING oniguruma_COPYING
 cp ext/mbstring/ucgendat/OPENLDAP_LICENSE ucgendat_LICENSE
 cp ext/fileinfo/libmagic/LICENSE libmagic_LICENSE
 cp ext/phar/LICENSE phar_LICENSE
@@ -838,7 +838,7 @@ libtoolize --force --copy
 cat `aclocal --print-ac-dir`/{libtool,ltoptions,ltsugar,ltversion,lt~obsolete}.m4 >build/libtool.m4
 
 # Regenerate configure scripts (patches change config.m4's)
-touch configure.in
+touch configure.ac
 ./buildconf --force
 
 CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign"
@@ -881,7 +881,6 @@ ln -sf ../configure
     --with-freetype-dir=%{_prefix} \
     --with-png-dir=%{_prefix} \
     --with-xpm-dir=%{_prefix} \
-    --enable-gd-native-ttf \
     --without-gdbm \
     --with-jpeg-dir=%{_prefix} \
     --with-openssl \
@@ -916,6 +915,7 @@ build --libdir=%{_libdir}/php \
       --enable-phpdbg \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
+      --with-onig=%{_prefix} \
       --enable-mbregex \
 %if %{with_libgd}
       --with-gd=shared,%{_prefix} \
@@ -929,6 +929,7 @@ build --libdir=%{_libdir}/php \
       --enable-ctype=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
                           --with-tcadb=%{_prefix} \
+                          --with-lmdb=%{_prefix} \
       --enable-exif=shared \
       --enable-ftp=shared \
       --with-gettext=shared \
@@ -972,13 +973,13 @@ build --libdir=%{_libdir}/php \
       --with-libedit \
       --with-pspell=shared \
       --enable-phar=shared \
-      --with-mcrypt=shared,%{_prefix} \
       --with-tidy=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
       --enable-shmop=shared \
       --enable-posix=shared \
       --with-unixODBC=shared,%{_prefix} \
       --enable-fileinfo=shared \
+      --with-sodium=shared \
       --enable-intl=shared \
       --with-icu-dir=%{_prefix} \
       --with-enchant=shared,%{_prefix} \
@@ -990,6 +991,7 @@ without_shared="--without-gd \
       --disable-opcache \
       --disable-json \
       --disable-xmlreader --disable-xmlwriter \
+      --without-sodium \
       --without-sqlite3 --disable-phar --disable-fileinfo \
       --without-pspell --disable-wddx \
       --without-curl --disable-posix --disable-xml \
@@ -1042,6 +1044,7 @@ build --includedir=%{_includedir}/php-zts \
       --enable-opcache-file \
       --with-imap=shared --with-imap-ssl \
       --enable-mbstring=shared \
+      --with-onig=%{_prefix} \
       --enable-mbregex \
 %if %{with_libgd}
       --with-gd=shared,%{_prefix} \
@@ -1055,6 +1058,7 @@ build --includedir=%{_includedir}/php-zts \
       --enable-ctype=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
                           --with-tcadb=%{_prefix} \
+                          --with-lmdb=%{_prefix} \
       --with-gettext=shared \
       --with-iconv=shared \
       --enable-sockets=shared \
@@ -1099,13 +1103,13 @@ build --includedir=%{_includedir}/php-zts \
       --with-libedit \
       --with-pspell=shared \
       --enable-phar=shared \
-      --with-mcrypt=shared,%{_prefix} \
       --with-tidy=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
       --enable-shmop=shared \
       --enable-posix=shared \
       --with-unixODBC=shared,%{_prefix} \
       --enable-fileinfo=shared \
+      --with-sodium=shared \
       --enable-intl=shared \
       --with-icu-dir=%{_prefix} \
       --with-enchant=shared,%{_prefix} \
@@ -1136,6 +1140,7 @@ cd build-apache
 # Run tests, using the CLI SAPI
 export NO_INTERACTION=1 REPORT_EXIT_STATUS=1 MALLOC_CHECK_=2
 export SKIP_ONLINE_TESTS=1
+export SKIP_IO_CAPTURE_TESTS=1
 unset TZ LANG LC_ALL
 if ! make test; then
   set +x
@@ -1251,7 +1256,8 @@ for mod in pgsql odbc ldap snmp xmlrpc imap json \
 %endif
     sqlite3 \
     enchant phar fileinfo intl \
-    mcrypt tidy pdo_dblib pspell curl wddx \
+    tidy pdo_dblib pspell curl wddx \
+    sodium \
     posix shmop sysvshm sysvsem sysvmsg recode xml \
     ; do
     case $mod in
@@ -1272,12 +1278,12 @@ for mod in pgsql odbc ldap snmp xmlrpc imap json \
     else
       cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini} <<EOF
 ; Enable ${mod} extension module
-extension=${mod}.so
+extension=${mod}
 EOF
 %if %{with_zts}
       cat > $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/${ini} <<EOF
 ; Enable ${mod} extension module
-extension=${mod}.so
+extension=${mod}
 EOF
 %endif
     fi
@@ -1481,7 +1487,6 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %files xmlrpc -f files.xmlrpc
 %files mbstring -f files.mbstring
 %license libmbfl_LICENSE
-%license oniguruma_COPYING
 %license ucgendat_LICENSE
 %files gd -f files.gd
 %if ! %{with_libgd}
@@ -1494,7 +1499,6 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %files gmp -f files.gmp
 %files dba -f files.dba
 %files pdo -f files.pdo
-%files mcrypt -f files.mcrypt
 %files tidy -f files.tidy
 %files pdo-dblib -f files.pdo_dblib
 %files pspell -f files.pspell
@@ -1510,9 +1514,18 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %config(noreplace) %{_sysconfdir}/php.d/opcache-default.blacklist
 %config(noreplace) %{_sysconfdir}/php-zts.d/opcache-default.blacklist
 %files json -f files.json
+%files sodium -f files.sodium
 
 
 %changelog
+* Fri Sep 29 2017 Remi Collet <remi@fedoraproject.org> - 7.2.0~RC3-1
+- Update to 7.2.0RC3
+- drop mcrypt extension
+- add sodium extension
+- use system oniguruma
+- drop .so suffix from ini files
+- refresh configuration files from upstream
+
 * Wed Sep 27 2017 Remi Collet <remi@fedoraproject.org> - 7.1.10-1
 - Update to 7.1.10 - http://www.php.net/releases/7_1_10.php
 

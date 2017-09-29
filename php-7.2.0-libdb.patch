@@ -1,7 +1,7 @@
-diff -up php-7.0.2RC1/ext/dba/config.m4.libdb php-7.0.2RC1/ext/dba/config.m4
---- php-7.0.2RC1/ext/dba/config.m4.libdb	2015-12-27 07:54:48.669923462 +0100
-+++ php-7.0.2RC1/ext/dba/config.m4	2015-12-27 07:55:03.607947034 +0100
-@@ -312,61 +312,13 @@ if test "$PHP_DB4" != "no"; then
+diff -up php-7.2.0alpha0/ext/dba/config.m4.libdb php-7.2.0alpha0/ext/dba/config.m4
+--- php-7.2.0alpha0/ext/dba/config.m4.libdb	2017-05-29 08:56:06.000000000 +0200
++++ php-7.2.0alpha0/ext/dba/config.m4	2017-05-29 09:13:52.014823282 +0200
+@@ -346,61 +346,13 @@ if test "$PHP_DB4" != "no"; then
    dbdp4="/usr/local/BerkeleyDB.4."
    dbdp5="/usr/local/BerkeleyDB.5."
    for i in $PHP_DB4 ${dbdp5}1 ${dbdp5}0 ${dbdp4}8 ${dbdp4}7 ${dbdp4}6 ${dbdp4}5 ${dbdp4}4 ${dbdp4}3 ${dbdp4}2 ${dbdp4}1 ${dbdp}0 /usr/local /usr; do
@@ -65,12 +65,12 @@ diff -up php-7.0.2RC1/ext/dba/config.m4.libdb php-7.0.2RC1/ext/dba/config.m4
  fi
  PHP_DBA_STD_RESULT(db4,Berkeley DB4)
  
-diff -up php-7.0.2RC1/ext/dba/dba.c.libdb php-7.0.2RC1/ext/dba/dba.c
---- php-7.0.2RC1/ext/dba/dba.c.libdb	2015-12-22 16:19:29.000000000 +0100
-+++ php-7.0.2RC1/ext/dba/dba.c	2015-12-27 07:52:30.381638216 +0100
-@@ -52,6 +52,10 @@
- #include "php_qdbm.h"
+diff -up php-7.2.0alpha0/ext/dba/dba.c.libdb php-7.2.0alpha0/ext/dba/dba.c
+--- php-7.2.0alpha0/ext/dba/dba.c.libdb	2017-05-29 09:16:15.736628202 +0200
++++ php-7.2.0alpha0/ext/dba/dba.c	2017-05-29 09:16:20.494654746 +0200
+@@ -53,6 +53,10 @@
  #include "php_tcadb.h"
+ #include "php_lmdb.h"
  
 +#ifdef DB4_INCLUDE_FILE
 +#include DB4_INCLUDE_FILE
@@ -79,7 +79,7 @@ diff -up php-7.0.2RC1/ext/dba/dba.c.libdb php-7.0.2RC1/ext/dba/dba.c
  /* {{{ arginfo */
  ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
  	ZEND_ARG_INFO(0, path)
-@@ -552,6 +556,10 @@ PHP_MINFO_FUNCTION(dba)
+@@ -558,6 +562,10 @@ PHP_MINFO_FUNCTION(dba)
  
  	php_info_print_table_start();
   	php_info_print_table_row(2, "DBA support", "enabled");
