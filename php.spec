@@ -62,7 +62,7 @@
 %endif
 
 %global upver        7.2.0
-%global rcver        RC3
+%global rcver        RC4
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -112,12 +112,6 @@ Patch45: php-5.6.3-ldap_r.patch
 Patch46: php-7.2.0-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
-# disable sha3 for bigendian
-# https://bugs.php.net/75284
-Patch48: php-7.2.0-hash3.patch
-# check jit support in libpcre
-# https://bugs.php.net/75285
-Patch49: php-7.2.0-pcre.patch
 
 # Upstream fixes (100+)
 
@@ -730,8 +724,6 @@ low-level PHP extension for the libsodium cryptographic library.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
-%patch48 -p1 -b .sha3
-%patch49 -p1 -b .jit
 
 # upstream patches
 
@@ -1526,6 +1518,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Oct 10 2017 Remi Collet <remi@fedoraproject.org> - 7.2.0~RC4-1
+- Update to 7.2.0RC4
+
 * Fri Sep 29 2017 Remi Collet <remi@fedoraproject.org> - 7.2.0~RC3-1
 - Update to 7.2.0RC3
 - drop mcrypt extension
