@@ -67,7 +67,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -140,6 +140,7 @@ BuildRequires: libzip-devel >= 0.11
 %if %{with_dtrace}
 BuildRequires: systemtap-sdt-devel
 %endif
+BuildRequires: libargon2-devel
 
 %if %{with_zts}
 Provides: php-zts = %{version}-%{release}
@@ -892,6 +893,7 @@ ln -sf ../configure
     --with-libxml-dir=%{_prefix} \
     --with-system-tzdata \
     --with-mhash \
+    --with-password-argon2 \
 %if %{with_dtrace}
     --enable-dtrace \
 %endif
@@ -1518,6 +1520,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Oct 18 2017 Remi Collet <remi@remirepo.net> - 7.2.0~RC4-2
+- enable argon2 password hash
+
 * Tue Oct 10 2017 Remi Collet <remi@fedoraproject.org> - 7.2.0~RC4-1
 - Update to 7.2.0RC4
 
