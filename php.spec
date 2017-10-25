@@ -62,12 +62,12 @@
 %endif
 
 %global upver        7.2.0
-%global rcver        RC4
+%global rcver        RC5
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -152,7 +152,7 @@ Provides: mod_php = %{version}-%{release}
 Requires: php-common%{?_isa} = %{version}-%{release}
 # For backwards-compatibility, require php-cli for the time being:
 Requires: php-cli%{?_isa} = %{version}-%{release}
-Requires: php-fpm%{?_isa} = %{version}-%{release}
+Recommends: php-fpm%{?_isa} = %{version}-%{release}
 # To ensure correct /var/lib/php/session ownership:
 Requires(pre): httpd-filesystem
 # php engine for Apache httpd webserver
@@ -1520,6 +1520,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Oct 25 2017 Remi Collet <remi@fedoraproject.org> - 7.2.0~RC5-1
+- Update to 7.2.0RC5
+- make php-fpm a weak dependency
+
 * Wed Oct 18 2017 Remi Collet <remi@remirepo.net> - 7.2.0~RC4-2
 - enable argon2 password hash
 
