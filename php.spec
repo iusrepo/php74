@@ -62,7 +62,7 @@
 %endif
 
 %global upver        7.2.0
-%global rcver        RC5
+%global rcver        RC6
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1520,6 +1520,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Nov  7 2017 Remi Collet <remi@fedoraproject.org> - 7.2.0~RC6-1
+- Update to 7.2.0RC6
+
 * Wed Oct 25 2017 Remi Collet <remi@fedoraproject.org> - 7.2.0~RC5-1
 - Update to 7.2.0RC5
 - make php-fpm a weak dependency
