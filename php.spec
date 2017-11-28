@@ -62,7 +62,7 @@
 %endif
 
 %global upver        7.2.0
-%global rcver        RC6
+#global rcver        RC6
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -114,6 +114,7 @@ Patch46: php-7.2.0-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch100: 0001-Fixed-bug-75514-mt_rand-returns-value-outside-min-ma.patch
 
 # Security fixes (200+)
 
@@ -727,6 +728,7 @@ low-level PHP extension for the libsodium cryptographic library.
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch100 -p1 -b .upstream
 
 # security patches
 
@@ -1520,6 +1522,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Nov 28 2017 Remi Collet <remi@remirepo.net> - 7.2.0-1
+- update to 7.2.0 GA
+- add upstream patch for https://bugs.php.net/75514
+
 * Tue Nov  7 2017 Remi Collet <remi@fedoraproject.org> - 7.2.0~RC6-1
 - Update to 7.2.0RC6
 
