@@ -67,7 +67,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1522,6 +1522,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Nov 30 2017 Pete Walter <pwalter@fedoraproject.org> - 7.2.0-3
+- Rebuild for ICU 60.1
+
 * Tue Nov 28 2017 Remi Collet <remi@remirepo.net> - 7.2.0-2
 - refresh patch for https://bugs.php.net/75514
 
