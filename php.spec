@@ -61,8 +61,8 @@
 %global db_devel  libdb-devel
 %endif
 
-%global upver        7.2.1
-#global rcver        RC1
+%global upver        7.2.2
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -109,7 +109,7 @@ Patch43: php-5.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-5.6.3-ldap_r.patch
 # Make php_config.h constant across builds
-Patch46: php-7.2.0-fixheader.patch
+Patch46: php-7.2.2-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
 
@@ -831,6 +831,9 @@ sed -e '/opcache.huge_code_pages/s/0/1/' -i 10-opcache.ini
 
 
 %build
+# Set build date from https://reproducible-builds.org/specs/source-date-epoch/
+export SOURCE_DATE_EPOCH=$(date +%s -r NEWS)
+
 # aclocal workaround - to be improved
 cat `aclocal --print-ac-dir`/{libtool,ltoptions,ltsugar,ltversion,lt~obsolete}.m4 >>aclocal.m4
 
@@ -1520,6 +1523,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Jan 16 2018 Remi Collet <remi@remirepo.net> - 7.2.2~RC1-1
+- update to 7.2.2RC1
+- define SOURCE_DATE_EPOCH for reproducible build
+
 * Wed Jan  3 2018 Remi Collet <remi@remirepo.net> - 7.2.1-1
 - Update to 7.2.1 - http://www.php.net/releases/7_2_1.php
 
