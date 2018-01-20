@@ -67,7 +67,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1523,6 +1523,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Sat Jan 20 2018 Björn Esser <besser82@fedoraproject.org> - 7.2.2~RC1-2
+- Rebuilt for switch to libxcrypt
+
 * Tue Jan 16 2018 Remi Collet <remi@remirepo.net> - 7.2.2~RC1-1
 - update to 7.2.2RC1
 - define SOURCE_DATE_EPOCH for reproducible build
