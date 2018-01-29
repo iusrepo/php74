@@ -1572,7 +1572,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
-* Mon Jan 29 2018 Remi Collet <remi@remirepo.net> - 7.2.2~RC1-3
+* Mon Jan 29 2018 Remi Collet <rcollet@redhat.com> - 7.2.2~RC1-3
 - disable interbase, imap, pdo_dblib and sodium on rhel
 
 * Thu Jan 25 2018 Remi Collet <remi@remirepo.net> - 7.2.2~RC1-3
