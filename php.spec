@@ -55,9 +55,18 @@
 
 %global with_zip     0
 %global with_libzip  0
-# Not yet compatible with firebird 3
-# https://bugs.php.net/bug.php?id=73512
+
+%if 0%{?fedora}
 %global with_firebird 1
+%global with_imap     1
+%global with_freetds  1
+%global with_sodium   1
+%else
+%global with_firebird 0
+%global with_imap     0
+%global with_freetds  0
+%global with_sodium   0
+%endif
 
 %if 0%{?fedora} < 18 && 0%{?rhel} < 7
 %global db_devel  db4-devel
@@ -71,7 +80,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 3%{?dist}
+Release: 4%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -205,9 +214,7 @@ Requires(pre): /usr/sbin/useradd
 BuildRequires: systemd-units
 BuildRequires: systemd-devel
 Requires: systemd-units
-Requires(post): systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
+%{?systemd_requires}
 # To ensure correct /var/lib/php/session ownership:
 Requires(pre): httpd-filesystem
 # For php.conf in /etc/httpd/conf.d
@@ -307,6 +314,7 @@ bytecode in the shared memory. This eliminates the stages of reading code from
 the disk and compiling it on future access. In addition, it applies a few
 bytecode optimization patterns that make code execution faster.
 
+%if %{with_imap}
 %package imap
 Summary: A module for PHP applications that use IMAP
 Group: Development/Languages
@@ -319,6 +327,7 @@ BuildRequires: krb5-devel, openssl-devel, libc-client-devel
 The php-imap module will add IMAP (Internet Message Access Protocol)
 support to PHP. IMAP is a protocol for retrieving and uploading e-mail
 messages on mail servers. PHP is an HTML-embedded scripting language.
+%endif
 
 %package ldap
 Summary: A module for PHP applications that use LDAP
@@ -604,6 +613,7 @@ BuildRequires: libtidy-devel
 The php-tidy package contains a dynamic shared object that will add
 support for using the tidy library to PHP.
 
+%if %{with_freetds}
 %package pdo-dblib
 Summary: PDO driver Microsoft SQL Server and Sybase databases
 Group: Development/Languages
@@ -617,6 +627,7 @@ Provides: php-pdo_dblib, php-pdo_dblib%{?_isa}
 The php-pdo-dblib package contains a dynamic shared object
 that implements the PHP Data Objects (PDO) interface to enable access from
 PHP to Microsoft SQL Server and Sybase databases through the FreeTDS libary.
+%endif
 
 %package embedded
 Summary: PHP library for embedding in applications
@@ -695,6 +706,7 @@ Provides:  php-pecl-json%{?_isa}  = %{jsonver}
 The php-json package provides an extension that will add
 support for JavaScript Object Notation (JSON) to PHP.
 
+%if %{with_sodium}
 %package sodium
 Summary: Wrapper for the Sodium cryptographic library
 # All files licensed under PHP version 3.0.1
@@ -710,6 +722,7 @@ Provides:  php-pecl(libsodium)%{?_isa} = %{version}
 %description sodium
 The php-sodium package provides a simple,
 low-level PHP extension for the libsodium cryptographic library.
+%endif
 
 
 %prep
@@ -922,7 +935,9 @@ build --libdir=%{_libdir}/php \
       --enable-opcache \
       --enable-opcache-file \
       --enable-phpdbg \
+%if %{with_imap}
       --with-imap=shared --with-imap-ssl \
+%endif
       --enable-mbstring=shared \
       --with-onig=%{_prefix} \
       --enable-mbregex \
@@ -969,7 +984,9 @@ build --libdir=%{_libdir}/php \
       --with-pdo-mysql=shared,mysqlnd \
       --with-pdo-pgsql=shared,%{_prefix} \
       --with-pdo-sqlite=shared,%{_prefix} \
+%if %{with_freetds}
       --with-pdo-dblib=shared,%{_prefix} \
+%endif
       --with-sqlite3=shared,%{_prefix} \
       --enable-json=shared \
 %if %{with_zip}
@@ -988,7 +1005,11 @@ build --libdir=%{_libdir}/php \
       --enable-posix=shared \
       --with-unixODBC=shared,%{_prefix} \
       --enable-fileinfo=shared \
+%if %{with_sodium}
       --with-sodium=shared \
+%else
+      --without-sodium \
+%endif
       --enable-intl=shared \
       --with-icu-dir=%{_prefix} \
       --with-enchant=shared,%{_prefix} \
@@ -1051,7 +1072,9 @@ build --includedir=%{_includedir}/php-zts \
       --enable-pcntl \
       --enable-opcache \
       --enable-opcache-file \
+%if %{with_imap}
       --with-imap=shared --with-imap-ssl \
+%endif
       --enable-mbstring=shared \
       --with-onig=%{_prefix} \
       --enable-mbregex \
@@ -1099,7 +1122,9 @@ build --includedir=%{_includedir}/php-zts \
       --with-pdo-mysql=shared,mysqlnd \
       --with-pdo-pgsql=shared,%{_prefix} \
       --with-pdo-sqlite=shared,%{_prefix} \
+%if %{with_freetds}
       --with-pdo-dblib=shared,%{_prefix} \
+%endif
       --with-sqlite3=shared,%{_prefix} \
       --enable-json=shared \
 %if %{with_zip}
@@ -1118,7 +1143,11 @@ build --includedir=%{_includedir}/php-zts \
       --enable-posix=shared \
       --with-unixODBC=shared,%{_prefix} \
       --enable-fileinfo=shared \
+%if %{with_sodium}
       --with-sodium=shared \
+%else
+      --without-sodium \
+%endif
       --enable-intl=shared \
       --with-icu-dir=%{_prefix} \
       --with-enchant=shared,%{_prefix} \
@@ -1251,7 +1280,11 @@ install -D -m 644 %{SOURCE13} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/conf.d/php-fpm
 install -D -m 644 %{SOURCE14} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/default.d/php.conf
 
 # Generate files lists and stub .ini files for each subpackage
-for mod in pgsql odbc ldap snmp xmlrpc imap json \
+for mod in pgsql odbc ldap snmp xmlrpc
+%if %{with_imap}
+    imap \
+%endif
+    json \
     mysqlnd mysqli pdo_mysql \
     mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
     simplexml bz2 calendar ctype exif ftp gettext gmp iconv \
@@ -1265,8 +1298,14 @@ for mod in pgsql odbc ldap snmp xmlrpc imap json \
 %endif
     sqlite3 \
     enchant phar fileinfo intl \
-    tidy pdo_dblib pspell curl wddx \
+    tidy \
+%if %{with_freetds}
+    pdo_dblib \
+%endif
+    pspell curl wddx \
+%if %{with_sodium}
     sodium \
+%endif
     posix shmop sysvshm sysvsem sysvmsg recode xml \
     ; do
     case $mod in
@@ -1489,7 +1528,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 %files pgsql -f files.pgsql
 %files odbc -f files.odbc
+%if %{with_imap}
 %files imap -f files.imap
+%endif
 %files ldap -f files.ldap
 %files snmp -f files.snmp
 %files xml -f files.xml
@@ -1509,7 +1550,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %files dba -f files.dba
 %files pdo -f files.pdo
 %files tidy -f files.tidy
+%if %{with_freetds}
 %files pdo-dblib -f files.pdo_dblib
+%endif
 %files pspell -f files.pspell
 %files intl -f files.intl
 %files process -f files.process
@@ -1523,11 +1566,16 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %config(noreplace) %{_sysconfdir}/php.d/opcache-default.blacklist
 %config(noreplace) %{_sysconfdir}/php-zts.d/opcache-default.blacklist
 %files json -f files.json
+%if %{with_sodium}
 %files sodium -f files.sodium
+%endif
 
 
 %changelog
-* Thu Jan 25 2018 Remi Collet <remi@remirepo.net> - 7.2.2~RC1-2
+* Mon Jan 29 2018 Remi Collet <remi@remirepo.net> - 7.2.2~RC1-3
+- disable interbase, imap, pdo_dblib and sodium on rhel
+
+* Thu Jan 25 2018 Remi Collet <remi@remirepo.net> - 7.2.2~RC1-3
 - undefine _strict_symbol_defs_build
 
 * Sat Jan 20 2018 Björn Esser <besser82@fedoraproject.org> - 7.2.2~RC1-2
