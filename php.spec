@@ -44,18 +44,10 @@
 # needed at srpm build time, when httpd-devel not yet installed
 %{!?_httpd_mmn:        %{expand: %%global _httpd_mmn        %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo 0-0)}}
 
-%global with_dtrace 1
-
-# build with system libgd
-%if 0%{?fedora} < 20
-%global  with_libgd 0
-%else
-%global  with_libgd 1
-%endif
-
-%global with_zip     0
-%global with_libzip  0
-
+%global with_dtrace   1
+%global with_libgd    1
+%global with_zip      0
+%global with_libzip   0
 %if 0%{?fedora}
 %global with_firebird 1
 %global with_imap     1
@@ -66,12 +58,6 @@
 %global with_imap     0
 %global with_freetds  0
 %global with_sodium   0
-%endif
-
-%if 0%{?fedora} < 18 && 0%{?rhel} < 7
-%global db_devel  db4-devel
-%else
-%global db_devel  libdb-devel
 %endif
 
 %global upver        7.2.2
@@ -211,9 +197,7 @@ Summary: PHP FastCGI Process Manager
 BuildRequires: libacl-devel
 Requires: php-common%{?_isa} = %{version}-%{release}
 Requires(pre): /usr/sbin/useradd
-BuildRequires: systemd-units
 BuildRequires: systemd-devel
-Requires: systemd-units
 %{?systemd_requires}
 # To ensure correct /var/lib/php/session ownership:
 Requires(pre): httpd-filesystem
@@ -592,7 +576,7 @@ Summary: A database abstraction layer module for PHP applications
 Group: Development/Languages
 # All files licensed under PHP version 3.01
 License: PHP
-BuildRequires: %{db_devel}
+BuildRequires: libdb-devel
 BuildRequires: tokyocabinet-devel
 BuildRequires: lmdb-devel
 Requires: php-common%{?_isa} = %{version}-%{release}
