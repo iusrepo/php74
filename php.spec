@@ -61,12 +61,12 @@
 %endif
 
 %global upver        7.2.2
-%global rcver        RC1
+#global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 4%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1556,6 +1556,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Jan 30 2018 Remi Collet <remi@remirepo.net> - 7.2.2-1
+- Update to 7.2.2 - http://www.php.net/releases/7_2_2.php
+
 * Mon Jan 29 2018 Remi Collet <rcollet@redhat.com> - 7.2.2~RC1-3
 - disable interbase, imap, pdo_dblib and sodium on rhel
 
