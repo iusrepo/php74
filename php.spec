@@ -66,7 +66,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1556,6 +1556,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 7.2.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
 * Tue Jan 30 2018 Remi Collet <remi@remirepo.net> - 7.2.2-1
 - Update to 7.2.2 - http://www.php.net/releases/7_2_2.php
 
