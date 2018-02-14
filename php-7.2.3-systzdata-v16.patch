@@ -5,6 +5,7 @@ Add support for use of the system timezone database, rather
 than embedding a copy.  Discussed upstream but was not desired.
 
 History:
+r16: adapt for timelib 2017.06 (in 7.2.3RC1)
 r15: adapt for timelib 2017.05beta7 (in 7.2.0RC1)
 r14: improve check for valid tz file
 r13: adapt for upstream changes to use PHP allocator
@@ -26,9 +27,9 @@ r3: fix a crash if /usr/share/zoneinfo doesn't exist (Raphael Geissert)
 r2: add filesystem trawl to set up name alias index
 r1: initial revision
 
-diff -up ./ext/date/lib/parse_tz.c.systzdata ./ext/date/lib/parse_tz.c
---- ./ext/date/lib/parse_tz.c.systzdata	2017-08-22 09:40:38.000000000 +0200
-+++ ./ext/date/lib/parse_tz.c	2017-08-22 12:16:00.370298079 +0200
+diff -up php-7.2.3RC1/ext/date/lib/parse_tz.c.systzdata php-7.2.3RC1/ext/date/lib/parse_tz.c
+--- php-7.2.3RC1/ext/date/lib/parse_tz.c.systzdata	2018-02-13 20:18:34.000000000 +0100
++++ php-7.2.3RC1/ext/date/lib/parse_tz.c	2018-02-14 06:14:23.484804852 +0100
 @@ -25,8 +25,21 @@
  #include "timelib.h"
  #include "timelib_private.h"
@@ -266,7 +267,7 @@ diff -up ./ext/date/lib/parse_tz.c.systzdata ./ext/date/lib/parse_tz.c
 +    }
 +
 +    for (l = li[hash]; l; l = l->next) {
-+        if (strcasecmp(l->name, name) == 0)
++        if (timelib_strcasecmp(l->name, name) == 0)
 +            return l;
 +    }
 +
@@ -290,7 +291,7 @@ diff -up ./ext/date/lib/parse_tz.c.systzdata ./ext/date/lib/parse_tz.c
 +{
 +        const timelib_tzdb_index_entry *alpha = first, *beta = second;
 +
-+        return strcasecmp(alpha->id, beta->id);
++        return timelib_strcasecmp(alpha->id, beta->id);
 +}
 +
 +
@@ -493,8 +494,8 @@ diff -up ./ext/date/lib/parse_tz.c.systzdata ./ext/date/lib/parse_tz.c
 +static int inmem_seek_to_tz_position(const unsigned char **tzf, char *timezone, const timelib_tzdb *tzdb)
  {
  	int left = 0, right = tzdb->index_size - 1;
- #ifdef HAVE_SETLOCALE
-@@ -419,9 +859,48 @@ static int seek_to_tz_position(const uns
+ 
+@@ -400,9 +840,48 @@ static int seek_to_tz_position(const uns
  	return 0;
  }
  
@@ -542,8 +543,8 @@ diff -up ./ext/date/lib/parse_tz.c.systzdata ./ext/date/lib/parse_tz.c
 +#endif
  }
  
- const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(timelib_tzdb *tzdb, int *count)
-@@ -433,7 +912,30 @@ const timelib_tzdb_index_entry *timelib_
+ const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(const timelib_tzdb *tzdb, int *count)
+@@ -414,7 +893,30 @@ const timelib_tzdb_index_entry *timelib_
  int timelib_timezone_id_is_valid(char *timezone, const timelib_tzdb *tzdb)
  {
  	const unsigned char *tzf;
@@ -575,7 +576,7 @@ diff -up ./ext/date/lib/parse_tz.c.systzdata ./ext/date/lib/parse_tz.c
  }
  
  static int skip_64bit_preamble(const unsigned char **tzf, timelib_tzinfo *tz)
-@@ -475,12 +977,14 @@ static timelib_tzinfo* timelib_tzinfo_ct
+@@ -456,12 +958,14 @@ static timelib_tzinfo* timelib_tzinfo_ct
  timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb, int *error_code)
  {
  	const unsigned char *tzf;
@@ -591,7 +592,7 @@ diff -up ./ext/date/lib/parse_tz.c.systzdata ./ext/date/lib/parse_tz.c
  		tmp = timelib_tzinfo_ctor(timezone);
  
  		version = read_preamble(&tzf, tmp, &type);
-@@ -503,6 +1007,29 @@ timelib_tzinfo *timelib_parse_tzfile(cha
+@@ -484,6 +988,29 @@ timelib_tzinfo *timelib_parse_tzfile(cha
  			timelib_tzinfo_dtor(tmp);
  			return NULL;
  		}
@@ -621,7 +622,7 @@ diff -up ./ext/date/lib/parse_tz.c.systzdata ./ext/date/lib/parse_tz.c
  		if (version == 2 || version == 3) {
  			if (!skip_64bit_preamble(&tzf, tmp)) {
  				/* 64 bit preamble is not in place */
-@@ -520,6 +1047,9 @@ timelib_tzinfo *timelib_parse_tzfile(cha
+@@ -501,6 +1028,9 @@ timelib_tzinfo *timelib_parse_tzfile(cha
  		} else {
  			set_default_location_and_comments(&tzf, tmp);
  		}
@@ -631,9 +632,9 @@ diff -up ./ext/date/lib/parse_tz.c.systzdata ./ext/date/lib/parse_tz.c
  	} else {
  		*error_code = TIMELIB_ERROR_NO_SUCH_TIMEZONE;
  		tmp = NULL;
-diff -up ./ext/date/lib/timelib.m4.systzdata ./ext/date/lib/timelib.m4
---- ./ext/date/lib/timelib.m4.systzdata	2017-08-22 09:40:38.000000000 +0200
-+++ ./ext/date/lib/timelib.m4	2017-08-22 11:32:29.357799927 +0200
+diff -up php-7.2.3RC1/ext/date/lib/timelib.m4.systzdata php-7.2.3RC1/ext/date/lib/timelib.m4
+--- php-7.2.3RC1/ext/date/lib/timelib.m4.systzdata	2018-02-13 20:18:34.000000000 +0100
++++ php-7.2.3RC1/ext/date/lib/timelib.m4	2018-02-14 06:11:54.273089963 +0100
 @@ -81,3 +81,16 @@ io.h
  
  dnl Check for strtoll, atoll

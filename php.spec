@@ -60,13 +60,13 @@
 %global with_sodium   0
 %endif
 
-%global upver        7.2.2
-#global rcver        RC1
+%global upver        7.2.3
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -102,17 +102,18 @@ Patch8: php-7.2.0-libdb.patch
 
 # Functional changes
 Patch40: php-7.1.3-dlopen.patch
-Patch42: php-7.2.0-systzdata-v15.patch
+Patch42: php-7.2.3-systzdata-v16.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
-Patch45: php-5.6.3-ldap_r.patch
+Patch45: php-7.2.3-ldap_r.patch
 # Make php_config.h constant across builds
-Patch46: php-7.2.2-fixheader.patch
+Patch46: php-7.2.3-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch100: php-upstream.patch
 
 # Security fixes (200+)
 
@@ -728,6 +729,7 @@ low-level PHP extension for the libsodium cryptographic library.
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch100 -p1 -b .upstream
 
 # security patches
 
@@ -1556,6 +1558,11 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Feb 14 2018 Remi Collet <remi@remirepo.net> - 7.2.3~RC1-1
+- update to 7.2.3RC1
+- adapt systzdata, fixheader and ldap_r patches
+- apply upstream patch for date ext
+
 * Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 7.2.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
