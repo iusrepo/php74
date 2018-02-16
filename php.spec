@@ -53,11 +53,13 @@
 %global with_imap     1
 %global with_freetds  1
 %global with_sodium   1
+%global with_pspell   1
 %else
 %global with_firebird 0
 %global with_imap     0
 %global with_freetds  0
 %global with_sodium   0
+%global with_pspell   0
 %endif
 
 %global upver        7.2.3
@@ -66,7 +68,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -130,7 +132,13 @@ BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: sqlite-devel >= 3.6.0
 BuildRequires: zlib-devel, smtpdaemon, libedit-devel
 BuildRequires: pcre-devel >= 6.6
-BuildRequires: bzip2, perl-interpreter, libtool >= 1.4.3, gcc-c++
+BuildRequires: bzip2
+BuildRequires: perl-interpreter
+BuildRequires: autoconf
+BuildRequires: automake
+BuildRequires: gcc
+BuildRequires: gcc-c++
+BuildRequires: libtool
 BuildRequires: libtool-ltdl-devel
 %if %{with_libzip}
 BuildRequires: libzip-devel >= 0.11
@@ -261,7 +269,13 @@ package and the php-cli package.
 
 %package devel
 Summary: Files needed for building PHP extensions
-Requires: php-cli%{?_isa} = %{version}-%{release}, autoconf, automake
+Requires: php-cli%{?_isa} = %{version}-%{release}
+# always needed to build extension
+Requires: autoconf
+Requires: automake
+Requires: gcc
+Requires: gcc-c++
+Requires: libtool
 Requires: pcre-devel%{?_isa}
 Obsoletes: php-pecl-json-devel  < %{jsonver}
 Obsoletes: php-pecl-jsonc-devel < %{jsonver}
@@ -598,6 +612,7 @@ Provides: php-embedded-devel%{?_isa} = %{version}-%{release}
 The php-embedded package contains a library which can be embedded
 into applications to provide PHP scripting language support.
 
+%if %{with_pspell}
 %package pspell
 Summary: A module for PHP applications for using pspell interfaces
 # All files licensed under PHP version 3.01
@@ -608,6 +623,7 @@ BuildRequires: aspell-devel >= 0.50.0
 %description pspell
 The php-pspell package contains a dynamic shared object that will add
 support for using the pspell library to PHP.
+%endif
 
 %package recode
 Summary: A module for PHP applications for using the recode library
@@ -948,7 +964,9 @@ build --libdir=%{_libdir}/php \
 %endif
       --without-readline \
       --with-libedit \
+%if %{with_pspell}
       --with-pspell=shared \
+%endif
       --enable-phar=shared \
       --with-tidy=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
@@ -1086,7 +1104,9 @@ build --includedir=%{_includedir}/php-zts \
 %endif
       --without-readline \
       --with-libedit \
+%if %{with_pspell}
       --with-pspell=shared \
+%endif
       --enable-phar=shared \
       --with-tidy=shared,%{_prefix} \
       --enable-sysvmsg=shared --enable-sysvshm=shared --enable-sysvsem=shared \
@@ -1253,7 +1273,10 @@ for mod in pgsql odbc ldap snmp xmlrpc \
 %if %{with_freetds}
     pdo_dblib \
 %endif
-    pspell curl wddx \
+%if %{with_pspell}
+    pspell \
+%endif
+    curl wddx \
 %if %{with_sodium}
     sodium \
 %endif
@@ -1502,7 +1525,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %if %{with_freetds}
 %files pdo-dblib -f files.pdo_dblib
 %endif
+%if %{with_pspell}
 %files pspell -f files.pspell
+%endif
 %files intl -f files.intl
 %files process -f files.process
 %files recode -f files.recode
@@ -1521,6 +1546,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Fri Feb 16 2018 Remi Collet <remi@remirepo.net> - 7.2.3~RC1-3
+- disable pspell extension on RHEL
+- improve devel dependencies
+
 * Wed Feb 14 2018 Remi Collet <remi@remirepo.net> - 7.2.3~RC1-2
 - rebuild for new tag and drop patch merged upstream
 - drop ldconfig scriptlets
