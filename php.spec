@@ -32,15 +32,6 @@
 # arch detection heuristic used by bindir/mysql_config.
 %global mysql_config %{_libdir}/mysql/mysql_config
 
-# Build ZTS extension or only NTS
-%global with_zts      1
-
-%if 0%{?__isa_bits:1}
-%global isasuffix -%{__isa_bits}
-%else
-%global isasuffix %nil
-%endif
-
 # needed at srpm build time, when httpd-devel not yet installed
 %{!?_httpd_mmn:        %{expand: %%global _httpd_mmn        %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo 0-0)}}
 
@@ -49,12 +40,14 @@
 %global with_zip      0
 %global with_libzip   0
 %if 0%{?fedora}
+%global with_zts      1
 %global with_firebird 1
 %global with_imap     1
 %global with_freetds  1
 %global with_sodium   1
 %global with_pspell   1
 %else
+%global with_zts      0
 %global with_firebird 0
 %global with_imap     0
 %global with_freetds  0
@@ -68,7 +61,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 3%{?dist}
+Release: 4%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -225,8 +218,8 @@ Summary: Common files for PHP
 # regex, libmagic are licensed under BSD
 License: PHP and BSD
 # ABI/API check - Arch specific
-Provides: php(api) = %{apiver}%{isasuffix}
-Provides: php(zend-abi) = %{zendver}%{isasuffix}
+Provides: php(api) = %{apiver}-%{__isa_bits}
+Provides: php(zend-abi) = %{zendver}-%{__isa_bits}
 Provides: php(language) = %{version}, php(language)%{?_isa} = %{version}
 # Provides for all builtin/shared modules:
 Provides: php-bz2, php-bz2%{?_isa}
@@ -338,8 +331,8 @@ Summary: A database access abstraction module for PHP applications
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
 # ABI/API check - Arch specific
-Provides: php-pdo-abi  = %{pdover}%{isasuffix}
-Provides: php(pdo-abi) = %{pdover}%{isasuffix}
+Provides: php-pdo-abi  = %{pdover}-%{__isa_bits}
+Provides: php(pdo-abi) = %{pdover}-%{__isa_bits}
 Provides: php-sqlite3, php-sqlite3%{?_isa}
 Provides: php-pdo_sqlite, php-pdo_sqlite%{?_isa}
 
@@ -1359,9 +1352,9 @@ sed -e '/blacklist_filename/s/php.d/php-zts.d/' \
     -i $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/10-opcache.ini
 
 # Install the macros file:
-sed -e "s/@PHP_APIVER@/%{apiver}%{isasuffix}/" \
-    -e "s/@PHP_ZENDVER@/%{zendver}%{isasuffix}/" \
-    -e "s/@PHP_PDOVER@/%{pdover}%{isasuffix}/" \
+sed -e "s/@PHP_APIVER@/%{apiver}-%{__isa_bits}/" \
+    -e "s/@PHP_ZENDVER@/%{zendver}-%{__isa_bits}/" \
+    -e "s/@PHP_PDOVER@/%{pdover}-%{__isa_bits}/" \
     -e "s/@PHP_VERSION@/%{upver}/" \
 %if ! %{with_zts}
     -e "/zts/d" \
@@ -1546,6 +1539,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Wed Feb 21 2018 Remi Collet <remi@remirepo.net> - 7.2.3~RC1-4
+- disable ZTS on RHEL
+
 * Fri Feb 16 2018 Remi Collet <remi@remirepo.net> - 7.2.3~RC1-3
 - disable pspell extension on RHEL
 - improve devel dependencies
