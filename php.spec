@@ -1289,7 +1289,9 @@ for mod in pgsql odbc ldap snmp xmlrpc \
     # some extensions have their own config file
     if [ -f ${ini} ]; then
       cp -p ${ini} $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini}
+%if %{with_zts}
       cp -p ${ini} $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/${ini}
+%endif
     else
       cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini} <<EOF
 ; Enable ${mod} extension module
@@ -1347,9 +1349,11 @@ cat files.zip >> files.common
 
 # The default Zend OPcache blacklist file
 install -m 644 %{SOURCE51} $RPM_BUILD_ROOT%{_sysconfdir}/php.d/opcache-default.blacklist
+%if %{with_zts}
 install -m 644 %{SOURCE51} $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/opcache-default.blacklist
 sed -e '/blacklist_filename/s/php.d/php-zts.d/' \
     -i $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d/10-opcache.ini
+%endif
 
 # Install the macros file:
 sed -e "s/@PHP_APIVER@/%{apiver}-%{__isa_bits}/" \
@@ -1423,6 +1427,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %{_bindir}/php
 %if %{with_zts}
 %{_bindir}/zts-php
+%{_mandir}/man1/zts-php.1*
 %endif
 %{_bindir}/php-cgi
 %{_bindir}/phar.phar
@@ -1430,7 +1435,6 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 # provides phpize here (not in -devel) for pecl command
 %{_bindir}/phpize
 %{_mandir}/man1/php.1*
-%{_mandir}/man1/zts-php.1*
 %{_mandir}/man1/php-cgi.1*
 %{_mandir}/man1/phar.1*
 %{_mandir}/man1/phar.phar.1*
@@ -1531,7 +1535,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %files mysqlnd -f files.mysqlnd
 %files opcache -f files.opcache
 %config(noreplace) %{_sysconfdir}/php.d/opcache-default.blacklist
+%if %{with_zts}
 %config(noreplace) %{_sysconfdir}/php-zts.d/opcache-default.blacklist
+%endif
 %files json -f files.json
 %if %{with_sodium}
 %files sodium -f files.sodium
