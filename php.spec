@@ -46,6 +46,8 @@
 %global with_freetds  1
 %global with_sodium   1
 %global with_pspell   1
+%global with_lmdb     1
+%global with_argon2   1
 %else
 %global with_zts      0
 %global with_firebird 0
@@ -53,6 +55,8 @@
 %global with_freetds  0
 %global with_sodium   0
 %global with_pspell   0
+%global with_lmdb     0
+%global with_argon2   0
 %endif
 
 %global upver        7.2.3
@@ -139,7 +143,9 @@ BuildRequires: libzip-devel >= 0.11
 %if %{with_dtrace}
 BuildRequires: systemtap-sdt-devel
 %endif
+%if %{with_argon2}
 BuildRequires: libargon2-devel
+%endif
 
 %if %{with_zts}
 Provides: php-zts = %{version}-%{release}
@@ -561,7 +567,9 @@ Summary: A database abstraction layer module for PHP applications
 License: PHP
 BuildRequires: libdb-devel
 BuildRequires: tokyocabinet-devel
+%if %{with_lmdb}
 BuildRequires: lmdb-devel
+%endif
 Requires: php-common%{?_isa} = %{version}-%{release}
 
 %description dba
@@ -873,7 +881,9 @@ ln -sf ../configure
     --with-libxml-dir=%{_prefix} \
     --with-system-tzdata \
     --with-mhash \
+%if %{with_argon2}
     --with-password-argon2 \
+%endif
 %if %{with_dtrace}
     --enable-dtrace \
 %endif
@@ -913,7 +923,9 @@ build --libdir=%{_libdir}/php \
       --enable-ctype=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
                           --with-tcadb=%{_prefix} \
+%if %{with_lmdb}
                           --with-lmdb=%{_prefix} \
+%endif
       --enable-exif=shared \
       --enable-ftp=shared \
       --with-gettext=shared \
@@ -1052,7 +1064,9 @@ build --includedir=%{_includedir}/php-zts \
       --enable-ctype=shared \
       --enable-dba=shared --with-db4=%{_prefix} \
                           --with-tcadb=%{_prefix} \
+%if %{with_lmdb}
                           --with-lmdb=%{_prefix} \
+%endif
       --with-gettext=shared \
       --with-iconv=shared \
       --enable-sockets=shared \
