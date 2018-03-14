@@ -59,8 +59,8 @@
 %global with_argon2   0
 %endif
 
-%global upver        7.2.3
-#global rcver        RC1
+%global upver        7.2.4
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -99,14 +99,14 @@ Patch7: php-5.3.0-recode.patch
 Patch8: php-7.2.0-libdb.patch
 
 # Functional changes
-Patch40: php-7.1.3-dlopen.patch
+Patch40: php-7.2.4-dlopen.patch
 Patch42: php-7.2.3-systzdata-v16.patch
 # See http://bugs.php.net/53436
 Patch43: php-5.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-7.2.3-ldap_r.patch
 # Make php_config.h constant across builds
-Patch46: php-7.2.3-fixheader.patch
+Patch46: php-7.2.4-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
 
@@ -683,7 +683,7 @@ License: PHP
 BuildRequires:  pkgconfig(libsodium) >= 1.0.9
 
 Requires: php-common%{?_isa} = %{version}-%{release}
-Obsoletes: php-pecl-libsodium2 < 7
+Obsoletes: php-pecl-libsodium2 < 3
 Provides:  php-pecl(libsodium)         = %{version}
 Provides:  php-pecl(libsodium)%{?_isa} = %{version}
 
@@ -1559,6 +1559,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Tue Mar 13 2018 Remi Collet <remi@remirepo.net> - 7.2.4~RC1-1
+- update to 7.2.4RC1
+
 * Wed Feb 28 2018 Remi Collet <remi@remirepo.net> - 7.2.3-1
 - Update to 7.2.3 - http://www.php.net/releases/7_2_3.php
 - FPM: revert pid file removal
