@@ -1400,7 +1400,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 # Raised by new pool installation or new extension installation
 %transfiletriggerin fpm -- %{_sysconfdir}/php-fpm.d %{_sysconfdir}/php.d
-systemctl try-restart %{?scl:%{scl}-}php-fpm.service
+systemctl try-restart php-fpm.service
 
 
 %files
