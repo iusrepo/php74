@@ -65,7 +65,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1398,8 +1398,9 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %preun fpm
 %systemd_preun php-fpm.service
 
-%postun fpm
-%systemd_postun_with_restart php-fpm.service
+# Raised by new pool installation or new extension installation
+%transfiletriggerin fpm -- %{_sysconfdir}/php-fpm.d %{_sysconfdir}/php.d
+systemctl try-restart %{?scl:%{scl}-}php-fpm.service
 
 
 %files
@@ -1559,6 +1560,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 
 
 %changelog
+* Thu Mar 15 2018 Remi Collet <remi@remirepo.net> - 7.2.4~RC1-2
+- add file trigger to restart the php-fpm service
+  when new pool or new extension installed #1556762
+
 * Tue Mar 13 2018 Remi Collet <remi@remirepo.net> - 7.2.4~RC1-1
 - update to 7.2.4RC1
 
