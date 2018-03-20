@@ -35,6 +35,7 @@
 # needed at srpm build time, when httpd-devel not yet installed
 %{!?_httpd_mmn:        %{expand: %%global _httpd_mmn        %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo 0-0)}}
 
+%global with_argon2   1
 %global with_dtrace   1
 %global with_libgd    1
 %global with_zip      0
@@ -47,7 +48,6 @@
 %global with_sodium   1
 %global with_pspell   1
 %global with_lmdb     1
-%global with_argon2   1
 %else
 %global with_zts      0
 %global with_firebird 0
@@ -56,7 +56,6 @@
 %global with_sodium   0
 %global with_pspell   0
 %global with_lmdb     0
-%global with_argon2   0
 %endif
 
 %global upver        7.2.4
