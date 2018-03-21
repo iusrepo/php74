@@ -64,7 +64,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -801,9 +801,6 @@ rm -f TSRM/tsrm_win32.h \
 find . -name \*.[ch] -exec chmod 644 {} \;
 chmod 644 README.*
 
-# php-fpm configuration files for tmpfiles.d
-echo "d /run/php-fpm 755 root root" >php-fpm.tmpfiles
-
 # Some extensions have their own configuration file
 cp %{SOURCE50} 10-opcache.ini
 
@@ -1239,9 +1236,6 @@ install -m 644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.conf
 install -m 644 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d/www.conf
 mv $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.conf.default .
 mv $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d/www.conf.default .
-# tmpfiles.d
-install -m 755 -d $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d
-install -m 644 php-fpm.tmpfiles $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d/php-fpm.conf
 # install systemd unit files and scripts for handling server startup
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/php-fpm.service.d
 install -Dm 644 %{SOURCE6}  $RPM_BUILD_ROOT%{_unitdir}/php-fpm.service
@@ -1474,7 +1468,6 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 %config(noreplace) %{_sysconfdir}/logrotate.d/php-fpm
 %config(noreplace) %{_sysconfdir}/nginx/conf.d/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/nginx/default.d/php.conf
-%{_prefix}/lib/tmpfiles.d/php-fpm.conf
 %{_unitdir}/php-fpm.service
 %{_unitdir}/httpd.service.d/php-fpm.conf
 %{_unitdir}/nginx.service.d/php-fpm.conf
@@ -1483,7 +1476,7 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 %dir %{_sysconfdir}/php-fpm.d
 # log owned by apache for log
 %attr(770,apache,root) %dir %{_localstatedir}/log/php-fpm
-%dir /run/php-fpm
+%dir %ghost /run/php-fpm
 %{_mandir}/man8/php-fpm.8*
 %dir %{_datadir}/fpm
 %{_datadir}/fpm/status.html
@@ -1557,6 +1550,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Wed Mar 21 2018 Remi Collet <remi@remirepo.net> - 7.2.4~RC1-3
+- use systemd RuntimeDirectory instead of /etc/tmpfiles.d
+
 * Thu Mar 15 2018 Remi Collet <remi@remirepo.net> - 7.2.4~RC1-2
 - add file trigger to restart the php-fpm service
   when new pool or new extension installed #1556762
