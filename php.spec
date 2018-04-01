@@ -64,7 +64,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1550,6 +1550,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Sun Apr 01 2018 Mamoru TASAKA <mtasaka@fedoraproject.org> - 7.2.4-2
+- Rebuild against oniguruma 6.8.1
+
 * Tue Mar 27 2018 Remi Collet <remi@remirepo.net> - 7.2.4-1
 - Update to 7.2.4 - http://www.php.net/releases/7_2_4.php
 - FPM: update default pool configuration for process.dumpable
