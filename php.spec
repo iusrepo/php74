@@ -110,6 +110,7 @@ Patch46: php-7.2.4-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch100: php-upstream.patch
 
 # Security fixes (200+)
 
@@ -709,6 +710,7 @@ low-level PHP extension for the libsodium cryptographic library.
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch100 -p1 -b .upstream
 
 # security patches
 
@@ -1550,6 +1552,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Apr  3 2018 Remi Collet <remi@remirepo.net> - 7.2.4-2
+- add upstream patch for oniguruma 6.8.1, FTBFS #1562583
+
 * Sun Apr 01 2018 Mamoru TASAKA <mtasaka@fedoraproject.org> - 7.2.4-2
 - Rebuild against oniguruma 6.8.1
 
