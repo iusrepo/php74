@@ -58,13 +58,13 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.2.4
-#global rcver        RC1
+%global upver        7.2.5
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -110,7 +110,6 @@ Patch46: php-7.2.4-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
-Patch100: php-upstream.patch
 
 # Security fixes (200+)
 
@@ -710,7 +709,6 @@ low-level PHP extension for the libsodium cryptographic library.
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
-%patch100 -p1 -b .upstream
 
 # security patches
 
@@ -1552,6 +1550,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Wed Apr 11 2018 Remi Collet <remi@remirepo.net> - 7.2.5~RC1-1
+- update to 7.2.5RC1
+
 * Tue Apr  3 2018 Remi Collet <remi@remirepo.net> - 7.2.4-2
 - add upstream patch for oniguruma 6.8.1, FTBFS #1562583
 
