@@ -58,8 +58,8 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.2.5
-#global rcver        RC1
+%global upver        7.2.6
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1550,6 +1550,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Sun May 13 2018 Remi Collet <remi@remirepo.net> - 7.2.6~RC1-1
+- update to 7.2.6RC1
+
 * Mon Apr 30 2018 Pete Walter <pwalter@fedoraproject.org> - 7.2.5-2
 - Rebuild for ICU 61.1
 
