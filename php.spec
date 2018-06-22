@@ -824,7 +824,7 @@ cat `aclocal --print-ac-dir`/{libtool,ltoptions,ltsugar,ltversion,lt~obsolete}.m
 touch configure.ac
 ./buildconf --force
 
-CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign"
+CFLAGS=$(echo $RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign | sed 's/-mstackrealign//')
 export CFLAGS
 
 # Install extension modules in %{_libdir}/php/modules.
@@ -1552,6 +1552,7 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 %changelog
 * Wed Jun 20 2018 Remi Collet <remi@remirepo.net> - 7.2.7-1
 - Update to 7.2.7 - http://www.php.net/releases/7_2_7.php
+- drop -mstackrealign option, workaround to #1593144
 
 * Wed Jun  6 2018 Remi Collet <remi@remirepo.net> - 7.2.7~RC1-1
 - update to 7.2.7RC1
