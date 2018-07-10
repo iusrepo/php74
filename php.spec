@@ -64,7 +64,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1553,6 +1553,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Jul 10 2018 Pete Walter <pwalter@fedoraproject.org> - 7.2.8~RC1-3
+- Rebuild for ICU 62
+
 * Tue Jul  3 2018 Remi Collet <remi@remirepo.net> - 7.2.8~RC1-2
 - FPM: add getallheaders, backported from 7.3
 
