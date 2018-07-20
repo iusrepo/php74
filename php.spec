@@ -179,7 +179,7 @@ which adds support for the PHP language to Apache HTTP Server.
 
 %package cli
 Summary: Command-line interface for PHP
-# Zend/zend_sort is NCSA
+# sapi/cli/ps_title.c is PostgreSQL
 License: PHP and Zend and BSD and MIT and ASL 1.0 and NCSA and PostgreSQL
 Requires: php-common%{?_isa} = %{version}-%{release}
 Provides: php-cgi = %{version}-%{release}, php-cgi%{?_isa} = %{version}-%{release}
