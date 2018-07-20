@@ -70,7 +70,8 @@ Release: 1%{?dist}
 # TSRM is licensed under BSD
 # main/snprintf.c, main/spprintf.c and main/rfc1867.c are ASL 1.0
 # ext/date/lib is MIT
-License: PHP and Zend and BSD and MIT and ASL 1.0
+# Zend/zend_sort is NCSA
+License: PHP and Zend and BSD and MIT and ASL 1.0 and NCSA
 URL: http://www.php.net/
 
 Source0: http://www.php.net/distributions/php-%{upver}%{?rcver}.tar.xz
@@ -178,6 +179,8 @@ which adds support for the PHP language to Apache HTTP Server.
 
 %package cli
 Summary: Command-line interface for PHP
+# Zend/zend_sort is NCSA
+License: PHP and Zend and BSD and MIT and ASL 1.0 and NCSA and PostgreSQL
 Requires: php-common%{?_isa} = %{version}-%{release}
 Provides: php-cgi = %{version}-%{release}, php-cgi%{?_isa} = %{version}-%{release}
 Provides: php-pcntl, php-pcntl%{?_isa}
@@ -830,7 +833,7 @@ touch configure.ac
 CFLAGS=$(echo $RPM_OPT_FLAGS -fno-strict-aliasing -Wno-pointer-sign | sed 's/-mstackrealign//')
 export CFLAGS
 
-# Install extension modules in %{_libdir}/php/modules.
+# Install extension modules in %%{_libdir}/php/modules.
 EXTENSION_DIR=%{_libdir}/php/modules; export EXTENSION_DIR
 
 # Set PEAR_INSTALLDIR to ensure that the hard-coded include_path
