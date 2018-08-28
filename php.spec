@@ -58,8 +58,8 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.2.9
-#global rcver        RC1
+%global upver        7.2.10
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1556,6 +1556,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Aug 28 2018 Remi Collet <remi@remirepo.net> - 7.2.10~RC1-1
+- update to 7.2.10RC1
+
 * Thu Aug 16 2018 Remi Collet <remi@remirepo.net> - 7.2.9-1
 - Update to 7.2.9 - http://www.php.net/releases/7_2_9.php
 
