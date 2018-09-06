@@ -376,7 +376,7 @@ License: PHP
 Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-pdo_pgsql, php-pdo_pgsql%{?_isa}
-BuildRequires: krb5-devel, openssl-devel, postgresql-devel
+BuildRequires: krb5-devel, openssl-devel, libpq-devel
 
 %description pgsql
 The php-pgsql package add PostgreSQL database support to PHP.
