@@ -59,7 +59,7 @@
 %endif
 
 %global upver        7.2.10
-%global rcver        RC1
+#global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -113,6 +113,9 @@ Patch47: php-5.6.3-phpinfo.patch
 Patch48: php-7.2.8-getallheaders.patch
 
 # Upstream fixes (100+)
+Patch100: https://github.com/php/php-src/commit/cd0a37994e3cbf1f0aa1174155d3d662cefe2e7a.patch
+Patch101: https://github.com/php/php-src/commit/be50a72715c141befe6f34ece660745da894aaf3.patch
+Patch102: https://github.com/php/php-src/commit/c1729272b17a1fe893d1a54e423d3b71470f3ee8.patch
 
 # Security fixes (200+)
 
@@ -715,6 +718,9 @@ low-level PHP extension for the libsodium cryptographic library.
 %patch48 -p1 -b .getallheaders
 
 # upstream patches
+%patch100 -p1 -b .up1
+%patch101 -p1 -b .up2
+%patch102 -p1 -b .up3
 
 # security patches
 
@@ -1556,6 +1562,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Sep 11 2018 Remi Collet <remi@remirepo.net> - 7.2.10-1
+- Update to 7.2.10 - http://www.php.net/releases/7_2_10.php
+
 * Tue Aug 28 2018 Remi Collet <remi@remirepo.net> - 7.2.10~RC1-1
 - update to 7.2.10RC1
 
