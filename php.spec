@@ -876,7 +876,7 @@ ln -sf ../configure
     --with-openssl \
     --with-system-ciphers \
     --with-pcre-regex=%{_prefix} \
-%ifarch s390x
+%ifarch s390 s390x sparc64 sparcv9 riscv64
     --without-pcre-jit \
 %endif
     --with-zlib \
