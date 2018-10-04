@@ -7,11 +7,11 @@
 #
 
 # API/ABI check
-%global apiver      20170718
-%global zendver     20170718
+%global apiver      20180731
+%global zendver     20180731
 %global pdover      20170320
 # Extension version
-%global jsonver     1.6.0
+%global jsonver     1.7.0
 
 # we don't want -z defs linker flag
 %undefine _strict_symbol_defs_build
@@ -20,7 +20,7 @@
 %global _hardened_build 1
 
 # version used for php embedded library soname
-%global embed_version 7.2
+%global embed_version 7.3
 
 %global mysql_sock %(mysql_config --socket 2>/dev/null || echo /var/lib/mysql/mysql.sock)
 
@@ -58,12 +58,13 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.2.11
-%global rcver        RC1
+%global upver        7.3.0
+%global rcver        RC2
+%global lower        rc2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: %{upver}%{?rcver:~%{rcver}}
+Version: %{upver}%{?lower:~%{lower}}
 Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -109,10 +110,9 @@ Patch45: php-7.2.3-ldap_r.patch
 Patch46: php-7.2.4-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
-# getallheaders for FPM backported from 7.3
-Patch48: php-7.2.8-getallheaders.patch
 
 # Upstream fixes (100+)
+Patch100: https://github.com/php/php-src/commit/bbfea4b470f30b3d92ad73e4addf37c3e247052a.patch
 
 # Security fixes (200+)
 
@@ -130,7 +130,7 @@ BuildRequires: nginx-filesystem
 BuildRequires: libstdc++-devel, openssl-devel
 BuildRequires: sqlite-devel >= 3.6.0
 BuildRequires: zlib-devel, smtpdaemon, libedit-devel
-BuildRequires: pcre-devel >= 6.6
+BuildRequires: pcre2-devel >= 10.30
 BuildRequires: bzip2
 BuildRequires: perl-interpreter
 BuildRequires: autoconf
@@ -277,7 +277,7 @@ Requires: automake
 Requires: gcc
 Requires: gcc-c++
 Requires: libtool
-Requires: pcre-devel%{?_isa}
+Requires: pcre2-devel%{?_isa}
 Obsoletes: php-pecl-json-devel  < %{jsonver}
 Obsoletes: php-pecl-jsonc-devel < %{jsonver}
 %if %{with_zts}
@@ -712,9 +712,9 @@ low-level PHP extension for the libsodium cryptographic library.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
-%patch48 -p1 -b .getallheaders
 
 # upstream patches
+%patch100 -p1 -b .jit
 
 # security patches
 
@@ -733,7 +733,6 @@ cp sapi/fpm/LICENSE fpm_LICENSE
 cp ext/mbstring/libmbfl/LICENSE libmbfl_LICENSE
 cp ext/mbstring/ucgendat/OPENLDAP_LICENSE ucgendat_LICENSE
 cp ext/fileinfo/libmagic/LICENSE libmagic_LICENSE
-cp ext/phar/LICENSE phar_LICENSE
 cp ext/bcmath/libbcmath/COPYING.LIB libbcmath_COPYING
 cp ext/date/lib/LICENSE.rst timelib_LICENSE
 
@@ -754,6 +753,8 @@ rm ext/sockets/tests/mcast_ipv?_recv.phpt
 # cause stack exhausion
 rm Zend/tests/bug54268.phpt
 rm Zend/tests/bug68412.phpt
+# tar issue
+rm ext/zlib/tests/004-mb.phpt
 
 # Safety check for API version change.
 pver=$(sed -n '/#define PHP_VERSION /{s/.* "//;s/".*$//;p}' main/php_version.h)
@@ -875,6 +876,9 @@ ln -sf ../configure
     --with-openssl \
     --with-system-ciphers \
     --with-pcre-regex=%{_prefix} \
+%ifarch s390x
+    --without-pcre-jit \
+%endif
     --with-zlib \
     --with-layout=GNU \
     --with-kerberos \
@@ -1416,7 +1420,6 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 %doc CODING_STANDARDS CREDITS EXTENSIONS NEWS README*
 %license LICENSE TSRM_LICENSE
 %license libmagic_LICENSE
-%license phar_LICENSE
 %license timelib_LICENSE
 %doc php.ini-*
 %config(noreplace) %{_sysconfdir}/php.ini
@@ -1556,6 +1559,12 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Thu Oct  4 2018 Remi Collet <remi@remirepo.net> - 7.3.0~rc2-1
+- update to 7.3.0RC2
+- bump API numbers
+- switch from libpcre to libpcre2
+- temporarily disable pcre jit on s390x see https://bugzilla.redhat.com/1636032
+
 * Wed Sep 26 2018 Remi Collet <remi@remirepo.net> - 7.2.11~RC1-1
 - update to 7.2.11RC1
 

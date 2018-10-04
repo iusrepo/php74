@@ -1,0 +1,37 @@
+From bbfea4b470f30b3d92ad73e4addf37c3e247052a Mon Sep 17 00:00:00 2001
+From: Remi Collet <remi@php.net>
+Date: Thu, 4 Oct 2018 11:45:35 +0200
+Subject: [PATCH] Allow to disable pcre.jit when system library is used as it
+ is for now broken on some arch (s390x...)
+
+---
+ ext/pcre/config0.m4 | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/ext/pcre/config0.m4 b/ext/pcre/config0.m4
+index dd1b7d55aa69..3f7f04d4fc60 100644
+--- a/ext/pcre/config0.m4
++++ b/ext/pcre/config0.m4
+@@ -47,13 +47,15 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality
+       fi
+     fi
+ 
+-    PHP_CHECK_LIBRARY(pcre2-8, pcre2_jit_compile_8,
+-    [
+-      AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
+-    ],[
+-    ],[
+-      $PCRE2_LIB
+-    ])
++    if test "$PHP_PCRE_JIT" != "no"; then
++      PHP_CHECK_LIBRARY(pcre2-8, pcre2_jit_compile_8,
++      [
++        AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
++      ],[
++      ],[
++        $PCRE2_LIB
++      ])
++    fi
+ 
+     PHP_EVAL_INCLINE($PCRE2_INC)
+     PHP_EVAL_LIBLINE($PCRE2_LIB)
