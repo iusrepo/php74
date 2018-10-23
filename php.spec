@@ -59,8 +59,8 @@
 %endif
 
 %global upver        7.3.0
-%global rcver        RC3
-%global lower        rc3
+%global rcver        RC4
+%global lower        rc4
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -103,7 +103,7 @@ Patch8: php-7.2.0-libdb.patch
 Patch40: php-7.2.4-dlopen.patch
 Patch42: php-7.2.3-systzdata-v16.patch
 # See http://bugs.php.net/53436
-Patch43: php-5.4.0-phpize.patch
+Patch43: php-7.3.0-phpize.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-7.2.3-ldap_r.patch
 # Make php_config.h constant across builds
@@ -1557,6 +1557,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Oct 23 2018 Remi Collet <remi@remirepo.net> - 7.3.0~rc4-1
+- update to 7.3.0RC4
+
 * Tue Oct  9 2018 Remi Collet <remi@remirepo.net> - 7.3.0~rc3-1
 - update to 7.3.0RC3
 
