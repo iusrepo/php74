@@ -61,11 +61,15 @@
 %global upver        7.3.0
 %global rcver        RC4
 %global lower        rc4
+%global rpmrel       1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: %{upver}%{?lower:~%{lower}}
-Release: 1%{?dist}
+# Waiting https://pagure.io/packaging-committee/issue/398
+#Version: %%{upver}%%{?lower:~%%{lower}}
+#Release: 1%%{?dist}
+Version: %{upver}
+Release: %{?rcver:0.}%{rpmrel}%{?rcver:.%{rcver}}%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1557,6 +1561,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Fri Nov  2 2018 Remi Collet <remi@remirepo.net> - 7.3.0-0.1.rc4
+- rebuild
+
 * Tue Oct 23 2018 Remi Collet <remi@remirepo.net> - 7.3.0~rc4-1
 - update to 7.3.0RC4
 
