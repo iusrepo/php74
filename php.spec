@@ -59,9 +59,9 @@
 %endif
 
 %global upver        7.3.0
-%global rcver        RC4
-%global lower        rc4
-%global rpmrel       1
+%global rcver        RC5
+%global lower        rc5
+%global rpmrel       2
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1561,7 +1561,10 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
-* Fri Nov  2 2018 Remi Collet <remi@remirepo.net> - 7.3.0-0.1.rc4
+* Tue Nov  6 2018 Remi Collet <remi@remirepo.net> - 7.3.0~0.2.RC5
+- update to 7.3.0RC5
+
+* Fri Nov  2 2018 Remi Collet <remi@remirepo.net> - 7.3.0-0.1.RC4
 - rebuild
 
 * Tue Oct 23 2018 Remi Collet <remi@remirepo.net> - 7.3.0~rc4-1
