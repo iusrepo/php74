@@ -59,14 +59,13 @@
 %endif
 
 %global upver        7.3.0
-%global rcver        RC6
-%global lower        rc6
-%global rpmrel       3
+#global rcver        RC6
+%global rpmrel       1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 # Waiting https://pagure.io/packaging-committee/issue/398
-#Version: %%{upver}%%{?lower:~%%{lower}}
+#Version: %%{upver}%%{?rcver:~%%{rcver}}
 #Release: 1%%{?dist}
 Version: %{upver}
 Release: %{?rcver:0.}%{rpmrel}%{?rcver:.%{rcver}}%{?dist}
@@ -1561,6 +1560,10 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Dec  4 2018 Remi Collet <remi@remirepo.net> - 7.3.0-1
+- update to 7.3.0 GA
+- update FPM configuration from upstream
+
 * Tue Nov 20 2018 Remi Collet <remi@remirepo.net> - 7.3.0~0.3.RC5
 - update to 7.3.0RC6
 
