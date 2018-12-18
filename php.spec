@@ -58,8 +58,8 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.3.0
-#global rcver        RC6
+%global upver        7.3.1
+%global rcver        RC1
 %global rpmrel       1
 
 Summary: PHP scripting language for creating dynamic web sites
@@ -1560,6 +1560,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Dec 18 2018 Remi Collet <remi@remirepo.net> - 7.3.1-0.1.RC1
+- update to 7.3.1RC1
+
 * Tue Dec  4 2018 Remi Collet <remi@remirepo.net> - 7.3.0-1
 - update to 7.3.0 GA
 - update FPM configuration from upstream
