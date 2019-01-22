@@ -58,13 +58,13 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.3.1
-#global rcver        RC1
+%global upver        7.3.2
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: %{upver}%{?rcver:~%%{rcver}}
-Release: 2%{?dist}
+Version: %{upver}%{?rcver:~%{rcver}}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -100,7 +100,7 @@ Patch8: php-7.2.0-libdb.patch
 
 # Functional changes
 Patch40: php-7.2.4-dlopen.patch
-Patch42: php-7.2.3-systzdata-v16.patch
+Patch42: php-7.3.2-systzdata-v17.patch
 # See http://bugs.php.net/53436
 Patch43: php-7.3.0-phpize.patch
 # Use -lldap_r for OpenLDAP
@@ -1556,6 +1556,10 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Jan 22 2019 Remi Collet <remi@remirepo.net> - 7.3.2~RC1-1
+- update to 7.3.2RC1
+- update system tzdata patch for timelib 2018.01
+
 * Mon Jan 14 2019 Björn Esser <besser82@fedoraproject.org> - 7.3.1-2
 - Rebuilt for libcrypt.so.2 (#1666033)
 
