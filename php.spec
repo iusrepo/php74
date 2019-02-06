@@ -59,12 +59,12 @@
 %endif
 
 %global upver        7.3.2
-%global rcver        RC1
+#global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 3%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1556,6 +1556,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Wed Feb  6 2019 Remi Collet <remi@remirepo.net> - 7.3.2-1
+- Update to 7.3.2 - http://www.php.net/releases/7_3_2.php
+
 * Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org> - 7.3.2~RC1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
