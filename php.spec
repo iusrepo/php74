@@ -58,8 +58,8 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.3.2
-#global rcver        RC1
+%global upver        7.3.3
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -100,7 +100,7 @@ Patch8: php-7.2.0-libdb.patch
 
 # Functional changes
 Patch40: php-7.2.4-dlopen.patch
-Patch42: php-7.3.2-systzdata-v17.patch
+Patch42: php-7.3.3-systzdata-v18.patch
 # See http://bugs.php.net/53436
 Patch43: php-7.3.0-phpize.patch
 # Use -lldap_r for OpenLDAP
@@ -1556,6 +1556,10 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Feb 19 2019 Remi Collet <remi@remirepo.net> - 7.3.3~RC1-1
+- update to 7.3.3RC1
+- adapt systzdata patch (v18)
+
 * Wed Feb  6 2019 Remi Collet <remi@remirepo.net> - 7.3.2-1
 - Update to 7.3.2 - http://www.php.net/releases/7_3_2.php
 

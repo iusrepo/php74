@@ -5,6 +5,7 @@ Add support for use of the system timezone database, rather
 than embedding a copy.  Discussed upstream but was not desired.
 
 History:
+r18: adapt for autotool change in 7.3.3RC1
 r17: adapt for timelib 2018.01 (in 7.3.2RC1)
 r16: adapt for timelib 2017.06 (in 7.2.3RC1)
 r15: adapt for timelib 2017.05beta7 (in 7.2.0RC1)
@@ -28,9 +29,32 @@ r3: fix a crash if /usr/share/zoneinfo doesn't exist (Raphael Geissert)
 r2: add filesystem trawl to set up name alias index
 r1: initial revision
 
-diff -up php-7.3.2RC1/ext/date/lib/parse_tz.c.systzdata php-7.3.2RC1/ext/date/lib/parse_tz.c
---- php-7.3.2RC1/ext/date/lib/parse_tz.c.systzdata	2019-01-22 13:20:08.000000000 +0100
-+++ php-7.3.2RC1/ext/date/lib/parse_tz.c	2019-01-22 14:30:46.655691222 +0100
+diff -up php-7.3.3RC1/ext/date/config0.m4.systzdata php-7.3.3RC1/ext/date/config0.m4
+--- php-7.3.3RC1/ext/date/config0.m4.systzdata	2019-02-19 14:57:51.314601701 +0100
++++ php-7.3.3RC1/ext/date/config0.m4	2019-02-19 14:58:29.050812587 +0100
+@@ -9,6 +9,19 @@ io.h
+ dnl Check for strtoll, atoll
+ AC_CHECK_FUNCS(strtoll atoll)
+ 
++PHP_ARG_WITH(system-tzdata, for use of system timezone data,
++[  --with-system-tzdata[=DIR]      to specify use of system timezone data],
++no, no)
++
++if test "$PHP_SYSTEM_TZDATA" != "no"; then
++   AC_DEFINE(HAVE_SYSTEM_TZDATA, 1, [Define if system timezone data is used])
++
++   if test "$PHP_SYSTEM_TZDATA" != "yes"; then
++      AC_DEFINE_UNQUOTED(HAVE_SYSTEM_TZDATA_PREFIX, "$PHP_SYSTEM_TZDATA",
++                         [Define for location of system timezone data])
++   fi
++fi
++
+ PHP_DATE_CFLAGS="-I@ext_builddir@/lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DHAVE_TIMELIB_CONFIG_H=1"
+ timelib_sources="lib/astro.c lib/dow.c lib/parse_date.c lib/parse_tz.c
+                  lib/timelib.c lib/tm2unixtime.c lib/unixtime2tm.c lib/parse_iso_intervals.c lib/interval.c"
+diff -up php-7.3.3RC1/ext/date/lib/parse_tz.c.systzdata php-7.3.3RC1/ext/date/lib/parse_tz.c
+--- php-7.3.3RC1/ext/date/lib/parse_tz.c.systzdata	2019-02-19 12:18:27.000000000 +0100
++++ php-7.3.3RC1/ext/date/lib/parse_tz.c	2019-02-19 14:57:20.397428931 +0100
 @@ -25,8 +25,21 @@
  #include "timelib.h"
  #include "timelib_private.h"
@@ -630,23 +654,3 @@ diff -up php-7.3.2RC1/ext/date/lib/parse_tz.c.systzdata php-7.3.2RC1/ext/date/li
  	} else {
  		*error_code = TIMELIB_ERROR_NO_SUCH_TIMEZONE;
  		tmp = NULL;
-diff -up php-7.3.2RC1/ext/date/lib/timelib.m4.systzdata php-7.3.2RC1/ext/date/lib/timelib.m4
---- php-7.3.2RC1/ext/date/lib/timelib.m4.systzdata	2019-01-22 13:20:08.000000000 +0100
-+++ php-7.3.2RC1/ext/date/lib/timelib.m4	2019-01-22 13:47:07.807374084 +0100
-@@ -78,3 +78,16 @@ io.h
- 
- dnl Check for strtoll, atoll
- AC_CHECK_FUNCS(strtoll atoll strftime gettimeofday)
-+
-+PHP_ARG_WITH(system-tzdata, for use of system timezone data,
-+[  --with-system-tzdata[=DIR]      to specify use of system timezone data],
-+no, no)
-+
-+if test "$PHP_SYSTEM_TZDATA" != "no"; then
-+   AC_DEFINE(HAVE_SYSTEM_TZDATA, 1, [Define if system timezone data is used])
-+
-+   if test "$PHP_SYSTEM_TZDATA" != "yes"; then
-+      AC_DEFINE_UNQUOTED(HAVE_SYSTEM_TZDATA_PREFIX, "$PHP_SYSTEM_TZDATA",
-+                         [Define for location of system timezone data])
-+   fi
-+fi
