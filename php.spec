@@ -58,13 +58,13 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.3.3
-#global rcver        RC1
+%global upver        7.3.4
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -111,7 +111,6 @@ Patch46: php-7.2.4-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
-Patch100: php-openssl111.patch
 
 # Security fixes (200+)
 
@@ -713,7 +712,6 @@ low-level PHP extension for the libsodium cryptographic library.
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
-%patch100 -p1 -b .up
 
 # security patches
 
@@ -1558,6 +1556,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Mar 19 2019 Remi Collet <remi@remirepo.net> - 7.3.4~RC1-1
+- update to 7.3.4RC1
+
 * Mon Mar 18 2019 Remi Collet <remi@fedoraproject.org> - 7.3.3-2
 - rebuild for libargon2 new soname
 
