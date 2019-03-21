@@ -64,7 +64,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 3%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -713,7 +713,7 @@ low-level PHP extension for the libsodium cryptographic library.
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
-%patch100 -p1 -R -b .up
+%patch100 -p1 -b .up
 
 # security patches
 
@@ -1558,6 +1558,10 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Thu Mar 21 2019 Remi Collet <remi@remirepo.net> - 7.3.4~RC1-3
+- update to 7.3.4RC1 new tag
+- add upstream patches for failed tests
+
 * Wed Mar 20 2019 Remi Collet <remi@remirepo.net> - 7.3.4~RC1-2
 - revert upstream change for extension test suite
 
