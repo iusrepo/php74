@@ -147,6 +147,8 @@ BuildRequires: systemtap-sdt-devel
 %if %{with_argon2}
 BuildRequires: libargon2-devel
 %endif
+# used for tests
+BuildRequires: %{_bindir}/ps
 
 %if %{with_zts}
 Provides: php-zts = %{version}-%{release}
@@ -1561,6 +1563,7 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 * Thu Mar 21 2019 Remi Collet <remi@remirepo.net> - 7.3.4~RC1-3
 - update to 7.3.4RC1 new tag
 - add upstream patches for failed tests
+- add build dependency on ps command
 
 * Wed Mar 20 2019 Remi Collet <remi@remirepo.net> - 7.3.4~RC1-2
 - revert upstream change for extension test suite
