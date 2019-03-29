@@ -278,7 +278,14 @@ Requires: automake
 Requires: gcc
 Requires: gcc-c++
 Requires: libtool
+# see "php-config --libs"
+Requires: krb5-devel%{?_isa}
+Requires: libargon2-devel%{?_isa}
+Requires: libedit-devel%{?_isa}
+Requires: libxml2-devel%{?_isa}
+Requires: openssl-devel%{?_isa}
 Requires: pcre2-devel%{?_isa}
+Requires: zlib-devel%{?_isa}
 Obsoletes: php-pecl-json-devel  < %{jsonver}
 Obsoletes: php-pecl-jsonc-devel < %{jsonver}
 %if %{with_zts}
