@@ -59,7 +59,7 @@
 %endif
 
 %global upver        7.3.4
-%global rcver        RC1
+#global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
