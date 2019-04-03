@@ -13,7 +13,7 @@ $debug = (isset($_SERVER['argv'][2]) && $_SERVER['argv'][2]==-'d');
 $text = explode("\n", $text);
 $in=false;
 foreach ($text as $line) {
-	if (preg_match('/(^[0-9]+ ... 20[0-9][0-9])[,]* PHP (.*)$/', $line, $reg)) {
+	if (preg_match('/(^[0-9]+ .* 20[0-9][0-9])[,]* PHP (.*)$/', $line, $reg)) {
 		if ($in) {
 			break;
 		}
