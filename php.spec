@@ -58,8 +58,8 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.3.4
-#global rcver        RC1
+%global upver        7.3.5
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -111,7 +111,6 @@ Patch46: php-7.2.4-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
-Patch100: php-upstream.patch
 
 # Security fixes (200+)
 
@@ -722,7 +721,6 @@ low-level PHP extension for the libsodium cryptographic library.
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
-%patch100 -p1 -b .up
 
 # security patches
 
@@ -1567,6 +1565,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Apr 16 2019 Remi Collet <remi@remirepo.net> - 7.3.5~RC1-1
+- update to 7.3.5RC1
+
 * Tue Apr  2 2019 Remi Collet <remi@remirepo.net> - 7.3.4-1
 - Update to 7.3.4 - http://www.php.net/releases/7_3_4.php
 
