@@ -1386,7 +1386,7 @@ sed -e "s/@PHP_APIVER@/%{apiver}-%{__isa_bits}/" \
 %endif
     < %{SOURCE3} > macros.php
 install -m 644 -D macros.php \
-           $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d/macros.php
+           $RPM_BUILD_ROOT%{_rpmmacrodir}/macros.php
 
 # Remove unpackaged files
 rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
@@ -1509,7 +1509,7 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 %{_mandir}/man1/zts-phpize.1*
 %endif
 %{_mandir}/man1/php-config.1*
-%{_rpmconfigdir}/macros.d/macros.php
+%{_rpmmacrodir}/macros.php
 
 %files embedded
 %{_libdir}/libphp7.so
