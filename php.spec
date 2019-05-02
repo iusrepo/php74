@@ -608,7 +608,7 @@ Provides: php-pdo_dblib, php-pdo_dblib%{?_isa}
 %description pdo-dblib
 The php-pdo-dblib package contains a dynamic shared object
 that implements the PHP Data Objects (PDO) interface to enable access from
-PHP to Microsoft SQL Server and Sybase databases through the FreeTDS libary.
+PHP to Microsoft SQL Server and Sybase databases through the FreeTDS library.
 %endif
 
 %package embedded
