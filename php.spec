@@ -35,12 +35,12 @@
 # needed at srpm build time, when httpd-devel not yet installed
 %{!?_httpd_mmn:        %{expand: %%global _httpd_mmn        %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo 0-0)}}
 
-%global with_argon2   1
 %global with_dtrace   1
 %global with_libgd    1
 %global with_zip      0
 %global with_libzip   0
 %if 0%{?fedora}
+%global with_argon2   1
 %global with_zts      1
 %global with_firebird 1
 %global with_imap     1
@@ -49,6 +49,7 @@
 %global with_pspell   1
 %global with_lmdb     1
 %else
+%global with_argon2   0
 %global with_zts      0
 %global with_firebird 0
 %global with_imap     0
@@ -279,7 +280,9 @@ Requires: gcc-c++
 Requires: libtool
 # see "php-config --libs"
 Requires: krb5-devel%{?_isa}
+%if %{with_argon2}
 Requires: libargon2-devel%{?_isa}
+%endif
 Requires: libedit-devel%{?_isa}
 Requires: libxml2-devel%{?_isa}
 Requires: openssl-devel%{?_isa}
