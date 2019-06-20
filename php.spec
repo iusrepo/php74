@@ -60,7 +60,7 @@
 %endif
 
 %global upver        7.3.7
-%global rcver        RC2
+%global rcver        RC3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1568,6 +1568,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Thu Jun 20 2019 Remi Collet <remi@remirepo.net> - 7.3.7~RC3-1
+- update to 7.3.7RC3
+
 * Tue Jun 18 2019 Remi Collet <remi@remirepo.net> - 7.3.7~RC2-1
 - update to 7.3.7RC2
 
