@@ -60,7 +60,7 @@
 %endif
 
 %global upver        7.3.7
-%global rcver        RC3
+#global rcver        RC3
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -820,10 +820,6 @@ chmod 644 README.*
 # Some extensions have their own configuration file
 cp %{SOURCE50} 10-opcache.ini
 
-%ifarch x86_64
-sed -e '/opcache.huge_code_pages/s/0/1/' -i 10-opcache.ini
-%endif
-
 
 %build
 # Set build date from https://reproducible-builds.org/specs/source-date-epoch/
@@ -1568,6 +1564,10 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Jul  2 2019 Remi Collet <remi@remirepo.net> - 7.3.7-1
+- Update to 7.3.7 - http://www.php.net/releases/7_3_7.php
+- disable opcache.huge_code_pages in default configuration
+
 * Thu Jun 20 2019 Remi Collet <remi@remirepo.net> - 7.3.7~RC3-1
 - update to 7.3.7RC3
 
