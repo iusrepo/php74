@@ -1,0 +1,62 @@
+From f3e71b3b730eabc2b12871b3a19dad815219bcb9 Mon Sep 17 00:00:00 2001
+From: Nikita Popov <nikita.ppv@gmail.com>
+Date: Tue, 16 Jul 2019 11:08:27 +0200
+Subject: [PATCH] Fixed bug #78297
+
+(cherry picked from commit 8a19fe29de77d7477d59db472dd6aadabd5ac249)
+---
+ NEWS                            |  5 +++++
+ sapi/phpdbg/phpdbg_list.c       |  1 +
+ sapi/phpdbg/tests/bug78297.phpt | 16 ++++++++++++++++
+ 3 files changed, 22 insertions(+)
+ create mode 100644 sapi/phpdbg/tests/bug78297.phpt
+
+diff --git a/NEWS b/NEWS
+index ae6a3c5405d8..76e8f830a0bb 100644
+--- a/NEWS
++++ b/NEWS
+@@ -1,5 +1,10 @@
+ PHP                                                                        NEWS
+ |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
++?? ??? ????, PHP 7.3.8
++
++- Phpdbg:
++  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
++
+ 18 Jul 2019, PHP 7.3.8RC1
+ 
+ - Core:
+diff --git a/sapi/phpdbg/phpdbg_list.c b/sapi/phpdbg/phpdbg_list.c
+index aab641cb5606..a9b0f4b815cf 100644
+--- a/sapi/phpdbg/phpdbg_list.c
++++ b/sapi/phpdbg/phpdbg_list.c
+@@ -248,6 +248,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
+ 		} else {
+ 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file->filename);
+ 		}
++		return NULL;
+ 	}
+ 
+ 	data.buf = estrndup(bufptr, len);
+diff --git a/sapi/phpdbg/tests/bug78297.phpt b/sapi/phpdbg/tests/bug78297.phpt
+new file mode 100644
+index 000000000000..47b13ad60544
+--- /dev/null
++++ b/sapi/phpdbg/tests/bug78297.phpt
+@@ -0,0 +1,16 @@
++--TEST--
++Bug #78297: Include unexistent file memory leak
++--PHPDBG--
++r
++q
++--FILE--
++<?php
++include "does_not_exist.php";
++--EXPECTF--
++[Successful compilation of %s]
++prompt> 
++Warning: include(%s): failed to open stream: No such file or directory in %s on line %d
++
++Warning: include(): Failed opening 'does_not_exist.php' for inclusion (include_path=%s) in %s on line %d
++[Script ended normally]
++prompt>

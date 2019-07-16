@@ -59,13 +59,13 @@
 %global with_lmdb     0
 %endif
 
-%global upver        7.3.7
-#global rcver        RC3
+%global upver        7.3.8
+%global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -112,6 +112,7 @@ Patch46: php-7.2.4-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
+Patch100: php-bug78297.patch
 
 # Security fixes (200+)
 
@@ -156,11 +157,18 @@ Provides: php-zts%{?_isa} = %{version}-%{release}
 %endif
 
 Requires: httpd-mmn = %{_httpd_mmn}
-Provides: mod_php = %{version}-%{release}
-Requires: php-common%{?_isa} = %{version}-%{release}
+Provides: mod_php                = %{version}-%{release}
+Requires: php-common%{?_isa}     = %{version}-%{release}
 # For backwards-compatibility, require php-cli for the time being:
-Requires: php-cli%{?_isa} = %{version}-%{release}
-Recommends: php-fpm%{?_isa} = %{version}-%{release}
+Requires: php-cli%{?_isa}        = %{version}-%{release}
+# httpd have threaded MPM by default
+Recommends: php-fpm%{?_isa}      = %{version}-%{release}
+# as "php" is now mostly a meta-package, commonly used extensions
+Recommends: php-json%{?_isa}     = %{version}-%{release}
+Recommends: php-mbstring%{?_isa} = %{version}-%{release}
+Recommends: php-opcache%{?_isa}  = %{version}-%{release}
+Recommends: php-pdo%{?_isa}      = %{version}-%{release}
+Recommends: php-xml%{?_isa}      = %{version}-%{release}
 # To ensure correct /var/lib/php/session ownership:
 Requires(pre): httpd-filesystem
 # php engine for Apache httpd webserver
@@ -724,6 +732,7 @@ low-level PHP extension for the libsodium cryptographic library.
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
+%patch100 -p1 -b .78297
 
 # security patches
 
@@ -1564,6 +1573,12 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Jul 16 2019 Remi Collet <remi@remirepo.net> - 7.3.8~RC1-1
+- update to 7.3.8RC1
+- add upstream patch for #78297
+- main package now recommends commonly used extensions
+  (json, mbstring, opcache, pdo, xml)
+
 * Wed Jul  3 2019 Remi Collet <remi@remirepo.net> - 7.3.7-2
 - Update to 7.3.7 - http://www.php.net/releases/7_3_7.php
 - disable opcache.huge_code_pages in default configuration
