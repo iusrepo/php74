@@ -159,8 +159,8 @@ Provides: php-zts%{?_isa} = %{version}-%{release}
 Requires: httpd-mmn = %{_httpd_mmn}
 Provides: mod_php                = %{version}-%{release}
 Requires: php-common%{?_isa}     = %{version}-%{release}
-# For backwards-compatibility, require php-cli for the time being:
-Requires: php-cli%{?_isa}        = %{version}-%{release}
+# For backwards-compatibility, pull the "php" command
+Recommends: php-cli%{?_isa}      = %{version}-%{release}
 # httpd have threaded MPM by default
 Recommends: php-fpm%{?_isa}      = %{version}-%{release}
 # as "php" is now mostly a meta-package, commonly used extensions
