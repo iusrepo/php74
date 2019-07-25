@@ -3,4 +3,5 @@ TODO
 *.md
 php-5.*.xz
 php-7.*.xz
+php-7.*.xz.asc
 /opcache-default.blacklist
