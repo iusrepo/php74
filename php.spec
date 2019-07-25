@@ -65,7 +65,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -88,12 +88,6 @@ Source10: php.ztsmodconf
 Source12: php-fpm.wants
 Source13: nginx-fpm.conf
 Source14: nginx-php.conf
-# See https://secure.php.net/gpg-keys.php
-# With Derick, Peter, Christoph, Stanislav, Sara, and Remi keys
-# Release managers for 7.2, 7.3 and 7.4
-Source20: php-keyring.gpg
-Source21: http://www.php.net/distributions/php-%{upver}%{?rcver}.tar.xz.asc
-
 # Configuration files for some extensions
 Source50: 10-opcache.ini
 Source51: opcache-default.blacklist
@@ -127,7 +121,6 @@ Patch100: php-bug78297.patch
 Patch300: php-5.6.3-datetests.patch
 
 
-BuildRequires: gnupg2
 BuildRequires: bzip2-devel, curl-devel >= 7.9
 BuildRequires: httpd-devel >= 2.0.46-1, pam-devel
 # to ensure we are using httpd with filesystem feature (see #1081453)
@@ -721,8 +714,6 @@ low-level PHP extension for the libsodium cryptographic library.
 
 
 %prep
-%{gpgverify} --keyring='%{SOURCE20}' --signature='%{SOURCE21}' --data='%{SOURCE0}'
-
 %setup -q -n php-%{upver}%{?rcver}
 
 %patch1 -p1 -b .mpmcheck
@@ -1582,9 +1573,6 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
-* Thu Jul 25 2019 Remi Collet <remi@remirepo.net> - 7.3.8~RC1-2
-- add tarball signature check
-
 * Tue Jul 16 2019 Remi Collet <remi@remirepo.net> - 7.3.8~RC1-1
 - update to 7.3.8RC1
 - add upstream patch for #78297
