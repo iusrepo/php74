@@ -65,7 +65,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1571,6 +1571,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Aug 20 2019 Petr Pisar <ppisar@redhat.com> - 7.3.9~RC1-2
+- Rebuild against recode-3.7.2 (bug #1379055)
+
 * Mon Aug 19 2019 Remi Collet <remi@remirepo.net> - 7.3.9~RC1-1
 - update to 7.3.9RC1
 
