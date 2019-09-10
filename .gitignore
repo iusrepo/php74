@@ -5,3 +5,4 @@ php-5.*.xz
 php-7.*.xz
 /opcache-default.blacklist
 /php-7.3.9.tar.xz.asc
+/php-7.3.10RC1.tar.xz.asc
