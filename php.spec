@@ -10,7 +10,6 @@
 %global apiver      20180731
 %global zendver     20180731
 %global pdover      20170320
-# Extension version
 %global jsonver     1.7.0
 
 # we don't want -z defs linker flag
@@ -60,12 +59,12 @@
 %endif
 
 %global upver        7.3.10
-%global rcver        RC1
+#global rcver        RC1
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1577,6 +1576,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Sep 24 2019 Remi Collet <remi@remirepo.net> - 7.3.10-1
+- Update to 7.3.10 - http://www.php.net/releases/7_3_10.php
+
 * Wed Sep 11 2019 Remi Collet <remi@remirepo.net> - 7.3.10~RC1-2
 - update to 7.3.10RC1 (new tag)
 
