@@ -5,10 +5,9 @@ mod_php is build twice
 - as ZTS using --enable-maintainer-zts
 
 diff --git a/sapi/apache2handler/config.m4 b/sapi/apache2handler/config.m4
-index 2e64b21..ec4799f 100644
 --- a/sapi/apache2handler/config.m4
 +++ b/sapi/apache2handler/config.m4
-@@ -116,17 +116,6 @@ if test "$PHP_APXS2" != "no"; then
+@@ -105,17 +105,6 @@ if test "$PHP_APXS2" != "no"; then
      ;;
    esac
  
@@ -18,7 +17,7 @@ index 2e64b21..ec4799f 100644
 -      PHP_BUILD_THREAD_SAFE
 -    fi
 -  else
--    APACHE_THREADED_MPM=`$APXS_HTTPD -V | grep 'threaded:.*yes'`
+-    APACHE_THREADED_MPM=`$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes'`
 -    if test -n "$APACHE_THREADED_MPM"; then
 -      PHP_BUILD_THREAD_SAFE
 -    fi

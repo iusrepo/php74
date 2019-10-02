@@ -1,6 +1,6 @@
 --- php-5.6.3/sapi/embed/config.m4.embed
 +++ php-5.6.3/sapi/embed/config.m4
-@@ -12,7 +12,8 @@ if test "$PHP_EMBED" != "no"; then
+@@ -11,7 +11,8 @@ if test "$PHP_EMBED" != "no"; then
    case "$PHP_EMBED" in
      yes|shared)
        PHP_EMBED_TYPE=shared
@@ -19,6 +19,6 @@ diff -up php-5.5.30/scripts/php-config.in.old php-5.5.30/scripts/php-config.in
  configure_options="@CONFIGURE_OPTIONS@"
 -php_sapis="@PHP_INSTALLED_SAPIS@"
 +php_sapis="apache2handler embed fpm @PHP_INSTALLED_SAPIS@"
+ ini_dir="@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@"
+ ini_path="@EXPANDED_PHP_CONFIG_FILE_PATH@"
  
- # Set php_cli_binary and php_cgi_binary if available
- for sapi in $php_sapis; do

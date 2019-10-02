@@ -1,12 +1,12 @@
 
 Use -lldap_r by default.
 
-diff -up php-7.2.3RC1/ext/ldap/config.m4.ldap_r php-7.2.3RC1/ext/ldap/config.m4
---- php-7.2.3RC1/ext/ldap/config.m4.ldap_r	2018-02-14 06:05:11.553142812 +0100
-+++ php-7.2.3RC1/ext/ldap/config.m4	2018-02-14 06:07:31.179816122 +0100
-@@ -119,7 +119,11 @@ if test "$PHP_LDAP" != "no"; then
- 
-   MACHINE_INCLUDES=$($CC -dumpmachine)
+diff -up php-7.4.0RC2/ext/ldap/config.m4.ldap_r php-7.4.0RC2/ext/ldap/config.m4
+--- php-7.4.0RC2/ext/ldap/config.m4.ldap_r	2019-09-17 10:21:24.769200812 +0200
++++ php-7.4.0RC2/ext/ldap/config.m4	2019-09-17 10:21:30.658181771 +0200
+@@ -68,7 +68,11 @@ if test "$PHP_LDAP" != "no"; then
+   dnl -pc removal is a hack for clang
+   MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')
  
 -  if test -f $LDAP_LIBDIR/liblber.a || test -f $LDAP_LIBDIR/liblber.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.a || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.$SHLIB_SUFFIX_NAME; then
 +  if test -f $LDAP_LIBDIR/libldap_r.$SHLIB_SUFFIX_NAME; then

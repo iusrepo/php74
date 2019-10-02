@@ -1,0 +1,88 @@
+From d81eb77b4aaf579c151f7d16eef807838fcef9cc Mon Sep 17 00:00:00 2001
+From: Nikita Popov <nikita.ppv@gmail.com>
+Date: Wed, 2 Oct 2019 14:41:02 +0200
+Subject: [PATCH] Fix AArch64 build
+
+---
+ ext/standard/crc32.c | 49 ++++++++++++++++++++++++++++---------------------
+ 1 file changed, 28 insertions(+), 21 deletions(-)
+
+diff --git a/ext/standard/crc32.c b/ext/standard/crc32.c
+index 904ea25ff79..853c95ef54f 100644
+--- a/ext/standard/crc32.c
++++ b/ext/standard/crc32.c
+@@ -21,7 +21,6 @@
+ #include "crc32.h"
+ 
+ #if defined(__aarch64__)
+-# pragma GCC target ("+nothing+crc")
+ # include <arm_acle.h>
+ # if defined(__linux__)
+ #  include <sys/auxv.h>
+@@ -44,6 +43,31 @@ static inline int has_crc32_insn() {
+ 	return res;
+ # endif
+ }
++
++# pragma GCC push_options
++# pragma GCC target ("+nothing+crc")
++static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
++	while (nr >= sizeof(uint64_t)) {
++		crc = __crc32d(crc, *(uint64_t *)p);
++		p += sizeof(uint64_t);
++		nr -= sizeof(uint64_t);
++	}
++	if (nr >= sizeof(int32_t)) {
++		crc = __crc32w(crc, *(uint32_t *)p);
++		p += sizeof(uint32_t);
++		nr -= sizeof(uint32_t);
++	}
++	if (nr >= sizeof(int16_t)) {
++		crc = __crc32h(crc, *(uint16_t *)p);
++		p += sizeof(uint16_t);
++		nr -= sizeof(uint16_t);
++	}
++	if (nr) {
++		crc = __crc32b(crc, *p);
++	}
++	return crc;
++}
++# pragma GCC pop_options
+ #endif
+ 
+ /* {{{ proto string crc32(string str)
+@@ -63,28 +87,11 @@ PHP_NAMED_FUNCTION(php_if_crc32)
+ 
+ #if defined(__aarch64__)
+ 	if (has_crc32_insn()) {
+-		while(nr >= sizeof(uint64_t)) {
+-			crc = __crc32d(crc, *(uint64_t *)p);
+-			p += sizeof(uint64_t);
+-			nr -= sizeof(uint64_t);
+-		}
+-		if (nr >= sizeof(int32_t)) {
+-			crc = __crc32w(crc, *(uint32_t *)p);
+-			p += sizeof(uint32_t);
+-			nr -= sizeof(uint32_t);
+-		}
+-		if (nr >= sizeof(int16_t)) {
+-			crc = __crc32h(crc, *(uint16_t *)p);
+-			p += sizeof(uint16_t);
+-			nr -= sizeof(uint16_t);
+-		}
+-		if (nr) {
+-			crc = __crc32b(crc, *p);
+-			p += sizeof(uint8_t);
+-			nr -= sizeof(uint8_t);
+-		}
++		crc = crc32_aarch64(crc, p, nr);
++		RETVAL_LONG(crc^0xFFFFFFFF);
+ 	}
+ #endif
++
+ 	for (; nr--; ++p) {
+ 		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF ];
+ 	}
+-- 
+2.11.0
+
