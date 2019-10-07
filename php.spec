@@ -882,7 +882,7 @@ pushd build-cgi
 
 build --libdir=%{_libdir}/php \
       --enable-pcntl \
-      --enable-opcache=shared \
+      --enable-opcache \
       --enable-phpdbg \
 %if %{with_imap}
       --with-imap=shared --with-imap-ssl \
@@ -1011,7 +1011,7 @@ build --includedir=%{_includedir}/php-zts \
       --disable-cgi \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d \
       --enable-pcntl \
-      --enable-opcache=shared \
+      --enable-opcache \
 %if %{with_imap}
       --with-imap=shared --with-imap-ssl \
 %endif
