@@ -57,7 +57,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1205,27 +1205,29 @@ install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
 install -D -m 644 %{SOURCE13} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/conf.d/php-fpm.conf
 install -D -m 644 %{SOURCE14} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/default.d/php.conf
 
+TESTCMD="$RPM_BUILD_ROOT%{_bindir}/php --no-php-ini"
+# Ensure all provided extensions are really there
+for mod in core date filter hash libxml openssl pcntl pcre readline reflection session spl standard zlib
+do
+     $TESTCMD --modules | grep -qi $mod
+done
+
+TESTCMD="$TESTCMD --define extension_dir=$RPM_BUILD_ROOT%{_libdir}/php/modules"
+
 # Generate files lists and stub .ini files for each subpackage
-for mod in pgsql odbc ldap snmp xmlrpc \
+for mod in pgsql odbc ldap snmp \
 %if %{with_imap}
     imap \
 %endif
     json \
-    mysqlnd mysqli pdo_mysql \
-    mbstring gd dom xsl soap bcmath dba xmlreader xmlwriter \
+    mysqlnd mysqli \
+    mbstring gd dom xsl soap bcmath dba \
     simplexml bz2 calendar ctype exif ftp gettext gmp iconv \
     sockets tokenizer opcache \
-    pdo pdo_pgsql pdo_odbc pdo_sqlite \
-%if %{with_firebird}
-    pdo_firebird \
-%endif
     sqlite3 \
     enchant phar fileinfo intl \
     ffi \
     tidy \
-%if %{with_freetds}
-    pdo_dblib \
-%endif
 %if %{with_pspell}
     pspell \
 %endif
@@ -1234,18 +1236,32 @@ for mod in pgsql odbc ldap snmp xmlrpc \
     sodium \
 %endif
     posix shmop sysvshm sysvsem sysvmsg xml \
-    ; do
+    pdo_mysql pdo pdo_pgsql pdo_odbc pdo_sqlite \
+%if %{with_firebird}
+    pdo_firebird \
+%endif
+%if %{with_freetds}
+    pdo_dblib \
+%endif
+    xmlrpc xmlreader xmlwriter
+do
     case $mod in
       opcache)
         # Zend extensions
         ini=10-${mod}.ini;;
+        TESTCMD="$TESTCMD --define zend_extension=$mod"
       pdo_*|mysqli|xmlreader|xmlrpc)
         # Extensions with dependencies on 20-*
+        TESTCMD="$TESTCMD --define extension=$mod"
         ini=30-${mod}.ini;;
       *)
         # Extensions with no dependency
+        TESTCMD="$TESTCMD --define extension=$mod"
         ini=20-${mod}.ini;;
     esac
+
+    $TESTCMD --modules | grep -qi $mod
+
     # some extensions have their own config file
     if [ -f ${ini} ]; then
       cp -p ${ini} $RPM_BUILD_ROOT%{_sysconfdir}/php.d/${ini}
@@ -1492,7 +1508,10 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
-* Tue Oct  1 2019 Remi Collet <remi@remirepo.net> - 7.4.0~RC3-5
+* Mon Oct  7 2019 Remi Collet <remi@remirepo.net> - 7.4.0~RC3-2
+- ensure all shared extensions can be loaded
+
+* Tue Oct  1 2019 Remi Collet <remi@remirepo.net> - 7.4.0~RC3-1
 - update to 7.4.0RC3
 - bump API version to 20190902
 - drop wddx, recode and interbase extensions
