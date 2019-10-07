@@ -108,6 +108,7 @@ Patch47: php-5.6.3-phpinfo.patch
 # Upstream fixes (100+)
 # fix for https://bugs.php.net/78622
 Patch100: php-aarch64.patch
+Patch101: php-librt.patch
 
 # Security fixes (200+)
 
@@ -715,6 +716,7 @@ in pure PHP.
 
 # upstream patches
 %patch100 -p1 -b .wip
+%patch101 -p1 -b .wip2
 
 # security patches
 
@@ -880,8 +882,7 @@ pushd build-cgi
 
 build --libdir=%{_libdir}/php \
       --enable-pcntl \
-      --enable-opcache \
-      --enable-opcache-file \
+      --enable-opcache=shared \
       --enable-phpdbg \
 %if %{with_imap}
       --with-imap=shared --with-imap-ssl \
@@ -1010,8 +1011,7 @@ build --includedir=%{_includedir}/php-zts \
       --disable-cgi \
       --with-config-file-scan-dir=%{_sysconfdir}/php-zts.d \
       --enable-pcntl \
-      --enable-opcache \
-      --enable-opcache-file \
+      --enable-opcache=shared \
 %if %{with_imap}
       --with-imap=shared --with-imap-ssl \
 %endif
@@ -1236,7 +1236,7 @@ for mod in pgsql odbc ldap snmp \
     sodium \
 %endif
     posix shmop sysvshm sysvsem sysvmsg xml \
-    pdo_mysql pdo pdo_pgsql pdo_odbc pdo_sqlite \
+    pdo pdo_mysql pdo pdo_pgsql pdo_odbc pdo_sqlite \
 %if %{with_firebird}
     pdo_firebird \
 %endif
@@ -1248,8 +1248,8 @@ do
     case $mod in
       opcache)
         # Zend extensions
-        ini=10-${mod}.ini;;
         TESTCMD="$TESTCMD --define zend_extension=$mod"
+        ini=10-${mod}.ini;;
       pdo_*|mysqli|xmlreader|xmlrpc)
         # Extensions with dependencies on 20-*
         TESTCMD="$TESTCMD --define extension=$mod"
@@ -1510,6 +1510,8 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 %changelog
 * Mon Oct  7 2019 Remi Collet <remi@remirepo.net> - 7.4.0~RC3-2
 - ensure all shared extensions can be loaded
+- add patch from https://github.com/php/php-src/pull/4794
+  to ensure opcache is always linked with librt
 
 * Tue Oct  1 2019 Remi Collet <remi@remirepo.net> - 7.4.0~RC3-1
 - update to 7.4.0RC3

@@ -1,0 +1,23 @@
+diff --git a/ext/opcache/config.m4 b/ext/opcache/config.m4
+index a388dd787b..6876d37c08 100644
+--- a/ext/opcache/config.m4
++++ b/ext/opcache/config.m4
+@@ -2,7 +2,7 @@ PHP_ARG_ENABLE([opcache],
+   [whether to enable Zend OPcache support],
+   [AS_HELP_STRING([--disable-opcache],
+     [Disable Zend OPcache support])],
+-  [yes])
++  [shared])
+ 
+ PHP_ARG_ENABLE([huge-code-pages],
+   [whether to enable copying PHP CODE pages into HUGE PAGES],
+@@ -248,6 +248,9 @@ int main() {
+ 	Optimizer/zend_dump.c,
+ 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
+ 
++  PHP_CHECK_LIBRARY(rt, shm_unlink, [PHP_ADD_LIBRARY(rt,1,OPCACHE_SHARED_LIBADD)])
++
+   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
+   PHP_ADD_EXTENSION_DEP(opcache, pcre)
++  PHP_SUBST(OPCACHE_SHARED_LIBADD)
+ fi
