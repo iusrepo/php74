@@ -52,12 +52,12 @@
 %endif
 
 %global upver        7.4.0
-%global rcver        RC3
+%global rcver        RC4
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
 Version: %{upver}%{?rcver:~%{rcver}}
-Release: 2%{?dist}
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -106,9 +106,6 @@ Patch46: php-7.2.4-fixheader.patch
 Patch47: php-5.6.3-phpinfo.patch
 
 # Upstream fixes (100+)
-# fix for https://bugs.php.net/78622
-Patch100: php-aarch64.patch
-Patch101: php-librt.patch
 
 # Security fixes (200+)
 
@@ -715,8 +712,6 @@ in pure PHP.
 %patch47 -p1 -b .phpinfo
 
 # upstream patches
-%patch100 -p1 -b .wip
-%patch101 -p1 -b .wip2
 
 # security patches
 
@@ -1508,6 +1503,9 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Tue Oct 15 2019 Remi Collet <remi@remirepo.net> - 7.4.0~RC4-1
+- update to 7.4.0RC4
+
 * Mon Oct  7 2019 Remi Collet <remi@remirepo.net> - 7.4.0~RC3-2
 - ensure all shared extensions can be loaded
 - add patch from https://github.com/php/php-src/pull/4794
