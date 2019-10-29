@@ -52,7 +52,7 @@
 %endif
 
 %global upver        7.4.0
-%global rcver        RC4
+%global rcver        RC5
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
@@ -1146,7 +1146,7 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/
 install -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 
 # For third-party packaging:
-install -m 755 -d $RPM_BUILD_ROOT%{_datadir}/php
+install -m 755 -d $RPM_BUILD_ROOT%{_datadir}/php/preload
 
 # install the DSO
 install -m 755 -d $RPM_BUILD_ROOT%{_httpd_moddir}
@@ -1500,9 +1500,15 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 %files sodium -f files.sodium
 %endif
 %files ffi -f files.ffi
+%dir %{_datadir}/php/preload
 
 
 %changelog
+* Tue Oct 29 2019 Remi Collet <remi@remirepo.net> - 7.4.0~RC5-1
+- update to 7.4.0RC5
+- set opcache.enable_cli in provided default configuration
+- add /usr/share/php/preload as default ffi.preload configuration
+
 * Tue Oct 15 2019 Remi Collet <remi@remirepo.net> - 7.4.0~RC4-1
 - update to 7.4.0RC4
 
