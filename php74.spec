@@ -119,8 +119,6 @@ Patch300: php-5.6.3-datetests.patch
 BuildRequires: gnupg2
 BuildRequires: bzip2-devel
 BuildRequires: pkgconfig(libcurl)  >= 7.15.5
-# ensure we build with stock httpd, not httpd24u
-BuildRequires: httpd-devel < 2.4.10
 BuildRequires: pam-devel
 BuildRequires: libstdc++-devel
 # no pkgconfig to avoid compat-openssl10
@@ -147,24 +145,6 @@ BuildRequires: systemtap-sdt-devel
 # used for tests
 BuildRequires: %{_bindir}/ps
 
-%if %{with_zts}
-Provides: php-zts = %{version}-%{release}
-Provides: php-zts%{?_isa} = %{version}-%{release}
-%endif
-
-Requires: httpd-mmn = %{_httpd_mmn}
-Requires: php-common%{?_isa}     = %{version}-%{release}
-# php engine for Apache httpd webserver
-Provides: php(httpd)
-
-# safe replacement
-Provides:  php = %{version}-%{release}
-Provides:  php%{?_isa} = %{version}-%{release}
-Conflicts: php < %{version}-%{release}
-Provides:  mod_php = %{version}-%{release}
-Provides:  mod_php%{?_isa} = %{version}-%{release}
-Conflicts: mod_php < %{version}-%{release}
-
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
 easy for developers to write dynamically generated web pages. PHP also
@@ -173,8 +153,29 @@ non-commercial database management systems, so writing a
 database-enabled webpage with PHP is fairly simple. The most common
 use of PHP coding is probably as a replacement for CGI scripts.
 
-The php package contains the module (often referred to as mod_php)
-which adds support for the PHP language to Apache HTTP Server.
+%package -n mod_%{name}
+Summary: PHP module for the Apache HTTP Server
+# ensure we build with stock httpd, not httpd24u
+BuildRequires: httpd-devel < 2.4.10
+Requires: httpd-mmn = %{_httpd_mmn}
+Requires: php-common%{?_isa} = %{version}-%{release}
+%if %{with_zts}
+Provides: php-zts = %{version}-%{release}
+Provides: php-zts%{?_isa} = %{version}-%{release}
+%endif
+# php engine for Apache httpd webserver
+Provides: php(httpd)
+# safe replacement
+Provides:  php = %{version}-%{release}
+Provides:  php%{?_isa} = %{version}-%{release}
+Conflicts: php < %{version}-%{release}
+Provides:  mod_php = %{version}-%{release}
+Provides:  mod_php%{?_isa} = %{version}-%{release}
+Conflicts: mod_php < %{version}-%{release}
+
+%description -n mod_%{name}
+The mod_%{name} package contains the module which adds support for the PHP
+language to Apache HTTP Server.
 
 %package cli
 Summary: Command-line interface for PHP
@@ -1498,7 +1499,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %postun embedded -p /sbin/ldconfig
 
 
-%files
+%files -n mod_%{name}
 %{_httpd_moddir}/libphp7.so
 %if %{with_zts}
 %{_httpd_moddir}/libphp7-zts.so
@@ -1648,6 +1649,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 * Wed Dec 11 2019 Matt Linscott <matt.linscott@gmail.com> - 7.4.0-2
 - Initial port from Fedora to IUS
 - Use bundled pcre and gd
+- Move httpd module to mod_php subpackage
 
 * Wed Nov 27 2019 Remi Collet <remi@remirepo.net> - 7.4.0-1
 - update to 7.4.0 GA
