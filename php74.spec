@@ -107,6 +107,7 @@ Patch45: php-7.4.0-ldap_r.patch
 Patch46: php-7.2.4-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
+Patch49: php-7.1.0-curltls.patch
 
 # Upstream fixes (100+)
 
@@ -865,6 +866,9 @@ in pure PHP.
 %endif
 %patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
+%if 0%{?rhel}
+%patch49 -p1 -b .curltls
+%endif
 
 # upstream patches
 
@@ -1694,6 +1698,7 @@ exit 0
 - Use bundled pcre and gd
 - Move httpd module to mod_php subpackage
 - Add fpm-nginx and fpm-httpd subpackages
+- Add patch49 to enable TLS 1.1/1.2 support
 
 * Wed Nov 27 2019 Remi Collet <remi@remirepo.net> - 7.4.0-1
 - update to 7.4.0 GA

@@ -1,0 +1,43 @@
+From 6349d30d4fe6559d88472857c963f407bdf4d014 Mon Sep 17 00:00:00 2001
+From: Carl George <carl.george@rackspace.com>
+Date: Fri, 23 Dec 2016 19:13:25 -0600
+Subject: [PATCH] enable TLS 1.1/1.2 support
+
+Patch adapted from RHEL7's php-5.4.16-curltls.patch.
+
+See also:
+https://access.redhat.com/blogs/766093/posts/1976123
+https://bugzilla.redhat.com/show_bug.cgi?id=1255920
+https://bugzilla.redhat.com/show_bug.cgi?id=1291667
+https://git.centos.org/blob/rpms!php.git/c7/SOURCES!php-5.4.16-curltls.patch
+---
+ ext/curl/interface.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/ext/curl/interface.c b/ext/curl/interface.c
+index 6a25359597..95857b3db4 100644
+--- a/ext/curl/interface.c
++++ b/ext/curl/interface.c
+@@ -832,6 +832,9 @@ PHP_MINIT_FUNCTION(curl)
+ 	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_SSLv2);
+ 	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_SSLv3);
+ 	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1);
++	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_0);
++	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_1);
++	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_2);
+ 
+ 	/* Curl TIMECOND constants (CURLOPT_TIMECONDITION) */
+ 	REGISTER_CURL_CONSTANT(CURL_TIMECOND_IFMODSINCE);
+@@ -1206,10 +1209,6 @@ PHP_MINIT_FUNCTION(curl)
+ 
+ #if LIBCURL_VERSION_NUM >= 0x072200 /* Available since 7.34.0 */
+ 	REGISTER_CURL_CONSTANT(CURLOPT_LOGIN_OPTIONS);
+-
+-	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_0);
+-	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_1);
+-	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_2);
+ #endif
+ 
+ #if LIBCURL_VERSION_NUM >= 0x072400 /* Available since 7.36.0 */
+-- 
+2.11.0
