@@ -1,3 +1,5 @@
+# IUS spec file for php74, forked from
+#
 # Fedora spec file for php
 #
 # License: MIT
@@ -41,6 +43,8 @@
 %global with_sodium   1
 %global with_pspell   1
 %global with_lmdb     1
+%global with_libgd    1
+%global with_libpcre  1
 %else
 %global with_zts      0
 %global with_firebird 0
@@ -49,15 +53,14 @@
 %global with_sodium   0
 %global with_pspell   0
 %global with_lmdb     0
+%global with_libgd    0
+%global with_libpcre  0
 %endif
 
-%global upver        7.4.0
-#global rcver        RC6
-
 Summary: PHP scripting language for creating dynamic web sites
-Name: php
-Version: %{upver}%{?rcver:~%{rcver}}
-Release: 1%{?dist}
+Name: php74
+Version: 7.4.0
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -67,7 +70,7 @@ Release: 1%{?dist}
 License: PHP and Zend and BSD and MIT and ASL 1.0 and NCSA
 URL: http://www.php.net/
 
-Source0: https://www.php.net/distributions/php-%{upver}%{?rcver}.tar.xz
+Source0: https://www.php.net/distributions/php-%{version}.tar.xz
 Source1: php.conf
 Source2: php.ini
 Source3: macros.php
@@ -77,12 +80,11 @@ Source6: php-fpm.service
 Source7: php-fpm.logrotate
 Source9: php.modconf
 Source10: php.ztsmodconf
-Source12: php-fpm.wants
 Source13: nginx-fpm.conf
 Source14: nginx-php.conf
 # See https://secure.php.net/gpg-keys.php
 Source20: https://www.php.net/distributions/php-keyring.gpg
-Source21: https://www.php.net/distributions/php-%{upver}%{?rcver}.tar.xz.asc
+Source21: https://www.php.net/distributions/php-%{version}.tar.xz.asc
 # Configuration files for some extensions
 Source50: 10-opcache.ini
 Source51: opcache-default.blacklist
@@ -117,12 +119,9 @@ Patch300: php-5.6.3-datetests.patch
 BuildRequires: gnupg2
 BuildRequires: bzip2-devel
 BuildRequires: pkgconfig(libcurl)  >= 7.15.5
-BuildRequires: httpd-devel >= 2.0.46-1
+# ensure we build with stock httpd, not httpd24u
+BuildRequires: httpd-devel < 2.4.10
 BuildRequires: pam-devel
-# to ensure we are using httpd with filesystem feature (see #1081453)
-BuildRequires: httpd-filesystem
-# to ensure we are using nginx with filesystem feature (see #1142298)
-BuildRequires: nginx-filesystem
 BuildRequires: libstdc++-devel
 # no pkgconfig to avoid compat-openssl10
 BuildRequires: openssl-devel >= 1.0.1
@@ -130,7 +129,11 @@ BuildRequires: pkgconfig(sqlite3) >= 3.7.4
 BuildRequires: pkgconfig(zlib) >= 1.2.0.4
 BuildRequires: smtpdaemon
 BuildRequires: pkgconfig(libedit)
+%if %{with_libpcre}
 BuildRequires: pkgconfig(libpcre2-8) >= 10.30
+%else
+Provides:      bundled(pcre2) = 10.32
+%endif
 BuildRequires: bzip2
 BuildRequires: perl-interpreter
 BuildRequires: autoconf
@@ -150,26 +153,17 @@ Provides: php-zts%{?_isa} = %{version}-%{release}
 %endif
 
 Requires: httpd-mmn = %{_httpd_mmn}
-Provides: mod_php                = %{version}-%{release}
 Requires: php-common%{?_isa}     = %{version}-%{release}
-# For backwards-compatibility, pull the "php" command
-Recommends: php-cli%{?_isa}      = %{version}-%{release}
-# httpd have threaded MPM by default
-Recommends: php-fpm%{?_isa}      = %{version}-%{release}
-# as "php" is now mostly a meta-package, commonly used extensions
-Recommends: php-json%{?_isa}     = %{version}-%{release}
-Recommends: php-mbstring%{?_isa} = %{version}-%{release}
-Recommends: php-opcache%{?_isa}  = %{version}-%{release}
-Recommends: php-pdo%{?_isa}      = %{version}-%{release}
-%if %{with_sodium}
-Recommends: php-sodium%{?_isa}   = %{version}-%{release}
-%endif
-Recommends: php-xml%{?_isa}      = %{version}-%{release}
-# To ensure correct /var/lib/php/session ownership:
-Requires(pre): httpd-filesystem
 # php engine for Apache httpd webserver
 Provides: php(httpd)
 
+# safe replacement
+Provides:  php = %{version}-%{release}
+Provides:  php%{?_isa} = %{version}-%{release}
+Conflicts: php < %{version}-%{release}
+Provides:  mod_php = %{version}-%{release}
+Provides:  mod_php%{?_isa} = %{version}-%{release}
+Conflicts: mod_php < %{version}-%{release}
 
 %description
 PHP is an HTML-embedded scripting language. PHP attempts to make it
@@ -190,6 +184,10 @@ Requires: php-common%{?_isa} = %{version}-%{release}
 Provides: php-cgi = %{version}-%{release}, php-cgi%{?_isa} = %{version}-%{release}
 Provides: php-pcntl, php-pcntl%{?_isa}
 Provides: php-readline, php-readline%{?_isa}
+# safe replacement
+Provides:  php-cli = %{version}-%{release}
+Provides:  php-cli%{?_isa} = %{version}-%{release}
+Conflicts: php-cli < %{version}-%{release}
 
 %description cli
 The php-cli package contains the command-line interface
@@ -199,6 +197,10 @@ executing PHP scripts, /usr/bin/php, and the CGI interface.
 %package dbg
 Summary: The interactive PHP debugger
 Requires: php-common%{?_isa} = %{version}-%{release}
+# safe replacement
+Provides:  php-dbg = %{version}-%{release}
+Provides:  php-dbg%{?_isa} = %{version}-%{release}
+Conflicts: php-dbg < %{version}-%{release}
 
 %description dbg
 The php-dbg package contains the interactive PHP debugger.
@@ -211,15 +213,12 @@ BuildRequires: pkgconfig(libsystemd) >= 209
 Requires: php-common%{?_isa} = %{version}-%{release}
 Requires(pre): /usr/sbin/useradd
 %{?systemd_requires}
-# To ensure correct /var/lib/php/session ownership:
-Requires(pre): httpd-filesystem
-# For php.conf in /etc/httpd/conf.d
-# and version 2.4.10 for proxy support in SetHandler
-Requires: httpd-filesystem >= 2.4.10
 # php engine for Apache httpd webserver
 Provides: php(httpd)
-# for /etc/nginx ownership
-Requires: nginx-filesystem
+# safe replacement
+Provides:  php-fpm = %{version}-%{release}
+Provides:  php-fpm%{?_isa} = %{version}-%{release}
+Conflicts: php-fpm < %{version}-%{release}
 
 %description fpm
 PHP-FPM (FastCGI Process Manager) is an alternative PHP FastCGI
@@ -264,6 +263,11 @@ Provides: php-spl, php-spl%{?_isa}
 Provides: php-standard = %{version}, php-standard%{?_isa} = %{version}
 Provides: php-tokenizer, php-tokenizer%{?_isa}
 Provides: php-zlib, php-zlib%{?_isa}
+# safe replacement
+Provides:  php-common = %{version}-%{release}
+Provides:  php-common%{?_isa} = %{version}-%{release}
+Conflicts: php-common < %{version}-%{release}
+Conflicts: php56u-common, php70u-common, php71u-common, php72u-common, php73-common
 
 %description common
 The php-common package contains files used by both the php
@@ -283,14 +287,18 @@ Requires: krb5-devel%{?_isa}
 Requires: libedit-devel%{?_isa}
 Requires: libxml2-devel%{?_isa}
 Requires: openssl-devel%{?_isa} >= 1.0.1
+%if %{with_libpcre}
 Requires: pcre2-devel%{?_isa}
+%endif
 Requires: zlib-devel%{?_isa}
-Obsoletes: php-pecl-json-devel  < %{version}
-Obsoletes: php-pecl-jsonc-devel < %{version}
 %if %{with_zts}
 Provides: php-zts-devel = %{version}-%{release}
 Provides: php-zts-devel%{?_isa} = %{version}-%{release}
 %endif
+# safe replacement
+Provides:  php-devel = %{version}-%{release}
+Provides:  php-devel%{?_isa} = %{version}-%{release}
+Conflicts: php-devel < %{version}-%{release}
 
 %description devel
 The php-devel package contains the files needed for building PHP
@@ -305,6 +313,10 @@ Provides:  php-pecl-zendopcache = %{version}
 Provides:  php-pecl-zendopcache%{?_isa} = %{version}
 Provides:  php-pecl(opcache) = %{version}
 Provides:  php-pecl(opcache)%{?_isa} = %{version}
+# safe replacement
+Provides:  php-opcache = %{version}-%{release}
+Provides:  php-opcache%{?_isa} = %{version}-%{release}
+Conflicts: php-opcache < %{version}-%{release}
 
 %description opcache
 The Zend OPcache provides faster PHP execution through opcode caching and
@@ -323,6 +335,10 @@ BuildRequires: pkgconfig(krb5)
 BuildRequires: pkgconfig(krb5-gssapi)
 BuildRequires: openssl-devel >= 1.0.1
 BuildRequires: libc-client-devel
+# safe replacement
+Provides:  php-imap = %{version}-%{release}
+Provides:  php-imap%{?_isa} = %{version}-%{release}
+Conflicts: php-imap < %{version}-%{release}
 
 %description imap
 The php-imap module will add IMAP (Internet Message Access Protocol)
@@ -338,6 +354,10 @@ Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: pkgconfig(libsasl2)
 BuildRequires: openldap-devel
 BuildRequires: openssl-devel >= 1.0.1
+# safe replacement
+Provides:  php-ldap = %{version}-%{release}
+Provides:  php-ldap%{?_isa} = %{version}-%{release}
+Conflicts: php-ldap < %{version}-%{release}
 
 %description ldap
 The php-ldap adds Lightweight Directory Access Protocol (LDAP)
@@ -355,6 +375,10 @@ Provides: php-pdo-abi  = %{pdover}-%{__isa_bits}
 Provides: php(pdo-abi) = %{pdover}-%{__isa_bits}
 Provides: php-sqlite3, php-sqlite3%{?_isa}
 Provides: php-pdo_sqlite, php-pdo_sqlite%{?_isa}
+# safe replacement
+Provides:  php-pdo = %{version}-%{release}
+Provides:  php-pdo%{?_isa} = %{version}-%{release}
+Conflicts: php-pdo < %{version}-%{release}
 
 %description pdo
 The php-pdo package contains a dynamic shared object that will add
@@ -371,6 +395,11 @@ Provides: php_database
 Provides: php-mysqli = %{version}-%{release}
 Provides: php-mysqli%{?_isa} = %{version}-%{release}
 Provides: php-pdo_mysql, php-pdo_mysql%{?_isa}
+# safe replacement
+Provides:  php-mysqlnd = %{version}-%{release}
+Provides:  php-mysqlnd%{?_isa} = %{version}-%{release}
+Conflicts: php-mysqlnd < %{version}-%{release}
+Conflicts: php-mysql < %{version}-%{release}
 
 %description mysqlnd
 The php-mysqlnd package contains a dynamic shared object that will add
@@ -390,7 +419,11 @@ Provides: php_database
 Provides: php-pdo_pgsql, php-pdo_pgsql%{?_isa}
 BuildRequires: krb5-devel
 BuildRequires: openssl-devel >= 1.0.1
-BuildRequires: libpq-devel
+BuildRequires: postgresql-devel
+# safe replacement
+Provides:  php-pgsql = %{version}-%{release}
+Provides:  php-pgsql%{?_isa} = %{version}-%{release}
+Conflicts: php-pgsql < %{version}-%{release}
 
 %description pgsql
 The php-pgsql package add PostgreSQL database support to PHP.
@@ -410,6 +443,10 @@ Provides: php-shmop, php-shmop%{?_isa}
 Provides: php-sysvsem, php-sysvsem%{?_isa}
 Provides: php-sysvshm, php-sysvshm%{?_isa}
 Provides: php-sysvmsg, php-sysvmsg%{?_isa}
+# safe replacement
+Provides:  php-process = %{version}-%{release}
+Provides:  php-process%{?_isa} = %{version}-%{release}
+Conflicts: php-process < %{version}-%{release}
 
 %description process
 The php-process package contains dynamic shared objects which add
@@ -425,6 +462,10 @@ Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-pdo_odbc, php-pdo_odbc%{?_isa}
 BuildRequires: unixODBC-devel
+# safe replacement
+Provides:  php-odbc = %{version}-%{release}
+Provides:  php-odbc%{?_isa} = %{version}-%{release}
+Conflicts: php-odbc < %{version}-%{release}
 
 %description odbc
 The php-odbc package contains a dynamic shared object that will add
@@ -441,6 +482,10 @@ Summary: A module for PHP applications that use the SOAP protocol
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: pkgconfig(libxml-2.0)
+# safe replacement
+Provides:  php-soap = %{version}-%{release}
+Provides:  php-soap%{?_isa} = %{version}-%{release}
+Conflicts: php-soap < %{version}-%{release}
 
 %description soap
 The php-soap package contains a dynamic shared object that will add
@@ -456,6 +501,10 @@ BuildRequires:  firebird-devel
 Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-pdo_firebird, php-pdo_firebird%{?_isa}
+# safe replacement
+Provides:  php-interbase = %{version}-%{release}
+Provides:  php-interbase%{?_isa} = %{version}-%{release}
+Conflicts: php-interbase < %{version}-%{release}
 
 %description pdo-firebird
 The php-pdo-firebird package contains the PDO driver for
@@ -468,6 +517,10 @@ Summary: A module for PHP applications that query SNMP-managed devices
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}, net-snmp
 BuildRequires: net-snmp-devel
+# safe replacement
+Provides:  php-snmp = %{version}-%{release}
+Provides:  php-snmp%{?_isa} = %{version}-%{release}
+Conflicts: php-snmp < %{version}-%{release}
 
 %description snmp
 The php-snmp package contains a dynamic shared object that will add
@@ -489,6 +542,10 @@ Provides: php-xsl, php-xsl%{?_isa}
 BuildRequires: pkgconfig(libxslt)  >= 1.1
 BuildRequires: pkgconfig(libexslt)
 BuildRequires: pkgconfig(libxml-2.0)  >= 2.7.6
+# safe replacement
+Provides:  php-xml = %{version}-%{release}
+Provides:  php-xml%{?_isa} = %{version}-%{release}
+Conflicts: php-xml < %{version}-%{release}
 
 %description xml
 The php-xml package contains dynamic shared objects which add support
@@ -501,6 +558,10 @@ Summary: A module for PHP applications which use the XML-RPC protocol
 # libXMLRPC is licensed under BSD
 License: PHP and BSD
 Requires: php-xml%{?_isa} = %{version}-%{release}
+# safe replacement
+Provides:  php-xmlrpc = %{version}-%{release}
+Provides:  php-xmlrpc%{?_isa} = %{version}-%{release}
+Conflicts: php-xmlrpc < %{version}-%{release}
 
 %description xmlrpc
 The php-xmlrpc package contains a dynamic shared object that will add
@@ -515,6 +576,10 @@ License: PHP and LGPLv2 and OpenLDAP
 BuildRequires: pkgconfig(oniguruma) >= 6.8
 Provides: bundled(libmbfl) = 1.3.2
 Requires: php-common%{?_isa} = %{version}-%{release}
+# safe replacement
+Provides:  php-mbstring = %{version}-%{release}
+Provides:  php-mbstring%{?_isa} = %{version}-%{release}
+Conflicts: php-mbstring < %{version}-%{release}
 
 %description mbstring
 The php-mbstring package contains a dynamic shared object that will add
@@ -523,9 +588,28 @@ support for multi-byte string handling to PHP.
 %package gd
 Summary: A module for PHP applications for using the gd graphics library
 # All files licensed under PHP version 3.01
+%if %{with_libgd}
 License: PHP
+%else
+# bundled libgd is licensed under BSD
+License: PHP and BSD
+%endif
 Requires: php-common%{?_isa} = %{version}-%{release}
+%if %{with_libgd}
 BuildRequires: pkgconfig(gdlib) >= 2.1.1
+%else
+# Required to build the bundled GD library
+BuildRequires: libjpeg-devel
+BuildRequires: libpng-devel
+BuildRequires: freetype-devel
+BuildRequires: libXpm-devel
+BuildRequires: libwebp-devel
+Provides: bundled(gd) = 2.0.35
+%endif
+# safe replacement
+Provides:  php-gd = %{version}-%{release}
+Provides:  php-gd%{?_isa} = %{version}-%{release}
+Conflicts: php-gd < %{version}-%{release}
 
 %description gd
 The php-gd package contains a dynamic shared object that will add
@@ -537,6 +621,10 @@ Summary: A module for PHP applications for using the bcmath library
 # libbcmath is licensed under LGPLv2+
 License: PHP and LGPLv2+
 Requires: php-common%{?_isa} = %{version}-%{release}
+# safe replacement
+Provides:  php-bcmath = %{version}-%{release}
+Provides:  php-bcmath%{?_isa} = %{version}-%{release}
+Conflicts: php-bcmath < %{version}-%{release}
 
 %description bcmath
 The php-bcmath package contains a dynamic shared object that will add
@@ -548,6 +636,10 @@ Summary: A module for PHP applications for using the GNU MP library
 License: PHP
 BuildRequires: gmp-devel
 Requires: php-common%{?_isa} = %{version}-%{release}
+# safe replacement
+Provides:  php-gmp = %{version}-%{release}
+Provides:  php-gmp%{?_isa} = %{version}-%{release}
+Conflicts: php-gmp < %{version}-%{release}
 
 %description gmp
 These functions allow you to work with arbitrary-length integers
@@ -563,6 +655,10 @@ BuildRequires: tokyocabinet-devel
 BuildRequires: lmdb-devel
 %endif
 Requires: php-common%{?_isa} = %{version}-%{release}
+# safe replacement
+Provides:  php-dba = %{version}-%{release}
+Provides:  php-dba%{?_isa} = %{version}-%{release}
+Conflicts: php-dba < %{version}-%{release}
 
 %description dba
 The php-dba package contains a dynamic shared object that will add
@@ -574,6 +670,10 @@ Summary: Standard PHP module provides tidy library support
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: libtidy-devel
+# safe replacement
+Provides:  php-tidy = %{version}-%{release}
+Provides:  php-tidy%{?_isa} = %{version}-%{release}
+Conflicts: php-tidy < %{version}-%{release}
 
 %description tidy
 The php-tidy package contains a dynamic shared object that will add
@@ -587,6 +687,10 @@ License: PHP
 Requires: php-pdo%{?_isa} = %{version}-%{release}
 BuildRequires: freetds-devel
 Provides: php-pdo_dblib, php-pdo_dblib%{?_isa}
+# safe replacement
+Provides:  php-pdo-dblib = %{version}-%{release}
+Provides:  php-pdo-dblib%{?_isa} = %{version}-%{release}
+Conflicts: php-pdo-dblib < %{version}-%{release}
 
 %description pdo-dblib
 The php-pdo-dblib package contains a dynamic shared object
@@ -600,6 +704,10 @@ Requires: php-common%{?_isa} = %{version}-%{release}
 # doing a real -devel package for just the .so symlink is a bit overkill
 Provides: php-embedded-devel = %{version}-%{release}
 Provides: php-embedded-devel%{?_isa} = %{version}-%{release}
+# safe replacement
+Provides:  php-embedded = %{version}-%{release}
+Provides:  php-embedded%{?_isa} = %{version}-%{release}
+Conflicts: php-embedded < %{version}-%{release}
 
 %description embedded
 The php-embedded package contains a library which can be embedded
@@ -612,6 +720,10 @@ Summary: A module for PHP applications for using pspell interfaces
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: aspell-devel >= 0.50.0
+# safe replacement
+Provides:  php-pspell = %{version}-%{release}
+Provides:  php-pspell%{?_isa} = %{version}-%{release}
+Conflicts: php-pspell < %{version}-%{release}
 
 %description pspell
 The php-pspell package contains a dynamic shared object that will add
@@ -626,6 +738,10 @@ Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: pkgconfig(icu-i18n) >= 50.1
 BuildRequires: pkgconfig(icu-io)   >= 50.1
 BuildRequires: pkgconfig(icu-uc)   >= 50.1
+# safe replacement
+Provides:  php-intl = %{version}-%{release}
+Provides:  php-intl%{?_isa} = %{version}-%{release}
+Conflicts: php-intl < %{version}-%{release}
 
 %description intl
 The php-intl package contains a dynamic shared object that will add
@@ -637,6 +753,10 @@ Summary: Enchant spelling extension for PHP applications
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
 BuildRequires: pkgconfig(enchant)
+# safe replacement
+Provides:  php-enchant = %{version}-%{release}
+Provides:  php-enchant%{?_isa} = %{version}-%{release}
+Conflicts: php-enchant < %{version}-%{release}
 
 %description enchant
 The php-enchant package contains a dynamic shared object that will add
@@ -647,12 +767,14 @@ Summary: JavaScript Object Notation extension for PHP
 # All files licensed under PHP version 3.0.1
 License: PHP
 Requires: php-common%{?_isa} = %{version}-%{release}
-Obsoletes: php-pecl-json          < %{version}
-Obsoletes: php-pecl-jsonc         < %{version}
 Provides:  php-pecl(json)         = %{version}
 Provides:  php-pecl(json)%{?_isa} = %{version}
 Provides:  php-pecl-json          = %{version}
 Provides:  php-pecl-json%{?_isa}  = %{version}
+# safe replacement
+Provides:  php-json = %{version}-%{release}
+Provides:  php-json%{?_isa} = %{version}-%{release}
+Conflicts: php-json < %{version}-%{release}
 
 %description json
 The php-json package provides an extension that will add
@@ -666,9 +788,12 @@ License: PHP
 BuildRequires:  pkgconfig(libsodium) >= 1.0.9
 
 Requires: php-common%{?_isa} = %{version}-%{release}
-Obsoletes: php-pecl-libsodium2 < 3
 Provides:  php-pecl(libsodium)         = %{version}
 Provides:  php-pecl(libsodium)%{?_isa} = %{version}
+# safe replacement
+Provides:  php-sodium = %{version}-%{release}
+Provides:  php-sodium%{?_isa} = %{version}-%{release}
+Conflicts: php-sodium < %{version}-%{release}
 
 %description sodium
 The php-sodium package provides a simple,
@@ -683,6 +808,10 @@ License: PHP
 Group: System Environment/Libraries
 BuildRequires:  pkgconfig(libffi)
 Requires: php-common%{?_isa} = %{version}-%{release}
+# safe replacement
+Provides:  php-ffi = %{version}-%{release}
+Provides:  php-ffi%{?_isa} = %{version}-%{release}
+Conflicts: php-ffi < %{version}-%{release}
 
 %description ffi
 FFI is one of the features that made Python and LuaJIT very useful for fast
@@ -696,7 +825,7 @@ in pure PHP.
 %prep
 %{gpgverify} --keyring='%{SOURCE20}' --signature='%{SOURCE21}' --data='%{SOURCE0}'
 
-%setup -q -n php-%{upver}%{?rcver}
+%setup -q -n php-%{version}
 
 %patch1 -p1 -b .mpmcheck
 %patch5 -p1 -b .includedir
@@ -750,8 +879,8 @@ rm ext/zlib/tests/004-mb.phpt
 
 # Safety check for API version change.
 pver=$(sed -n '/#define PHP_VERSION /{s/.* "//;s/".*$//;p}' main/php_version.h)
-if test "x${pver}" != "x%{upver}%{?rcver}"; then
-   : Error: Upstream PHP version is now ${pver}, expecting %{upver}%{?rcver}.
+if test "x${pver}" != "x%{version}"; then
+   : Error: Upstream PHP version is now ${pver}, expecting %{version}.
    : Update the version/rcver macros and rebuild.
    exit 1
 fi
@@ -850,7 +979,9 @@ ln -sf ../configure
     --without-gdbm \
     --with-openssl \
     --with-system-ciphers \
+%if %{with_libpcre}
     --with-external-pcre \
+%endif
 %ifarch s390 s390x sparc64 sparcv9 riscv64
     --without-pcre-jit \
 %endif
@@ -885,7 +1016,11 @@ build --libdir=%{_libdir}/php \
       --enable-mbstring=shared \
       --enable-mbregex \
       --enable-gd=shared \
+%if %{with_libgd}
       --with-external-gd \
+%else
+      --with-webp \
+%endif
       --with-gmp=shared \
       --enable-calendar=shared \
       --enable-bcmath=shared \
@@ -908,6 +1043,7 @@ build --libdir=%{_libdir}/php \
       --with-mysqli=shared,mysqlnd \
       --with-mysql-sock=%{mysql_sock} \
 %if %{with_firebird}
+      --with-interbase=shared \
       --with-pdo-firebird=shared \
 %endif
       --enable-dom=shared \
@@ -1013,7 +1149,11 @@ build --includedir=%{_includedir}/php-zts \
       --enable-mbstring=shared \
       --enable-mbregex \
       --enable-gd=shared \
+%if %{with_libgd}
       --with-external-gd \
+%else
+      --with-webp \
+%endif
       --with-gmp=shared \
       --enable-calendar=shared \
       --enable-bcmath=shared \
@@ -1037,6 +1177,7 @@ build --includedir=%{_includedir}/php-zts \
       --with-mysql-sock=%{mysql_sock} \
       --enable-mysqlnd-threading \
 %if %{with_firebird}
+      --with-interbase=shared \
       --with-pdo-firebird=shared \
 %endif
       --enable-dom=shared \
@@ -1191,8 +1332,6 @@ mv $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d/www.conf.default .
 # install systemd unit files and scripts for handling server startup
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/php-fpm.service.d
 install -Dm 644 %{SOURCE6}  $RPM_BUILD_ROOT%{_unitdir}/php-fpm.service
-install -Dm 644 %{SOURCE12} $RPM_BUILD_ROOT%{_unitdir}/httpd.service.d/php-fpm.conf
-install -Dm 644 %{SOURCE12} $RPM_BUILD_ROOT%{_unitdir}/nginx.service.d/php-fpm.conf
 # LogRotate
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
 install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
@@ -1324,7 +1463,7 @@ sed -e '/blacklist_filename/s/php.d/php-zts.d/' \
 sed -e "s/@PHP_APIVER@/%{apiver}-%{__isa_bits}/" \
     -e "s/@PHP_ZENDVER@/%{zendver}-%{__isa_bits}/" \
     -e "s/@PHP_PDOVER@/%{pdover}-%{__isa_bits}/" \
-    -e "s/@PHP_VERSION@/%{upver}/" \
+    -e "s/@PHP_VERSION@/%{version}/" \
 %if ! %{with_zts}
     -e "/zts/d" \
 %endif
@@ -1334,7 +1473,9 @@ install -m 644 -D macros.php \
 
 # Remove unpackaged files
 rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
+%if %{with_zts}
        $RPM_BUILD_ROOT%{_libdir}/php-zts/modules/*.a \
+%endif
        $RPM_BUILD_ROOT%{_bindir}/{phptar} \
        $RPM_BUILD_ROOT%{_datadir}/pear \
        $RPM_BUILD_ROOT%{_libdir}/libphp7.a \
@@ -1350,9 +1491,11 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %preun fpm
 %systemd_preun php-fpm.service
 
-# Raised by new pool installation or new extension installation
-%transfiletriggerin fpm -- %{_sysconfdir}/php-fpm.d %{_sysconfdir}/php.d
-systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
+%postun fpm
+%systemd_postun_with_restart php-fpm.service
+
+%post   embedded -p /sbin/ldconfig
+%postun embedded -p /sbin/ldconfig
 
 
 %files
@@ -1427,8 +1570,6 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 %config(noreplace) %{_sysconfdir}/nginx/conf.d/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/nginx/default.d/php.conf
 %{_unitdir}/php-fpm.service
-%{_unitdir}/httpd.service.d/php-fpm.conf
-%{_unitdir}/nginx.service.d/php-fpm.conf
 %{_sbindir}/php-fpm
 %dir %{_sysconfdir}/systemd/system/php-fpm.service.d
 %dir %{_sysconfdir}/php-fpm.d
@@ -1504,6 +1645,10 @@ systemctl try-restart php-fpm.service >/dev/null 2>&1 || :
 
 
 %changelog
+* Wed Dec 11 2019 Matt Linscott <matt.linscott@gmail.com> - 7.4.0-2
+- Initial port from Fedora to IUS
+- Use bundled pcre and gd
+
 * Wed Nov 27 2019 Remi Collet <remi@remirepo.net> - 7.4.0-1
 - update to 7.4.0 GA
 
