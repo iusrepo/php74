@@ -82,6 +82,7 @@ Source9: php.modconf
 Source10: php.ztsmodconf
 Source13: nginx-fpm.conf
 Source14: nginx-php.conf
+Source15: httpd-fpm.conf
 # See https://secure.php.net/gpg-keys.php
 Source20: https://www.php.net/distributions/php-keyring.gpg
 Source21: https://www.php.net/distributions/php-%{version}.tar.xz.asc
@@ -225,6 +226,30 @@ Conflicts: php-fpm < %{version}-%{release}
 PHP-FPM (FastCGI Process Manager) is an alternative PHP FastCGI
 implementation with some additional features useful for sites of
 any size, especially busier sites.
+
+%package fpm-nginx
+Summary: Nginx configuration for PHP-FPM
+BuildArch: noarch
+Requires: %{name}-fpm = %{version}-%{release}
+Requires: nginx
+# safe replacement
+Provides:  php-fpm-nginx = %{version}-%{release}
+Conflicts: php-fpm-nginx < %{version}-%{release}
+
+%description fpm-nginx
+Nginx configuration files for the PHP FastCGI Process Manager.
+
+%package fpm-httpd
+Summary: Apache HTTP Server configuration for PHP-FPM
+BuildArch: noarch
+Requires: %{name}-fpm = %{version}-%{release}
+Requires: httpd >= 2.4
+# safe replacement
+Provides:  php-fpm-httpd = %{version}-%{release}
+Conflicts: php-fpm-httpd < %{version}-%{release}
+
+%description fpm-httpd
+Apache HTTP Server configuration file for the PHP FastCGI Process Manager.
 
 %package common
 Summary: Common files for PHP
@@ -1313,16 +1338,21 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-zts.d
 %endif
 install -m 755 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php
 install -m 755 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/peclxml
-install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/session
-install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/wsdlcache
-install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/opcache
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/mod_php
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/mod_php/session
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/mod_php/wsdlcache
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/mod_php/opcache
 
 install -m 755 -d $RPM_BUILD_ROOT%{_docdir}/pecl
 install -m 755 -d $RPM_BUILD_ROOT%{_datadir}/tests/pecl
 
 # PHP-FPM stuff
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/fpm
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/fpm/session
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/fpm/wsdlcache
+install -m 700 -d $RPM_BUILD_ROOT%{_sharedstatedir}/php/fpm/opcache
 # Log
-install -m 755 -d $RPM_BUILD_ROOT%{_localstatedir}/log/php-fpm
+install -m 750 -d $RPM_BUILD_ROOT%{_localstatedir}/log/php-fpm
 install -m 755 -d $RPM_BUILD_ROOT/run/php-fpm
 # Config
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php-fpm.d
@@ -1339,6 +1369,8 @@ install -m 644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/php-fpm
 # Nginx configuration
 install -D -m 644 %{SOURCE13} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/conf.d/php-fpm.conf
 install -D -m 644 %{SOURCE14} $RPM_BUILD_ROOT%{_sysconfdir}/nginx/default.d/php.conf
+# Apache httpd configuration
+install -D -m 644 %{SOURCE15} $RPM_BUILD_ROOT%{_httpd_confdir}/php-fpm.conf
 
 TESTCMD="$RPM_BUILD_ROOT%{_bindir}/php --no-php-ini"
 # Ensure all provided extensions are really there
@@ -1485,6 +1517,12 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/php/modules/*.a \
 # Remove irrelevant docs
 rm -f README.{Zeus,QNX,CVS-RULES}
 
+%pre fpm
+getent group php-fpm >/dev/null || groupadd -r php-fpm
+getent passwd php-fpm >/dev/null || \
+    useradd -r -g php-fpm -d %{_sharedstatedir}/php/fpm \
+    -s /sbin/nologin -c "php-fpm" php-fpm
+exit 0
 
 %post fpm
 %systemd_post php-fpm.service
@@ -1504,9 +1542,10 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %if %{with_zts}
 %{_httpd_moddir}/libphp7-zts.so
 %endif
-%attr(0770,root,apache) %dir %{_sharedstatedir}/php/session
-%attr(0770,root,apache) %dir %{_sharedstatedir}/php/wsdlcache
-%attr(0770,root,apache) %dir %{_sharedstatedir}/php/opcache
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/mod_php
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/mod_php/session
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/mod_php/wsdlcache
+%attr(0770,root,apache) %dir %{_sharedstatedir}/php/mod_php/opcache
 %config(noreplace) %{_httpd_confdir}/php.conf
 %config(noreplace) %{_httpd_modconfdir}/15-php.conf
 
@@ -1561,25 +1600,29 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 %files fpm
 %doc php-fpm.conf.default www.conf.default
 %license fpm_LICENSE
-%attr(0770,root,apache) %dir %{_sharedstatedir}/php/session
-%attr(0770,root,apache) %dir %{_sharedstatedir}/php/wsdlcache
-%attr(0770,root,apache) %dir %{_sharedstatedir}/php/opcache
-%config(noreplace) %{_httpd_confdir}/php.conf
+%attr(0770,root,php-fpm) %dir %{_sharedstatedir}/php/fpm
+%attr(0770,root,php-fpm) %dir %{_sharedstatedir}/php/fpm/session
+%attr(0770,root,php-fpm) %dir %{_sharedstatedir}/php/fpm/wsdlcache
+%attr(0770,root,php-fpm) %dir %{_sharedstatedir}/php/fpm/opcache
 %config(noreplace) %{_sysconfdir}/php-fpm.conf
 %config(noreplace) %{_sysconfdir}/php-fpm.d/www.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/php-fpm
-%config(noreplace) %{_sysconfdir}/nginx/conf.d/php-fpm.conf
-%config(noreplace) %{_sysconfdir}/nginx/default.d/php.conf
 %{_unitdir}/php-fpm.service
 %{_sbindir}/php-fpm
 %dir %{_sysconfdir}/systemd/system/php-fpm.service.d
 %dir %{_sysconfdir}/php-fpm.d
-# log owned by apache for log
-%attr(770,apache,root) %dir %{_localstatedir}/log/php-fpm
+%attr(750,php-fpm,php-fpm) %dir %{_localstatedir}/log/php-fpm
 %dir %ghost /run/php-fpm
 %{_mandir}/man8/php-fpm.8*
 %dir %{_datadir}/fpm
 %{_datadir}/fpm/status.html
+
+%files fpm-nginx
+%config(noreplace) %{_sysconfdir}/nginx/conf.d/php-fpm.conf
+%config(noreplace) %{_sysconfdir}/nginx/default.d/php.conf
+
+%files fpm-httpd
+%config(noreplace) %{_httpd_confdir}/php-fpm.conf
 
 %files devel
 %{_bindir}/php-config
@@ -1650,6 +1693,7 @@ rm -f README.{Zeus,QNX,CVS-RULES}
 - Initial port from Fedora to IUS
 - Use bundled pcre and gd
 - Move httpd module to mod_php subpackage
+- Add fpm-nginx and fpm-httpd subpackages
 
 * Wed Nov 27 2019 Remi Collet <remi@remirepo.net> - 7.4.0-1
 - update to 7.4.0 GA
