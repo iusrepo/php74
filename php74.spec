@@ -35,23 +35,20 @@
 # needed at srpm build time, when httpd-devel not yet installed
 %{!?_httpd_mmn:        %{expand: %%global _httpd_mmn        %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo 0-0)}}
 
-%if 0%{?fedora}
-%global with_zts      1
+# subpackages
 %global with_firebird 1
 %global with_imap     1
 %global with_freetds  1
 %global with_sodium   1
 %global with_pspell   1
+
+%if 0%{?fedora}
+%global with_zts      1
 %global with_lmdb     1
 %global with_libgd    1
 %global with_libpcre  1
 %else
 %global with_zts      0
-%global with_firebird 0
-%global with_imap     0
-%global with_freetds  0
-%global with_sodium   0
-%global with_pspell   0
 %global with_lmdb     0
 %global with_libgd    0
 %global with_libpcre  0
@@ -1699,6 +1696,7 @@ exit 0
 - Move httpd module to mod_php subpackage
 - Add fpm-nginx and fpm-httpd subpackages
 - Add patch49 to enable TLS 1.1/1.2 support
+- Enable subpackages pdo-firebird, imap, pdo-dblib, sodium, pspell
 
 * Wed Nov 27 2019 Remi Collet <remi@remirepo.net> - 7.4.0-1
 - update to 7.4.0 GA
