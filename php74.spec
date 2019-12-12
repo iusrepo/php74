@@ -57,7 +57,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php74
 Version: 7.4.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -526,9 +526,9 @@ Requires: php-pdo%{?_isa} = %{version}-%{release}
 Provides: php_database
 Provides: php-pdo_firebird, php-pdo_firebird%{?_isa}
 # safe replacement
-Provides:  php-interbase = %{version}-%{release}
-Provides:  php-interbase%{?_isa} = %{version}-%{release}
-Conflicts: php-interbase < %{version}-%{release}
+Provides:  php-pdo-firebird = %{version}-%{release}
+Provides:  php-pdo-firebird%{?_isa} = %{version}-%{release}
+Conflicts: php-pdo-firebird < %{version}-%{release}
 
 %description pdo-firebird
 The php-pdo-firebird package contains the PDO driver for
@@ -1070,7 +1070,6 @@ build --libdir=%{_libdir}/php \
       --with-mysqli=shared,mysqlnd \
       --with-mysql-sock=%{mysql_sock} \
 %if %{with_firebird}
-      --with-interbase=shared \
       --with-pdo-firebird=shared \
 %endif
       --enable-dom=shared \
@@ -1204,7 +1203,6 @@ build --includedir=%{_includedir}/php-zts \
       --with-mysql-sock=%{mysql_sock} \
       --enable-mysqlnd-threading \
 %if %{with_firebird}
-      --with-interbase=shared \
       --with-pdo-firebird=shared \
 %endif
       --enable-dom=shared \
@@ -1690,6 +1688,9 @@ exit 0
 
 
 %changelog
+* Thu Dec 12 2019 Matt Linscott <matt.linscott@gmail.com> - 7.4.0-3
+- Fix pdo-firebird and remove references to interbase
+
 * Wed Dec 11 2019 Matt Linscott <matt.linscott@gmail.com> - 7.4.0-2
 - Initial port from Fedora to IUS
 - Use bundled pcre and gd
