@@ -57,7 +57,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php74
 Version: 7.4.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -104,7 +104,7 @@ Patch45: php-7.4.0-ldap_r.patch
 Patch46: php-7.2.4-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
-Patch49: php-7.1.0-curltls.patch
+Patch49: php-7.4.0-curltls.patch
 
 # Upstream fixes (100+)
 
@@ -1688,6 +1688,9 @@ exit 0
 
 
 %changelog
+* Mon Dec 23 2019 Matt Linscott <matt.linscott@gmail.com> - 7.4.0-4
+- Fix curltls patch name since it was updated for 7.4.0
+
 * Thu Dec 12 2019 Matt Linscott <matt.linscott@gmail.com> - 7.4.0-3
 - Fix pdo-firebird and remove references to interbase
 
