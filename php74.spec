@@ -56,8 +56,8 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php74
-Version: 7.4.0
-Release: 4%{?dist}
+Version: 7.4.1
+Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -1688,6 +1688,9 @@ exit 0
 
 
 %changelog
+* Fri Jan 03 2020 Matt Linscott <matt.linscott@gmail.com> - 7.4.1-1
+- Latest upstream
+
 * Mon Dec 23 2019 Matt Linscott <matt.linscott@gmail.com> - 7.4.0-4
 - Fix curltls patch name since it was updated for 7.4.0
 
