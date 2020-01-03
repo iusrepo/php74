@@ -41,6 +41,9 @@
 %global with_freetds  1
 %global with_sodium   1
 %global with_pspell   1
+%if %{defined fedora} || (%{defined rhel} && 0%{?rhel} < 8)
+%global with_mod_php   1
+%endif
 
 %if 0%{?fedora}
 %global with_zts      1
@@ -57,7 +60,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php74
 Version: 7.4.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -152,6 +155,7 @@ non-commercial database management systems, so writing a
 database-enabled webpage with PHP is fairly simple. The most common
 use of PHP coding is probably as a replacement for CGI scripts.
 
+%if %{with_mod_php}
 %package -n mod_%{name}
 Summary: PHP module for the Apache HTTP Server
 # ensure we build with stock httpd, not httpd24u
@@ -175,6 +179,7 @@ Conflicts: mod_php < %{version}-%{release}
 %description -n mod_%{name}
 The mod_%{name} package contains the module which adds support for the PHP
 language to Apache HTTP Server.
+%endif
 
 %package cli
 Summary: Command-line interface for PHP
@@ -885,9 +890,15 @@ cp ext/bcmath/libbcmath/LICENSE libbcmath_LICENSE
 cp ext/date/lib/LICENSE.rst timelib_LICENSE
 
 # Multiple builds for multiple SAPIs
-mkdir build-cgi build-apache build-embedded \
+mkdir build-cgi build-embedded \
+%if %{with_mod_php}
+    build-apache \
+%endif
 %if %{with_zts}
-    build-zts build-ztscli \
+%if %{with_mod_php}
+    build-zts \
+%endif
+    build-ztscli \
 %endif
     build-fpm
 
@@ -1129,6 +1140,7 @@ without_shared="--without-gd \
       --disable-sysvmsg --disable-sysvshm --disable-sysvsem"
 
 # Build Apache module, and the CLI SAPI, /usr/bin/php
+%if %{with_mod_php}
 pushd build-apache
 build --with-apxs2=%{_httpd_apxs} \
       --libdir=%{_libdir}/php \
@@ -1136,6 +1148,7 @@ build --with-apxs2=%{_httpd_apxs} \
       --disable-pdo \
       ${without_shared}
 popd
+%endif
 
 # Build php-fpm
 pushd build-fpm
@@ -1247,6 +1260,7 @@ build --includedir=%{_includedir}/php-zts \
 popd
 
 # Build a special thread-safe Apache SAPI
+%if %{with_mod_php}
 pushd build-zts
 build --with-apxs2=%{_httpd_apxs} \
       --includedir=%{_includedir}/php-zts \
@@ -1257,6 +1271,7 @@ build --with-apxs2=%{_httpd_apxs} \
       --disable-pdo \
       ${without_shared}
 popd
+%endif
 
 ### NOTE!!! EXTENSION_DIR was changed for the -zts build, so it must remain
 ### the last SAPI to be built.
@@ -1265,6 +1280,7 @@ popd
 
 %check
 %if %runselftest
+%if %{with_mod_php}
 cd build-apache
 
 # Run tests, using the CLI SAPI
@@ -1286,6 +1302,7 @@ if ! make test TESTS=-j4; then
   #exit 1
 fi
 unset NO_INTERACTION REPORT_EXIT_STATUS MALLOC_CHECK_
+%endif
 %endif
 
 %install
@@ -1314,6 +1331,7 @@ install -m 644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 # For third-party packaging:
 install -m 755 -d $RPM_BUILD_ROOT%{_datadir}/php/preload
 
+%if %{with_mod_php}
 # install the DSO
 install -m 755 -d $RPM_BUILD_ROOT%{_httpd_moddir}
 install -m 755 build-apache/libs/libphp7.so $RPM_BUILD_ROOT%{_httpd_moddir}
@@ -1330,6 +1348,7 @@ install -D -m 644 %{SOURCE9} $RPM_BUILD_ROOT%{_httpd_modconfdir}/15-php.conf
 cat %{SOURCE10} >>$RPM_BUILD_ROOT%{_httpd_modconfdir}/15-php.conf
 %endif
 install -D -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_httpd_confdir}/php.conf
+%endif
 
 install -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 %if %{with_zts}
@@ -1688,6 +1707,9 @@ exit 0
 
 
 %changelog
+* Fri Jan 03 2020 Carl George <carl@george.computer> - 7.4.1-2
+- Disable mod_php subpackage if built on EL8
+
 * Fri Jan 03 2020 Matt Linscott <matt.linscott@gmail.com> - 7.4.1-1
 - Latest upstream
 
