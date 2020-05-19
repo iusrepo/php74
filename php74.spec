@@ -57,7 +57,7 @@
 Summary: PHP scripting language for creating dynamic web sites
 Name: php74
 Version: 7.4.6
-Release: 3%{?dist}
+Release: 2%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
 # TSRM is licensed under BSD
@@ -877,10 +877,6 @@ in pure PHP.
 # Prevent %%doc confusion over LICENSE files
 cp Zend/LICENSE Zend/ZEND_LICENSE
 cp TSRM/LICENSE TSRM_LICENSE
-%if ! %{with_libgd}
-cp ext/gd/libgd/README libgd_README
-cp ext/gd/libgd/COPYING libgd_COPYING
-%endif
 cp sapi/fpm/LICENSE fpm_LICENSE
 cp ext/mbstring/libmbfl/LICENSE libmbfl_LICENSE
 cp ext/fileinfo/libmagic/LICENSE libmagic_LICENSE
@@ -1663,10 +1659,6 @@ exit 0
 %files mbstring -f files.mbstring
 %license libmbfl_LICENSE
 %files gd -f files.gd
-%if ! %{with_libgd}
-%license libgd_README
-%license libgd_COPYING
-%endif
 %files soap -f files.soap
 %files bcmath -f files.bcmath
 %license libbcmath_LICENSE
@@ -1701,9 +1693,6 @@ exit 0
 
 
 %changelog
-* Tue May 19 2020 Carl George <carl@george.computer> - 7.4.6-3
-- Include bundled libgd license and readme
-
 * Mon May 18 2020 David Alger <davidmalger@gmail.com> - 7.4.6-2
 - Reintroduce freetype, jpeg and xpm support in GD
 
