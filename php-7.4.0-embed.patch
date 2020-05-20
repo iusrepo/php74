@@ -18,7 +18,7 @@ diff -up php-5.5.30/scripts/php-config.in.old php-5.5.30/scripts/php-config.in
  php_cgi_binary=NONE
  configure_options="@CONFIGURE_OPTIONS@"
 -php_sapis="@PHP_INSTALLED_SAPIS@"
-+php_sapis="apache2handler embed fpm @PHP_INSTALLED_SAPIS@"
++php_sapis="apache2handler fpm @PHP_INSTALLED_SAPIS@"
  ini_dir="@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@"
  ini_path="@EXPANDED_PHP_CONFIG_FILE_PATH@"
  
