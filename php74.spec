@@ -1122,6 +1122,7 @@ popd
 without_shared="--without-gd \
       --disable-dom --disable-dba --without-unixODBC \
       --disable-opcache \
+      --disable-phpdbg \
       --disable-json \
       --without-ffi \
       --disable-xmlreader --disable-xmlwriter \
