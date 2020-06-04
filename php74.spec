@@ -1707,7 +1707,7 @@ exit 0
 
 
 %changelog
-* Tue May 12 2020 Remi Collet <remi@remirepo.net> - 7.4.6-3
+* Tue Jun 04 2020 Remi Collet <remi@remirepo.net> - 7.4.6-3
 - use php-config from embed SAPI to reduce used libs
 
 * Mon May 18 2020 David Alger <davidmalger@gmail.com> - 7.4.6-2
