@@ -57,7 +57,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php74
-Version: 7.4.7
+Version: 7.4.8
 Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -101,8 +101,6 @@ Patch42: php-7.3.3-systzdata-v18.patch
 Patch43: php-7.4.0-phpize.patch
 # Use -lldap_r for OpenLDAP
 Patch45: php-7.4.0-ldap_r.patch
-# Make php_config.h constant across builds
-Patch46: php-7.2.4-fixheader.patch
 # drop "Configure command" from phpinfo output
 Patch47: php-5.6.3-phpinfo.patch
 Patch49: php-7.4.0-curltls.patch
@@ -862,7 +860,6 @@ in pure PHP.
 %if 0%{?fedora} >= 18 || 0%{?rhel} >= 7
 %patch45 -p1 -b .ldap_r
 %endif
-%patch46 -p1 -b .fixheader
 %patch47 -p1 -b .phpinfo
 %if 0%{?rhel}
 %patch49 -p1 -b .curltls
@@ -957,6 +954,8 @@ cp %{SOURCE50} %{SOURCE51} %{SOURCE53} .
 %build
 # Set build date from https://reproducible-builds.org/specs/source-date-epoch/
 export SOURCE_DATE_EPOCH=$(date +%s -r NEWS)
+# Override default uname detection.
+export PHP_UNAME=$(uname)
 
 # Force use of system libtool:
 libtoolize --force --copy
@@ -1707,6 +1706,10 @@ exit 0
 
 
 %changelog
+* Thu Jul  9 2020 Jeff Sheltren <jeff@tag1consulting.com> - 7.4.8-1
+- Latest upstream
+- Drop configure.ac uname patch
+
 * Wed Jul  1 2020 Jeff Sheltren <jeff@tag1consulting.com> - 7.4.7-1
 - Latest upstream
 
