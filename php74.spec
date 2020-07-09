@@ -954,6 +954,8 @@ cp %{SOURCE50} %{SOURCE51} %{SOURCE53} .
 %build
 # Set build date from https://reproducible-builds.org/specs/source-date-epoch/
 export SOURCE_DATE_EPOCH=$(date +%s -r NEWS)
+# Override default uname detection.
+export PHP_UNAME=$(uname)
 
 # Force use of system libtool:
 libtoolize --force --copy
