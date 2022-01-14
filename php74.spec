@@ -1706,7 +1706,7 @@ exit 0
 
 
 %changelog
-* Fri Jan 14 2021 Jeff Sheltren <jeff@tag1consulting.com> - 7.4.27-1
+* Fri Jan 14 2022 Jeff Sheltren <jeff@tag1consulting.com> - 7.4.27-1
 - Latest upstream
 
 * Thu Nov 18 2021 Jeff Sheltren <jeff@tag1consulting.com> - 7.4.26-1
