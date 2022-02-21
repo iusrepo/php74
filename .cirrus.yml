@@ -19,6 +19,7 @@ task:
   repos_script:     yum-config-manager --enable epel-testing
   sources_script:   spectool --get-files $CIRRUS_REPO_NAME.spec
   srpm_script:      rpmbuild -bs $CIRRUS_REPO_NAME.spec
+  vault_script:     sed -e 's|http://vault.centos.org|https://mirror.rackspace.com/centos-vault|' -i /etc/yum.repos.d/CentOS-Sources.repo
   builddep_script:  yum-builddep --assumeyes $HOME/rpmbuild/SRPMS/$CIRRUS_REPO_NAME-*.src.rpm
   rpm_script:       rpmbuild -bb $CIRRUS_REPO_NAME.spec
   gather_script:
