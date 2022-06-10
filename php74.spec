@@ -1706,7 +1706,7 @@ exit 0
 
 
 %changelog
-* Thu Jun 10 2022 Peter Zelina <pzelina@qualityunit.com> - 7.4.30-1
+* Fri Jun 10 2022 Peter Zelina <pzelina@qualityunit.com> - 7.4.30-1
 - Latest upstream
 
 * Thu Apr 14 2022 Jeff Sheltren <jeff@tag1consulting.com> - 7.4.29-1
