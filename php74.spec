@@ -57,7 +57,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php74
-Version: 7.4.29
+Version: 7.4.30
 Release: 1%{?dist}
 # All files licensed under PHP version 3.01, except
 # Zend is licensed under Zend
@@ -1706,6 +1706,9 @@ exit 0
 
 
 %changelog
+* Thu Jun 10 2022 Peter Zelina <pzelina@qualityunit.com> - 7.4.30-1
+- Latest upstream
+
 * Thu Apr 14 2022 Jeff Sheltren <jeff@tag1consulting.com> - 7.4.29-1
 - Latest upstream
 
